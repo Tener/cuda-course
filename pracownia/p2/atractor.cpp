@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <sys/time.h>
 
 // includes, GL
 #include <GL/glew.h>
@@ -21,8 +22,15 @@
 extern "C" void GPUAtractor(char* C, int M, int N, float s);
 extern "C" void CPUAtractor(char* C, int M, int N, float s);
 
-// wydrukuj tablicę
 
+// dobre zmienne globalne nie są złe...
+int M;
+int N;
+
+float s = 2;
+
+
+// wydrukuj tablicę
 char char2repr( char c )
 {
   if ( c == 1 ) return '1';
@@ -37,17 +45,15 @@ char char2repr( char c )
 void char2img( FILE * f, char c )
 {
   int r, g, b;
-  r = 0;
-  g = 0;
-  b = 0;
+  r = 255;
+  g = 255;
+  b = 255;
 
-  //  if ( c == 0 ) r =   0, g = 255, b =   0;
   if ( c == 1 ) { r =   0; g =   0; b =   0; }
   if ( c == 2 ) { r =   0; g = 153; b =   0; }
   if ( c == 3 ) { r =   0; g =  76; b = 153; }
   if ( c == 4 ) { r = 153; g =   0; b = 153; }
   if ( c == 5 ) { r = 153; g =  76; b =   0; }
-  //if ( c == 6 ) r = 252, g =   3, b = 255;
 
   fprintf(f, "%d %d %d\n", (int)r, (int)g, (int)b );
 }
@@ -80,7 +86,7 @@ void printResultPPM( char * C, int N, int M )
   char command[1024];
   sprintf(command,"convert %s %s", filename_ppm, filename_png);
   system(command);
-  //unlink(filename_ppm);
+  unlink(filename_ppm);
 }
 
 void printResultChar( char * C, int N, int M )
@@ -113,17 +119,51 @@ void printResult( char * C, int N, int M )
 
   // default case
   printResultChar( C, N, M );
+}
 
+const int CPU = 1;
+const int GPU = 2;
+
+double timevaldiff(struct timeval starttime, struct timeval finishtime)
+{
+  double msec=0;
+  msec+=(finishtime.tv_usec-starttime.tv_usec);
+  msec+=(finishtime.tv_sec-starttime.tv_sec)*1000000;
+  return (msec/1000000);
+}
+
+void run( int proc )
+{
+  bool write_img = true;
+  //  write_img = ( (N * M) < (5000 * 5000));
+
+  size_t C_len = sizeof(char) * N * M + 1;
+  char * C = (char *)malloc(C_len);
+  memset( C, '\0', C_len);
+  struct timeval tv_start, tv_stop;
+
+  gettimeofday(&tv_start, NULL);
+
+  if ( proc == CPU )
+    CPUAtractor( C, N, M, s );
+
+  if ( proc == GPU )
+    GPUAtractor( C, N, M, s );
+
+  gettimeofday(&tv_stop, NULL);
+
+  if ( write_img )
+    printResult( C, N, M );
+  printf("%s time: %f\n",
+         proc == CPU ? "CPU" : "GPU",
+         timevaldiff(tv_start,tv_stop));
+  free( C );
 }
 
 
 
 int main(int argn, char ** argv)
 {
-  int M;
-  int N;
-
-  float s = 2;
 
   if (argn != 3)
     {
@@ -136,34 +176,8 @@ int main(int argn, char ** argv)
 
   printf("M=%d N=%d\n", M, N);
 
-
-  {
-    size_t C_len = sizeof(char) * N * M + 1;
-    char * C = (char *)malloc(C_len);
-    memset( C, '\0', C_len);
-    time_t start, stop;
-
-    start = time(NULL);
-    CPUAtractor( C, N, M, s );
-    stop = time(NULL);
-
-    printResult( C, N, M );
-    printf("CPU time: %d\n", (int)(stop-start));
-  }
-
-  {
-    size_t C_len = sizeof(char) * N * M + 1;
-    char * C = (char *)malloc(C_len);
-    memset( C, '\0', C_len);
-    time_t start, stop;
-
-    start = time(NULL);
-    GPUAtractor( C, N, M, s );
-    stop = time(NULL);
-
-    printResult( C, N, M );
-    printf("GPU time: %d\n", (int)(stop-start));
-  }
+  run( CPU );
+  run( GPU );
 
   return 0;
 }

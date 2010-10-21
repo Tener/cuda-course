@@ -7,6 +7,7 @@ import Data.Complex
 --import Data.List.Split
 import System.Environment
 import System.Process
+import Control.DeepSeq
 
 type FL = Float
 type CX = Complex FL
@@ -44,8 +45,7 @@ dist (x1 :+ y1) (x2 :+ y2) = ((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2)) ** 0.5
 evalPoint :: FL -> FL -> Int
 evalPoint x y = go maxCount (x :+ y)
     where go 0 _ = 1
-          go n pnt | (1 - magnitude pnt) > epsilon = go (n-1) (step pnt)
-                   | dist pnt (1 :+ 0)  <= epsilon = 2
+          go n pnt | dist pnt (1 :+ 0)  <= epsilon = 2
                    | dist pnt (0 :+ 1)  <= epsilon = 3
                    | dist pnt ((-1) :+ 0) <= epsilon = 4
                    | dist pnt (0 :+ (-1)) <= epsilon = 5
@@ -61,13 +61,15 @@ main = do
       m_x x = d_x * (fromIntegral (x::Int)) - s
       m_y y = d_y * (fromIntegral (y::Int)) - s
 
-      solution = splitEvery m [ evalPoint (m_x x) (m_y y) | x <- [1..m], y <- [1..n] ]
+      solution = [[ evalPoint (m_x x) (m_y y) | x <- [1..m]] | y <- [1..n] ]
 
       txt = unlines (map (map numToChar) solution)
       img = ppm (map (map numToCol) solution)
 
-  when (n + m < 100) (putStr txt)
-  writeFile "out.ppm" img
-  _ <- system "convert out.ppm out.png"
+  print $ deepseq solution ()
+
+--  when (n + m < 100) (putStr txt)
+--  writeFile "out.ppm" img
+--  _ <- system "convert out.ppm out.png"
 
   return ()
