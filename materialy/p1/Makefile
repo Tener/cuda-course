@@ -48,4 +48,4 @@ USERENDERCHECKGL     := 1
 ################################################################################
 # Rules and targets
 
-include ../common.mk
+include common.mk

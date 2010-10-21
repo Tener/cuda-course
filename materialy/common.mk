@@ -23,7 +23,7 @@
 # Add new SM Versions here as devices with new Compute Capability are released
 SM_VERSIONS   := 10 11 12 13 20
 
-CUDA_INSTALL_PATH ?= /home/tener/localopt/cuda
+CUDA_INSTALL_PATH ?= /usr/local/cuda
 
 ifdef cuda-install
 	CUDA_INSTALL_PATH := $(cuda-install)
@@ -46,15 +46,15 @@ OSARCH= $(shell uname -m)
 # Basic directory setup for SDK
 # (override directories only if they are not already defined)
 SRCDIR     ?=
-ROOTDIR    ?= /home/tener/localopt/NVIDIA_GPU_Computing_SDK/C
+ROOTDIR    ?= /opt/NVIDIA_GPU_Computing_SDK/C
 ROOTBINDIR ?= bin
 # BINDIR     ?= $(ROOTBINDIR)/$(OSLOWER)
 BINDIR     ?= $(ROOTBINDIR)
 ROOTOBJDIR ?= obj
-LIBDIR     := $(ROOTDIR)/lib
-COMMONDIR  := $(ROOTDIR)/common
-SHAREDDIR  := /home/tener/localopt/NVIDIA_GPU_Computing_SDK/shared
-# SHAREDDIR  := /opt/NVIDIA_GPU_Computing_SDK/shared/
+LIBDIR     := $(ROOTDIR)/../lib
+COMMONDIR  := $(ROOTDIR)/../common
+# SHAREDDIR  := $(ROOTDIR)/../../shared/
+SHAREDDIR  := /opt/NVIDIA_GPU_Computing_SDK/shared/
 
 # Compilers
 NVCC       := $(CUDA_INSTALL_PATH)/bin/nvcc
@@ -325,14 +325,11 @@ else
 endif
 
 # check if verbose
-#ifeq ($(verbose), 1)
-# 	VERBOSE :=
-#else
-# 	VERBOSE := @
-#endif
-
-VERBOSE := @
-
+ifeq ($(verbose), 1)
+	VERBOSE :=
+else
+	VERBOSE := @
+endif
 
 ################################################################################
 # Check for input flags and set compiler flags appropriately
