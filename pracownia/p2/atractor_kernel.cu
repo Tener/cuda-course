@@ -1,6 +1,8 @@
 #ifndef _ATRACTOR_KERNEL_H_
 #define _ATRACTOR_KERNEL_H_
 
+#include <stdio.h>
+
 #define EPSILON 0.001
 #define MAX_ITER 1000
 
@@ -40,8 +42,11 @@ __global__ void kernel_gpu(char * tab, int M, int N, float s)
 {
   /* wylicz a i b */
   float a, b;
-  a = (s / (2*M))*threadIdx.x - s;
-  b = (s / (2*N))*threadIdx.y - s;
+  float d_a = (2 * s)/(M);
+  float d_b = (2 * s)/(N);
+
+  a = -s + d_a * threadIdx.x;
+  b = -s + d_b * threadIdx.y;
 
   /* wylicz ix */
   int ix = threadIdx.x * M + threadIdx.y; // offset w tablicy
@@ -49,7 +54,25 @@ __global__ void kernel_gpu(char * tab, int M, int N, float s)
   tab[ix] = calculateAtractor( a, b );
 }
 
-//__host__ void kernel_cpu(char* C, int M, int N, float s
+__host__ void kernel_cpu(char* tab, int M, int N, float s)
+{
+
+  for(int x=0; x < M; x++)
+    for(int y=0; y < N; y++)
+      {
+        /* wylicz a i b */
+        float a, b;
+        float d_a = (2 * s)/(M);
+        float d_b = (2 * s)/(N);
+
+        a = -s + d_a * x;
+        b = -s + d_b * y;
+
+        /* wylicz ix */
+        int ix = x * M + y; // offset w tablicy
+        tab[ix] = calculateAtractor( a, b );
+      }
+}
 
 // Wrapper for the __global__ call that sets up the kernel call
 extern "C" void GPUAtractor(char* C, int M, int N, float s)
@@ -59,23 +82,28 @@ extern "C" void GPUAtractor(char* C, int M, int N, float s)
 //  int mesh_height = 10;
 //  dim3 block(8, 8, 1);
 //  dim3 grid(mesh_width / block.x, mesh_height / block.y, 1);
-  char * arg = 0;
+  char * dev_C = 0;
   size_t C_len = sizeof(char) * N * M + 1;
 
-  cudaMalloc ( &arg, C_len );
+  cudaMalloc ( &dev_C, C_len );
 
-  cudaMemcpy ( arg, C, C_len,
+  cudaMemcpy ( dev_C, C, C_len,
                cudaMemcpyHostToDevice );
 
-  kernel_gpu<<< N, M >>>(C, M, N, s);
+  int numBlocks = 1;
+  dim3 threadsPerBlock(N, M);
 
-  cudaMemcpy ( C, arg, C_len,
+  kernel_gpu<<< numBlocks, threadsPerBlock >>>(dev_C, M, N, s);
+
+  cudaMemcpy ( C, dev_C, C_len,
                cudaMemcpyDeviceToHost );
+
+  cudaFree( dev_C );
 }
 
 extern "C" void CPUAtractor(char* C, int M, int N, float s)
 {
-    
+  kernel_cpu( C, M, N, s );
 }
 
 

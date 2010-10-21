@@ -1,0 +1,41 @@
+	Thu Oct 21 03:28 2010 Time and Allocation Profiling Report  (Final)
+
+	   atractor-haskell +RTS -M1.5G -sstderr -prof -RTS 1024 1024
+
+	total time  =        9.86 secs   (493 ticks @ 20 ms)
+	total alloc = 4,486,727,352 bytes  (excludes profiling overheads)
+
+COST CENTRE                    MODULE               %time %alloc
+
+step                           Main                  62.5   33.0
+main                           Main                  25.6   59.6
+evalPoint                      Main                  11.8    7.4
+
+
+                                                                                               individual    inherited
+COST CENTRE              MODULE                                               no.    entries  %time %alloc   %time %alloc
+
+MAIN                     MAIN                                                   1           0   0.0    0.0   100.0  100.0
+ main                    Main                                                 286           2  25.6   59.6   100.0  100.0
+  evalPoint              Main                                                 289     1048576  11.8    7.4    74.2   40.4
+   step                  Main                                                 291     8606876  62.5   33.0    62.5   33.0
+  numToCol               Main                                                 288     1048576   0.2    0.0     0.2    0.0
+ CAF                     Main                                                 280          10   0.0    0.0     0.0    0.0
+  step                   Main                                                 292           0   0.0    0.0     0.0    0.0
+  evalPoint              Main                                                 290           0   0.0    0.0     0.0    0.0
+  main                   Main                                                 287           0   0.0    0.0     0.0    0.0
+ CAF                     GHC.TopHandler                                       279           1   0.0    0.0     0.0    0.0
+ CAF                     Data.Typeable                                        278           5   0.0    0.0     0.0    0.0
+ CAF                     GHC.Read                                             258           1   0.0    0.0     0.0    0.0
+ CAF                     Text.Read.Lex                                        246           8   0.0    0.0     0.0    0.0
+ CAF                     GHC.IO.Handle.FD                                     218           2   0.0    0.0     0.0    0.0
+ CAF                     System.Posix.Internals                               217           6   0.0    0.0     0.0    0.0
+ CAF                     GHC.IO.FD                                            202           4   0.0    0.0     0.0    0.0
+ CAF                     GHC.Conc                                             201           2   0.0    0.0     0.0    0.0
+ CAF                     GHC.IO.Handle.Internals                              192           1   0.0    0.0     0.0    0.0
+ CAF                     GHC.IO.Encoding.Iconv                                186           6   0.0    0.0     0.0    0.0
+ CAF                     System.Environment                                   180           2   0.0    0.0     0.0    0.0
+ CAF                     Codec.Image.PPM                                      167           1   0.0    0.0     0.0    0.0
+ CAF                     System.Process                                       155           1   0.0    0.0     0.0    0.0
+ CAF                     System.Posix.Signals                                 147           4   0.0    0.0     0.0    0.0
+ CAF                     System.Process.Internals                             144           5   0.0    0.0     0.0    0.0
