@@ -49,3 +49,8 @@ USERENDERCHECKGL     := 0
 # Rules and targets
 
 include common.mk
+
+
+# pakuje pliki i dodaje je do archiwum
+kno:
+	7z -tzip a kno_krzysztof_skrzetnicki_cuda_`date +%s`.zip atractor.cpp atractor_kernel.cu atractor.hs Makefile common.mk
