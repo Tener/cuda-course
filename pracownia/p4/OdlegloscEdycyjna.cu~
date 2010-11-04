@@ -125,7 +125,8 @@ void runCPU( char * slowo, char * slownik, int rozmiar_slownika,
 
 /////////////// GPU ///////////////
 __global__
-void kernelGPU_OE( char * slownik, int rozmiar_slownika, char * slowo, int dlugosc_slowa, int * reverse_wyniki)
+void kernelGPU_OE( texture<char> slownik_Tex,
+                   char * slownik, int rozmiar_slownika, char * slowo, int dlugosc_slowa, int * reverse_wyniki)
 {
   int idx = blockIdx.x * blockDim.x + threadIdx.x;
   if ( idx >= rozmiar_slownika )
@@ -158,7 +159,8 @@ void kernelGPU_OE( char * slownik, int rozmiar_slownika, char * slowo, int dlugo
 }
 
 __host__
-void runGPU( char * slowo, char * slownik_gpu, int rozmiar_slownika,
+void runGPU( texture<char> slownik_Tex,
+             char * slowo, char * slownik_gpu, int rozmiar_slownika,
              int * najblizsze_slowo, int * odleglosc)
 {
   int liczba_watkow = (1+(rozmiar_slownika / TILE)) * TILE;
@@ -182,7 +184,7 @@ void runGPU( char * slowo, char * slownik_gpu, int rozmiar_slownika,
   // Wywołanie jądra
   dim3 dimGrid(liczba_watkow / TILE);
   dim3 dimBlock(TILE);
-  kernelGPU_OE<<<dimGrid, dimBlock>>>(slownik_gpu, rozmiar_slownika, slowo_gpu, strlen(slowo), reverse_wyniki_gpu);
+  kernelGPU_OE<<<dimGrid, dimBlock>>>(slownik_Tex, slownik_gpu, rozmiar_slownika, slowo_gpu, strlen(slowo), reverse_wyniki_gpu);
   cudaMemcpy(reverse_wyniki, reverse_wyniki_gpu, MAX_L+1, cudaMemcpyDeviceToHost);
 
   for(int i = 0; i < MAX_L+1; i++)
@@ -308,9 +310,9 @@ int main(int argc, char** argv){
   cudaMalloc(&slownik_GPU, slownik_size);
   cudaMemcpy(slownik_GPU, slownik, slownik_size, cudaMemcpyHostToDevice);
 
-  //texture<char> slownik_Tex;
-  //const struct textureReference texRef = slownik_Tex;
-  //cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<char>();
+  texture<char> slownik_Tex;
+  const struct textureReference texRef = slownik_Tex;
+  cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<char>();
   //cudaBindTexture(0, &texRef, (void *)slownik_GPU, &channelDesc, slownik_size);
 
   for(int argNum = 2; argNum < argc; argNum++)
@@ -335,7 +337,7 @@ int main(int argc, char** argv){
         // GPU
         cutilCheckError( cutCreateTimer( &timer));
         cutilCheckError( cutStartTimer( timer));
-        runGPU(slowo, slownik_GPU, slownik_rozmiar, &numer_slowa, &odleglosc );
+        runGPU( slownik_Tex, slowo, slownik_GPU, slownik_rozmiar, &numer_slowa, &odleglosc );
         double runTime = cutGetTimerValue( timer);
         printResult("GPU", runTime, slowo, slownik+MAX_L*numer_slowa, numer_slowa, odleglosc);
         cutilCheckError( cutDeleteTimer( timer));
