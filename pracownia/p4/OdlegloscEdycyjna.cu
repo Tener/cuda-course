@@ -41,6 +41,9 @@ void printResult( char * proc, double time, char * slowo, char * najblizsze, int
     iconv( iconv_to_utf8,
            &iso, &iso_len,
            &utf, &utf_len);
+
+    * utf = 0;
+    * iso = 0;
   }
 
   {
@@ -53,12 +56,15 @@ void printResult( char * proc, double time, char * slowo, char * najblizsze, int
     iconv( iconv_to_utf8,
            &iso, &iso_len,
            &utf, &utf_len);
+
+    * utf = 0;
+    * iso = 0;
   }
 
 
   printf("%s time: %2.6f (ms)\n", proc, time);
-//  printf("Wzorzec:'%16s' Znaleziony(ix=%03d:'%16s' (odleglosc=%3d)\n",
-//         slowo_utf8, najblizsze_ix, najblizsze_utf8, odleglosc);
+  printf("Wzorzec:'%16s' Znaleziony(ix=%03d) :'%16s' (odleglosc=%3d)\n",
+         slowo_utf8, najblizsze_ix, najblizsze_utf8, odleglosc);
 //  printf("Wzorzec:'%16s' Znaleziony(ix=%03d:'%16s' (odleglosc=%3d)\n",
 //         slowo, najblizsze_ix, najblizsze, odleglosc);
 }
@@ -118,7 +124,7 @@ void runCPU( char * slowo, char * slownik, int rozmiar_slownika,
 
 /////////////// GPU ///////////////
 __global__
-void kernelGPU_OE(char * slownik, int rozmiar_slownika, char * slowo, int dlugosc_slowa, char * wyniki)
+void kernelGPU_OE(char * slownik, int rozmiar_slownika, char * slowo, int dlugosc_slowa, char * wyniki, int * reverse_wyniki)
 {
   int idx = blockIdx.x * blockDim.x + threadIdx.x;
   if ( idx >= rozmiar_slownika )
@@ -152,10 +158,10 @@ void kernelGPU_OE(char * slownik, int rozmiar_slownika, char * slowo, int dlugos
 
   //  __syncthreads(); // coalescent memory access
   int val = OE_CPU( a, aN, b, bN );
-  //wyniki[idx] = val;
+  wyniki[idx] = val;
 
   //reverse_wyniki[val] = idx;
-  atomicMin(reverse_wyniki[val], idx);
+  //atomicMin(reverse_wyniki[val], idx);
 
 
 // 
@@ -209,8 +215,11 @@ void runGPU( char * slowo, char * slownik_gpu, int rozmiar_slownika,
   // Wywołanie jądra
   dim3 dimGrid(liczba_watkow / TILE);
   dim3 dimBlock(TILE);
-  kernelGPU_OE<<<dimGrid, dimBlock>>>(slownik_gpu, rozmiar_slownika, slowo_gpu, strlen(slowo), wyniki_gpu);
+  kernelGPU_OE<<<dimGrid, dimBlock>>>(slownik_gpu, rozmiar_slownika, slowo_gpu, strlen(slowo), wyniki_gpu, NULL);
+
+#ifdef DEBUG
   cudaThreadSynchronize();
+#endif
 
   dim3 wynik;
   dim3 * wynik_gpu;
