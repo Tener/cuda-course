@@ -9,6 +9,7 @@
 #include <iconv.h>
 
 #include <cutil_inline.h>
+#include <cuda_runtime.h>
 
 #include <vector>
 
@@ -17,9 +18,9 @@ using namespace std;
 iconv_t iconv_from_utf8;
 iconv_t iconv_to_utf8;
 
-const int MAX_L=16;  // Maksymalna dlugosc slowa (łącznie z 0 na końcu napisu)
-const int MAX_ARG=2048; // Maksymalna liczba argumentów
-const int TILE = 16;
+const int MAX_L = 16;  // Maksymalna dlugosc slowa (łącznie z 0 na końcu napisu)
+const int MAX_ARG= 2048; // Maksymalna liczba argumentów
+const int TILE = 256;
 
 __device__ __host__ inline int minimum(const int a,const int b,const int c){
   return a<b? (c<a?c:a): (c<b?c:b);
@@ -124,79 +125,37 @@ void runCPU( char * slowo, char * slownik, int rozmiar_slownika,
 
 /////////////// GPU ///////////////
 __global__
-void kernelGPU_OE(char * slownik, int rozmiar_slownika, char * slowo, int dlugosc_slowa, char * wyniki, int * reverse_wyniki)
+void kernelGPU_OE(char * slownik, int rozmiar_slownika, char * slowo, int dlugosc_slowa, int * reverse_wyniki)
 {
+  __shared__ char _a[MAX_L * TILE]; // słowo ze słownika
+
   int idx = blockIdx.x * blockDim.x + threadIdx.x;
   if ( idx >= rozmiar_slownika )
     {
-      wyniki[idx] = 0;
       return;
     }
 
-  // TODO: use shared memory here instead.
-  //  int gt1C[MAX_L];
-  //  int gt2C[MAX_L];
-
-  char a[MAX_L]; // słowo ze słownika
+  char * a = _a + threadIdx.x*MAX_L;
   char * b = slowo;
 
   int aN = 0; // calculated below
   int bN = dlugosc_slowa;
 
-  // loop is good here, can be unrolled at compile time.
-  // TODO: consider #pragma unroll(MAX_L)
-#pragma unroll 16
   for(int i=0; i < MAX_L; i++)
     {
       if (!slownik[MAX_L*idx+i])
         {
-          aN = aN == 0 ? i : aN;
+          aN = i;
           break; // TODO: check whether is't good to break here
         }
       a[i] = slownik[MAX_L*idx+i];
     }
 
-  //  __syncthreads(); // coalescent memory access
   int val = OE_CPU( a, aN, b, bN );
-  wyniki[idx] = val;
 
-  //reverse_wyniki[val] = idx;
-  //atomicMin(reverse_wyniki[val], idx);
+  reverse_wyniki[val] = idx;
+  //  atomicMin(&reverse_wyniki[val], idx);
 
-
-// 
-//  for (int j=0;j<=bN;j++) d1[j]=j;
-// 
-//  for (int i=1;i<=aN;i++) {
-//    d2[0] = i;
-//    for (int j=1;j<=bN;j++) {
-//      d2[j] = minimum(d1[j  ] + 1,                        // deletion
-//                      d2[j-1] + 1,                        // insertion
-//                      d1[j-1] + ((a[i-1]==b[j-1])? 0:1)); // substitution
-//    }
-//    d1 = (d1==gt1C)? gt2C:gt1C; // table exchange 1<>2
-//    d2 = (d2==gt2C)? gt1C:gt2C; // table exchange 1<>2
-//  }
-//  wyniki[idx] = d1[bN];
-
-}
-
-__global__
-void kernelGPU_min(char * wyniki, int rozmiar_slownika, dim3 * wynik)
-{
-  int minOdl = 9999;
-  int minIdx;
-
-  for(int i=0; i < rozmiar_slownika; i++)
-    {
-      if (wyniki[i] < minOdl)
-        {
-          minOdl = wyniki[i];
-          minIdx = i;
-        }
-    }
-
-   *wynik = dim3( minOdl, minIdx );
 }
 
 __host__
@@ -205,30 +164,42 @@ void runGPU( char * slowo, char * slownik_gpu, int rozmiar_slownika,
 {
   int liczba_watkow = (1+(rozmiar_slownika / TILE)) * TILE;
 
+  const int SPECIAL = rozmiar_slownika+5;
+
   char * slowo_gpu;
   cudaMalloc(&slowo_gpu, MAX_L);
   cudaMemcpy(slowo_gpu, slowo, MAX_L, cudaMemcpyHostToDevice);
 
-  char * wyniki_gpu;
-  cudaMalloc(&wyniki_gpu, liczba_watkow);
+  int * reverse_wyniki_gpu;
+  cudaMalloc(&reverse_wyniki_gpu, sizeof(int) * (MAX_L + 1));
+
+  int reverse_wyniki[MAX_L+1];
+  for(int i = 0; i < MAX_L+1; i++)
+    {
+      reverse_wyniki[i] = SPECIAL;
+    }
+  cudaMemcpy(reverse_wyniki_gpu, reverse_wyniki, MAX_L+1, cudaMemcpyHostToDevice);
 
   // Wywołanie jądra
   dim3 dimGrid(liczba_watkow / TILE);
   dim3 dimBlock(TILE);
-  kernelGPU_OE<<<dimGrid, dimBlock>>>(slownik_gpu, rozmiar_slownika, slowo_gpu, strlen(slowo), wyniki_gpu, NULL);
+  kernelGPU_OE<<<dimGrid, dimBlock>>>(slownik_gpu, rozmiar_slownika, slowo_gpu, strlen(slowo), reverse_wyniki_gpu);
 
 #ifdef DEBUG
   cudaThreadSynchronize();
 #endif
 
-  dim3 wynik;
-  dim3 * wynik_gpu;
-  cudaMalloc(&wynik_gpu, sizeof(dim3));
-  kernelGPU_min<<< 1, 1 >>>(wyniki_gpu, rozmiar_slownika, wynik_gpu);
-  cudaMemcpy(&wynik,wynik_gpu, sizeof(dim3), cudaMemcpyDeviceToHost);
+  cudaMemcpy(reverse_wyniki, reverse_wyniki_gpu, MAX_L+1, cudaMemcpyDeviceToHost);
 
-  *odleglosc = wynik.x;
-  *najblizsze_slowo = wynik.y;
+  for(int i = 0; i < MAX_L+1; i++)
+    {
+      if (reverse_wyniki[i] != SPECIAL)
+        {
+          *najblizsze_slowo = reverse_wyniki[i];
+          *odleglosc = i;
+          return;
+        }
+    }
 
 #ifdef DEBUG
   char * wyniki = (char *) malloc(liczba_watkow);
@@ -252,6 +223,10 @@ void runGPU( char * slowo, char * slownik_gpu, int rozmiar_slownika,
 
 
 int main(int argc, char** argv){
+ printf("MAX_L=%d\n", MAX_L);
+ printf("MAX_ARG=%d\n", MAX_ARG);
+ printf("TILE=%d\n", TILE);
+
   if ( argc < 3 )
     {
       printf("Za mało argumentów\n");
@@ -366,7 +341,8 @@ int main(int argc, char** argv){
         cutilCheckError( cutCreateTimer( &timer));
         cutilCheckError( cutStartTimer( timer));
         runCPU( slowo, slownik, slownik_rozmiar, &numer_slowa, &odleglosc );
-        printResult("CPU", cutGetTimerValue( timer), slowo, slownik+MAX_L*numer_slowa, numer_slowa, odleglosc);
+        double runTime = cutGetTimerValue( timer);
+        printResult("CPU", runTime, slowo, slownik+MAX_L*numer_slowa, numer_slowa, odleglosc);
         cutilCheckError( cutDeleteTimer( timer));
       }
 
@@ -377,7 +353,8 @@ int main(int argc, char** argv){
         cutilCheckError( cutCreateTimer( &timer));
         cutilCheckError( cutStartTimer( timer));
         runGPU( slowo, slownik_GPU, slownik_rozmiar, &numer_slowa, &odleglosc );
-        printResult("GPU", cutGetTimerValue( timer), slowo, slownik+MAX_L*numer_slowa, numer_slowa, odleglosc);
+        double runTime = cutGetTimerValue( timer);
+        printResult("GPU", runTime, slowo, slownik+MAX_L*numer_slowa, numer_slowa, odleglosc);
         cutilCheckError( cutDeleteTimer( timer));
       }
 
