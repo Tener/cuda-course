@@ -11,63 +11,59 @@
 #include <cutil_inline.h>
 #include <cuda_runtime.h>
 
-#include <vector>
-
-using namespace std;
-
 iconv_t iconv_from_utf8;
 iconv_t iconv_to_utf8;
 
 const int MAX_L = 16;  // Maksymalna dlugosc slowa (łącznie z 0 na końcu napisu)
-const int MAX_ARG= 2048; // Maksymalna liczba argumentów
+const int MAX_ARG = 2048; // Maksymalna liczba argumentów
 const int TILE = 256;
 
 __device__ __host__ inline int minimum(const int a,const int b,const int c){
   return a<b? (c<a?c:a): (c<b?c:b);
 }
 
-
-void printResult( char * proc, double time, char * slowo, char * najblizsze, int najblizsze_ix, int odleglosc )
+char * iconv_wrapper( iconv_t conversion, char * slowo )
 {
-  char slowo_utf8[1024];
-  char najblizsze_utf8[1024];
+  static char buf[128][1024];
+  static int counter = 0;
 
-  {
-    size_t iso_len = strlen(slowo);
-    size_t utf_len = 1024;
+  char * slowo_conv = buf[counter];
 
-    char * utf = slowo_utf8;
-    char * iso = slowo;
+  size_t iso_len = strlen(slowo);
+  size_t conv_len = 1024;
 
-    iconv( iconv_to_utf8,
-           &iso, &iso_len,
-           &utf, &utf_len);
+  char * conv = slowo_conv;
+  char * iso = slowo;
 
-    * utf = 0;
-    * iso = 0;
-  }
+  iconv( conversion,
+         &iso, &iso_len,
+         &conv, &conv_len);
 
-  {
-    size_t iso_len = strlen(najblizsze);
-    size_t utf_len = 1024;
+  counter++;
+  return slowo_conv;
+}
 
-    char * utf = najblizsze_utf8;
-    char * iso = najblizsze;
+char * to_UTF_8( char * slowo )
+{
+  return iconv_wrapper( iconv_to_utf8, slowo );
+}
 
-    iconv( iconv_to_utf8,
-           &iso, &iso_len,
-           &utf, &utf_len);
+char * to_ISO_8859_2( char * slowo )
+{
+  return iconv_wrapper( iconv_from_utf8, slowo );
+}
 
-    * utf = 0;
-    * iso = 0;
-  }
-
-
-  printf("%s time: %2.6f (ms)\n", proc, time);
-  printf("Wzorzec:'%16s' Znaleziony(ix=%03d) :'%16s' (odleglosc=%3d)\n",
-         slowo_utf8, najblizsze_ix, najblizsze_utf8, odleglosc);
-//  printf("Wzorzec:'%16s' Znaleziony(ix=%03d:'%16s' (odleglosc=%3d)\n",
-//         slowo, najblizsze_ix, najblizsze, odleglosc);
+void printOverallResults( int argc, char * proc, char * slownik, double totalTime, dim3 results[MAX_ARG], char * arguments[MAX_ARG] )
+{
+  printf("CZAS CAŁKOWITY (%s): %2.6f\n", proc, totalTime);
+  for(int argNum = 2; argNum < argc; argNum++)
+    {
+      printf("%4d. %20s -> %20s : %4d\n",
+             argNum-1,
+             to_UTF_8(arguments[argNum]),
+             to_UTF_8(slownik+MAX_L*results[argNum].x),
+             results[argNum].y);
+    }
 }
 
 inline int maximum( int a, int b ){ return a > b ? a : b; }
@@ -166,24 +162,26 @@ void runGPU( char * slowo, char * slownik_gpu, int rozmiar_slownika,
   const int SPECIAL = rozmiar_slownika+5;
 
   char * slowo_gpu;
-  cudaMalloc(&slowo_gpu, MAX_L);
-  cudaMemcpy(slowo_gpu, slowo, MAX_L, cudaMemcpyHostToDevice);
+  cutilSafeCall(cudaMalloc(&slowo_gpu, MAX_L));
+  cutilSafeCall(cudaMemcpy(slowo_gpu, slowo, MAX_L, cudaMemcpyHostToDevice));
 
   int * reverse_wyniki_gpu;
-  cudaMalloc(&reverse_wyniki_gpu, sizeof(int) * (MAX_L + 1));
+  cutilSafeCall(cudaMalloc(&reverse_wyniki_gpu, sizeof(int) * (MAX_L+1)));
 
   int reverse_wyniki[MAX_L+1];
   for(int i = 0; i < MAX_L+1; i++)
     {
       reverse_wyniki[i] = SPECIAL;
     }
-  cudaMemcpy(reverse_wyniki_gpu, reverse_wyniki, MAX_L+1, cudaMemcpyHostToDevice);
+  cutilSafeCall(cudaMemcpy(reverse_wyniki_gpu, reverse_wyniki, MAX_L+1, cudaMemcpyHostToDevice));
 
   // Wywołanie jądra
   dim3 dimGrid(liczba_watkow / TILE);
   dim3 dimBlock(TILE);
   kernelGPU_OE<<<dimGrid, dimBlock>>>(slownik_gpu, rozmiar_slownika, slowo_gpu, strlen(slowo), reverse_wyniki_gpu);
-  cudaMemcpy(reverse_wyniki, reverse_wyniki_gpu, MAX_L+1, cudaMemcpyDeviceToHost);
+  cutilCheckMsg("kernelGPU_OE() execution failed\n");
+  cutilSafeCall( cudaThreadSynchronize() );
+  cutilSafeCall(cudaMemcpy(reverse_wyniki, reverse_wyniki_gpu, MAX_L+1, cudaMemcpyDeviceToHost));
 
   for(int i = 0; i < MAX_L+1; i++)
     {
@@ -195,15 +193,15 @@ void runGPU( char * slowo, char * slownik_gpu, int rozmiar_slownika,
         }
     }
 
-  cudaFree(slowo_gpu);
-  cudaFree(reverse_wyniki_gpu);
+  cutilSafeCall(cudaFree(slowo_gpu));
+  cutilSafeCall(cudaFree(reverse_wyniki_gpu));
 }
 
 
 int main(int argc, char** argv){
- printf("MAX_L=%d\n", MAX_L);
- printf("MAX_ARG=%d\n", MAX_ARG);
- printf("TILE=%d\n", TILE);
+  printf("MAX_L=%d\n", MAX_L);
+  printf("MAX_ARG=%d\n", MAX_ARG);
+  printf("TILE=%d\n", TILE);
 
   if ( argc < 3 )
     {
@@ -305,45 +303,57 @@ int main(int argc, char** argv){
   /* przesyłanie słownika na GPU */
 
   char * slownik_GPU;
-  cudaMalloc(&slownik_GPU, slownik_size);
-  cudaMemcpy(slownik_GPU, slownik, slownik_size, cudaMemcpyHostToDevice);
+  cutilSafeCall(cudaMalloc(&slownik_GPU, slownik_size));
+  cutilSafeCall(cudaMemcpy(slownik_GPU, slownik, slownik_size, cudaMemcpyHostToDevice));
 
   //texture<char> slownik_Tex;
   //const struct textureReference texRef = slownik_Tex;
-  //cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<char>();
-  //cudaBindTexture(0, &texRef, (void *)slownik_GPU, &channelDesc, slownik_size);
+  //cutilCheckError(cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<char>());
+  //cutilCheckError(cudaBindTexture(0, &texRef, (void *)slownik_GPU, &channelDesc, slownik_size));
 
-  for(int argNum = 2; argNum < argc; argNum++)
-    {
-      char * slowo = arguments[argNum];
+  // Pętla dla CPU
+  {
+    unsigned int timer = 0;
+    double totalTime;
+    dim3 results[MAX_ARG];
 
+    cutilCheckError( cutCreateTimer( &timer));
+    cutilCheckError( cutStartTimer( timer));
+    for(int argNum = 2; argNum < argc; argNum++)
       {
-        unsigned int timer = 0;
+        char * slowo = arguments[argNum];
         int numer_slowa = 0, odleglosc = 999;
-        // CPU
-        cutilCheckError( cutCreateTimer( &timer));
-        cutilCheckError( cutStartTimer( timer));
         runCPU( slowo, slownik, slownik_rozmiar, &numer_slowa, &odleglosc );
-        double runTime = cutGetTimerValue( timer);
-        printResult("CPU", runTime, slowo, slownik+MAX_L*numer_slowa, numer_slowa, odleglosc);
-        cutilCheckError( cutDeleteTimer( timer));
+        results[argNum].x = numer_slowa;
+        results[argNum].y = odleglosc;
       }
+    totalTime = cutGetTimerValue(timer);
+    printOverallResults( argc, "CPU", slownik, totalTime, results, arguments );
+    cutilCheckError(cutDeleteTimer(timer));
+  }
 
+  // Pętla dla GPU
+  {
+    unsigned int timer = 0;
+    double totalTime;
+    dim3 results[MAX_ARG];
+
+    cutilCheckError( cutCreateTimer( &timer));
+    cutilCheckError( cutStartTimer( timer));
+    for(int argNum = 2; argNum < argc; argNum++)
       {
-        unsigned int timer = 0;
+        char * slowo = arguments[argNum];
         int numer_slowa = 0, odleglosc = 999;
-        // GPU
-        cutilCheckError( cutCreateTimer( &timer));
-        cutilCheckError( cutStartTimer( timer));
-        runGPU(slowo, slownik_GPU, slownik_rozmiar, &numer_slowa, &odleglosc );
-        double runTime = cutGetTimerValue( timer);
-        printResult("GPU", runTime, slowo, slownik+MAX_L*numer_slowa, numer_slowa, odleglosc);
-        cutilCheckError( cutDeleteTimer( timer));
+        runGPU( slowo, slownik_GPU, slownik_rozmiar, &numer_slowa, &odleglosc );
+        results[argNum].x = numer_slowa;
+        results[argNum].y = odleglosc;
       }
+    totalTime = cutGetTimerValue(timer);
+    printOverallResults( argc, "GPU", slownik, totalTime, results, arguments );
+    cutilCheckError(cutDeleteTimer(timer));
+  }
 
-    }
-
-  cudaFree(slownik_GPU);
+  cutilSafeCall(cudaFree(slownik_GPU));
   iconv_close(iconv_from_utf8);
   iconv_close(iconv_to_utf8);
 
