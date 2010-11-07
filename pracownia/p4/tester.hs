@@ -78,18 +78,18 @@ validate input output distance = let dist' = levenshteinDistance (EditCosts 1 1 
 main = do
   [slownik, nazwaProgramu] <- getArgs
 
-  -- test ze słownika
+  -- test ze słownika -- TODO
 
   -- test losowy
   letters <- randomRs ('a','z') <$> newStdGen
   wordLenghts <- randomRs (3,10) <$> newStdGen
   let batchCount = 100
-      batchSize = 10
+      batchSize = 28
       batches = take batchCount $ splitEvery batchSize (cut letters wordLenghts)
 
       cut xs (z:zs) = let (a,b) = splitAt z xs in a : cut b zs
 
-  mapM_ (runTest slownik nazwaProgramu) batches
+  mapM_ (\b -> runTest slownik nazwaProgramu b >> putStr "." >> hFlush stdout) batches
 
   -- test wybranych kombinacji słów
   runTest slownik nazwaProgramu ["testowość", "przewlokły", "woretewr", "żywotnikowiek", "gżegżułka"]
