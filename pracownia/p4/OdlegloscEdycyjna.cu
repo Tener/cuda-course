@@ -30,6 +30,7 @@ T align_up( T x, T2 y )
   return ((x / y) + (x % y ? 1 : 0)) * y;
 }
 
+#define SPECIAL( x ) (x + 5) // specjalna wartość do oznaczania niezajętych jeszcze pól
 const int MAX_L = 16;  // Maksymalna dlugosc slowa (łącznie z 0 na końcu napisu)
 const int MAX_ARG = 32; // Maksymalna liczba argumentów
 const int TILE = 256;
@@ -191,7 +192,7 @@ void kernelGPU_OE(int numer_argumentu, char * slownik, int rozmiar_slownika, int
 #if 0
   reverse_wyniki[val] = idx;
 #else
-  if ( reverse_wyniki[val] == rozmiar_slownika+5 )
+  if ( reverse_wyniki[val] == SPECIAL(rozmiar_slownika) )
     atomicMin(&reverse_wyniki[val], idx);
 #endif
 
@@ -206,7 +207,6 @@ void runGPU( int numer_argumentu,
 {
   int liczba_watkow = align_up(rozmiar_slownika,TILE); // (1+(rozmiar_slownika / TILE)) * TILE;
 
-  const int SPECIAL = rozmiar_slownika+5;
 
   static int * reverse_wyniki_gpu = NULL;
   if (!reverse_wyniki_gpu)
@@ -215,7 +215,7 @@ void runGPU( int numer_argumentu,
   int reverse_wyniki[MAX_L+1];
   for(int i = 0; i < MAX_L+1; i++)
     {
-      reverse_wyniki[i] = SPECIAL;
+      reverse_wyniki[i] = SPECIAL(rozmiar_slownika);
     }
   cutilSafeCall(cudaMemcpy(reverse_wyniki_gpu, reverse_wyniki, MAX_L+1, cudaMemcpyHostToDevice));
 
@@ -228,7 +228,7 @@ void runGPU( int numer_argumentu,
 #pragma unroll 16
   for(int i = 0; i < MAX_L+1; i++)
     {
-      if (reverse_wyniki[i] != SPECIAL)
+      if (reverse_wyniki[i] != SPECIAL(rozmiar_slownika))
         {
           *najblizsze_slowo = reverse_wyniki[i];
           *odleglosc = i;
