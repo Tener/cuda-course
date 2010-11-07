@@ -27,7 +27,7 @@ b - aktualna
 
 6. Przykład uruchomienia:
 
-tener@phenom:~/cuda/p4$ ./a.out  slowa.txt  fooo bar baz
+tener@phenom:~/cuda/p4$ ./a.out slowa.txt fooo bar baz
 MAX_L=16
 MAX_ARG=16
 TILE=256
@@ -41,3 +41,20 @@ CZAS CAŁKOWITY (GPU): 51.917999
    1.                 fooo ->                 foto :    1
    2.                  bar ->                  bar :    0
    3.                  baz ->                  baz :    0
+
+
+7. Trick:
+
+#if 0
+  reverse_wyniki[val] = idx;
+#else // metoda równie szybka co powyższa, ale dla odmiany zachowuje zgodność z obliczeniami na CPU
+  if ( reverse_wyniki[val] == SPECIAL(rozmiar_slownika) )
+    atomicMin(&reverse_wyniki[val], idx);
+#endif
+
+8. Tester napisany w Haskellu, działa dla: GHC 6.12.3, edit-distance == 0.1.2, split == 0.1.2.1
+   - GHC z paczki dla systemu
+   - cabal install edit-distance
+   - cabal install split
+
+9. Zmienna systemowa PORCELAIN sprawia, że wyjście programu jest parsowalne maszynowo.
