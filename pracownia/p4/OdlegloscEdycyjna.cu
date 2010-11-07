@@ -1,20 +1,6 @@
-/* Przykładowe wyjście:
+/*
 
-./a.out  slowa.txt fooo bar baz
-
-MAX_L=16
-MAX_ARG=2048
-TILE=256
-Maksymalna długość: 14
-Wczytano 795875 słów, 795876 nowych linii
-CZAS CAŁKOWITY (CPU): 1152.609985
-   1.                 fooo ->                 foot :    1
-   2.                  bar ->                  bar :    0
-   3.                  baz ->                  baz :    0
-CZAS CAŁKOWITY (GPU): 237.882004
-   1.                 fooo ->                 foto :    1
-   2.                  bar ->                  bar :    0
-   3.                  baz ->                  baz :    0
+./a.out slowa.txt testowość przewlokły woretewr żywotnikowiek gżegżułka
 
 */
 
@@ -34,7 +20,9 @@ CZAS CAŁKOWITY (GPU): 237.882004
 iconv_t iconv_from_utf8;
 iconv_t iconv_to_utf8;
 texture<char, 1, cudaReadModeElementType> slownik_tex;
-
+// porcelain: kontrolowane przez zmienną środowiskową PORCELAIN.
+// jeżeli jest ustawiona, to wyjście programu jest w formie łatwej do sparsowania przez programy.
+bool porcelain;
 
 template< typename T, typename T2 >
 T align_up( T x, T2 y )
@@ -85,14 +73,30 @@ char * to_ISO_8859_2( char * slowo )
 
 void printOverallResults( int argc, char * proc, char * slownik, double totalTime, dim3 results[MAX_ARG], char * arguments[MAX_ARG] )
 {
-  printf("CZAS CAŁKOWITY (%s): %2.6f\n", proc, totalTime);
+  if (porcelain)
+    printf("TOTAL=%s=%d=%2.6f\n", proc, argc-2, totalTime);
+  else
+    printf("CZAS CAŁKOWITY (%s): %2.6f\n", proc, totalTime);
+
   for(int argNum = 2; argNum < argc; argNum++)
     {
-      printf("%4d. %20s -> %20s : %4d\n",
-             argNum-1,
-             to_UTF_8(arguments[argNum]),
-             to_UTF_8(slownik+MAX_L*results[argNum].x),
-             results[argNum].y);
+      if (porcelain)
+        {
+          printf("%s;%s;%s;%d\n",
+                 proc,
+                 to_UTF_8(arguments[argNum]),
+                 to_UTF_8(slownik+MAX_L*results[argNum].x),
+                 results[argNum].y // odległość
+                 );
+        }
+      else
+        {
+          printf("%4d. %20s -> %20s : %4d\n",
+                 argNum-1,
+                 to_UTF_8(arguments[argNum]),
+                 to_UTF_8(slownik+MAX_L*results[argNum].x),
+                 results[argNum].y);
+        }
     }
 }
 
@@ -176,8 +180,13 @@ void kernelGPU_OE(int numer_argumentu, char * slownik, int rozmiar_slownika, int
 
   int val = OE_CPU( a, aN, (const char*)(arguments_gpu_const+numer_argumentu*MAX_L), dlugosc_slowa );
 
+#if 0
   reverse_wyniki[val] = idx;
-  //atomicMin(&reverse_wyniki[val], idx);
+#else
+  if ( reverse_wyniki[val] == rozmiar_slownika+5 )
+    atomicMin(&reverse_wyniki[val], idx);
+#endif
+
   //atomicCAS( &reverse_wyniki[val], rozmiar_slownika+5, idx);
 
 }
@@ -224,9 +233,17 @@ void runGPU( int numer_argumentu,
 
 
 int main(int argc, char** argv){
-  printf("MAX_L=%d\n", MAX_L);
-  printf("MAX_ARG=%d\n", MAX_ARG);
-  printf("TILE=%d\n", TILE);
+  porcelain = getenv("PORCELAIN") ? 1 : 0;
+#ifdef PORCELAIN_ONLY
+  porcelain = 1;
+#endif
+
+  if ( !porcelain )
+    {
+      printf("MAX_L=%d\n", MAX_L);
+      printf("MAX_ARG=%d\n", MAX_ARG);
+      printf("TILE=%d\n", TILE);
+    }
 
   if ( argc < 3 )
     {
@@ -263,7 +280,9 @@ int main(int argc, char** argv){
       max_dl = maximum( max_dl, dl );
       ilosc++;
     }
-  printf("Maksymalna długość: %d\n", max_dl);
+  if (!porcelain)
+    printf("Maksymalna długość: %d\n", max_dl);
+
   assert( max_dl < MAX_L ); // zakładamy że słowa są krótsze niż MAX_L bajty
 
   /* wczytujemy słownik faktycznie */
@@ -291,7 +310,8 @@ int main(int argc, char** argv){
     }
   slownik_rozmiar = cnt;
 
-  printf("Wczytano %d słów, %d nowych linii\n", cnt, ilosc);
+  if (!porcelain)
+    printf("Wczytano %d słów, %d nowych linii\n", cnt, ilosc);
 
   /* konwertujemy argumenty */
   iconv_from_utf8 = iconv_open("ISO-8859-2","UTF-8");
