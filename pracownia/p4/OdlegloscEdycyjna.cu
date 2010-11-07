@@ -206,14 +206,14 @@ void runGPU( int numer_argumentu,
              int * najblizsze_slowo, int * odleglosc)
 {
   int liczba_watkow = align_up(rozmiar_slownika,TILE); // (1+(rozmiar_slownika / TILE)) * TILE;
-
+  const size_t REVERSE_SIZE = MAX_L+1;
 
   static int * reverse_wyniki_gpu = NULL;
   if (!reverse_wyniki_gpu)
-    cutilSafeCall(cudaMalloc(&reverse_wyniki_gpu, sizeof(int) * (MAX_L+1)));
+    cutilSafeCall(cudaMalloc(&reverse_wyniki_gpu, sizeof(int) * REVERSE_SIZE));
 
-  int reverse_wyniki[MAX_L+1];
-  for(int i = 0; i < MAX_L+1; i++)
+  int reverse_wyniki[REVERSE_SIZE];
+  for(int i = 0; i < REVERSE_SIZE; i++)
     {
       reverse_wyniki[i] = SPECIAL(rozmiar_slownika);
     }
@@ -225,8 +225,8 @@ void runGPU( int numer_argumentu,
   kernelGPU_OE<<<dimGrid, dimBlock>>>(numer_argumentu, slownik_gpu, rozmiar_slownika, strlen(slowo), reverse_wyniki_gpu);
   cutilSafeCall(cudaMemcpy(reverse_wyniki, reverse_wyniki_gpu, MAX_L+1, cudaMemcpyDeviceToHost));
 
-#pragma unroll 16
-  for(int i = 0; i < MAX_L+1; i++)
+
+  for(int i = 0; i < REVERSE_SIZE; i++)
     {
       if (reverse_wyniki[i] != SPECIAL(rozmiar_slownika))
         {
