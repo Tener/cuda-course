@@ -178,7 +178,6 @@ void kernelGPU_OE(int numer_argumentu, char * slownik, int rozmiar_slownika, int
     {
       char c;
       c = tex1Dfetch( slownik_tex, MAX_L*idx+i);
-      //c = slownik[MAX_L*idx+i];
       if (!c)
         {
           aN = i;
@@ -195,9 +194,6 @@ void kernelGPU_OE(int numer_argumentu, char * slownik, int rozmiar_slownika, int
   if ( reverse_wyniki[val] == SPECIAL(rozmiar_slownika) )
     atomicMin(&reverse_wyniki[val], idx);
 #endif
-
-  //atomicCAS( &reverse_wyniki[val], rozmiar_slownika+5, idx);
-
 }
 
 __host__
@@ -205,7 +201,7 @@ void runGPU( int numer_argumentu,
              char * slowo, char * slownik_gpu, int rozmiar_slownika,
              int * najblizsze_slowo, int * odleglosc)
 {
-  int liczba_watkow = align_up(rozmiar_slownika,TILE); // (1+(rozmiar_slownika / TILE)) * TILE;
+  int liczba_watkow = align_up(rozmiar_slownika,TILE);
   const size_t REVERSE_SIZE = MAX_L+1;
 
   static int * reverse_wyniki_gpu = NULL;
@@ -235,8 +231,6 @@ void runGPU( int numer_argumentu,
           return;
         }
     }
-
-  //cutilSafeCall(cudaFree(reverse_wyniki_gpu));
 }
 
 
