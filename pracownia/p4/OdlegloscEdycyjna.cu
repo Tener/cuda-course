@@ -1,3 +1,23 @@
+/* Przykładowe wyjście:
+
+./a.out  slowa.txt fooo bar baz
+
+MAX_L=16
+MAX_ARG=2048
+TILE=256
+Maksymalna długość: 14
+Wczytano 795875 słów, 795876 nowych linii
+CZAS CAŁKOWITY (CPU): 1152.609985
+   1.                 fooo ->                 foot :    1
+   2.                  bar ->                  bar :    0
+   3.                  baz ->                  baz :    0
+CZAS CAŁKOWITY (GPU): 237.882004
+   1.                 fooo ->                 foto :    1
+   2.                  bar ->                  bar :    0
+   3.                  baz ->                  baz :    0
+
+*/
+
 // nvcc -I$CUDA_SDK/C/common/inc -L$CUDA_SDK/C/lib -lcutil_i386 OdlegloscEdycyjna.cu
 // Kompilacja:  ^.^
 #include <stdlib.h>
@@ -13,10 +33,22 @@
 
 iconv_t iconv_from_utf8;
 iconv_t iconv_to_utf8;
+texture<char, 1, cudaReadModeElementType> slownik_tex;
+
+
+template< typename T, typename T2 >
+T align_up( T x, T2 y )
+{
+  return ((x / y) + (x % y ? 1 : 0)) * y;
+}
 
 const int MAX_L = 16;  // Maksymalna dlugosc slowa (łącznie z 0 na końcu napisu)
-const int MAX_ARG = 2048; // Maksymalna liczba argumentów
+const int MAX_ARG = 16; // Maksymalna liczba argumentów
 const int TILE = 256;
+
+__device__ __constant__ char arguments_gpu_const[MAX_ARG * MAX_L];
+
+__device__ __constant__ char slowo_const[MAX_L * 2];
 
 __device__ __host__ inline int minimum(const int a,const int b,const int c){
   return a<b? (c<a?c:a): (c<b?c:b);
@@ -94,7 +126,6 @@ int OE_CPU(const char *a,const int aN,const char *b,const int bN){
   return d1[bN];
 }
 
-
 void runCPU( char * slowo, char * slownik, int rozmiar_slownika,
              int * najblizsze_slowo, int * odleglosc)
 {
@@ -121,7 +152,7 @@ void runCPU( char * slowo, char * slownik, int rozmiar_slownika,
 
 /////////////// GPU ///////////////
 __global__
-void kernelGPU_OE( char * slownik, int rozmiar_slownika, char * slowo, int dlugosc_slowa, int * reverse_wyniki)
+void kernelGPU_OE(int numer_argumentu, char * slownik, int rozmiar_slownika, int dlugosc_slowa, int * reverse_wyniki)
 {
   int idx = blockIdx.x * blockDim.x + threadIdx.x;
   if ( idx >= rozmiar_slownika )
@@ -135,8 +166,8 @@ void kernelGPU_OE( char * slownik, int rozmiar_slownika, char * slowo, int dlugo
   for(int i=0; i < MAX_L; i++)
     {
       char c;
+      c = tex1Dfetch( slownik_tex, MAX_L*idx+i);
       c = slownik[MAX_L*idx+i];
-      //c = tex1D( slownik_Tex, MAX_L*idx+i);
       if (!c)
         {
           aN = i;
@@ -145,7 +176,7 @@ void kernelGPU_OE( char * slownik, int rozmiar_slownika, char * slowo, int dlugo
       a[i] = c;
     }
 
-  int val = OE_CPU( a, aN, slowo, dlugosc_slowa );
+  int val = OE_CPU( a, aN, (const char*)(arguments_gpu_const+numer_argumentu*MAX_L), dlugosc_slowa );
 
   reverse_wyniki[val] = idx;
   //atomicMin(&reverse_wyniki[val], idx);
@@ -154,16 +185,16 @@ void kernelGPU_OE( char * slownik, int rozmiar_slownika, char * slowo, int dlugo
 }
 
 __host__
-void runGPU( char * slowo, char * slownik_gpu, int rozmiar_slownika,
+void runGPU( int numer_argumentu,
+             char * slowo, char * slownik_gpu, int rozmiar_slownika,
              int * najblizsze_slowo, int * odleglosc)
 {
-  int liczba_watkow = (1+(rozmiar_slownika / TILE)) * TILE;
+  int liczba_watkow = align_up(rozmiar_slownika,TILE); // (1+(rozmiar_slownika / TILE)) * TILE;
 
   const int SPECIAL = rozmiar_slownika+5;
 
-  char * slowo_gpu;
-  cutilSafeCall(cudaMalloc(&slowo_gpu, MAX_L));
-  cutilSafeCall(cudaMemcpy(slowo_gpu, slowo, MAX_L, cudaMemcpyHostToDevice));
+  cutilSafeCall(cudaMemcpyToSymbol(slowo_const, slowo, MAX_L, cudaMemcpyHostToDevice));
+  cudaThreadSynchronize();
 
   int * reverse_wyniki_gpu;
   cutilSafeCall(cudaMalloc(&reverse_wyniki_gpu, sizeof(int) * (MAX_L+1)));
@@ -178,9 +209,7 @@ void runGPU( char * slowo, char * slownik_gpu, int rozmiar_slownika,
   // Wywołanie jądra
   dim3 dimGrid(liczba_watkow / TILE);
   dim3 dimBlock(TILE);
-  kernelGPU_OE<<<dimGrid, dimBlock>>>(slownik_gpu, rozmiar_slownika, slowo_gpu, strlen(slowo), reverse_wyniki_gpu);
-  cutilCheckMsg("kernelGPU_OE() execution failed\n");
-  cutilSafeCall( cudaThreadSynchronize() );
+  kernelGPU_OE<<<dimGrid, dimBlock>>>(numer_argumentu, slownik_gpu, rozmiar_slownika, strlen(slowo), reverse_wyniki_gpu);
   cutilSafeCall(cudaMemcpy(reverse_wyniki, reverse_wyniki_gpu, MAX_L+1, cudaMemcpyDeviceToHost));
 
   for(int i = 0; i < MAX_L+1; i++)
@@ -193,7 +222,6 @@ void runGPU( char * slowo, char * slownik_gpu, int rozmiar_slownika,
         }
     }
 
-  cutilSafeCall(cudaFree(slowo_gpu));
   cutilSafeCall(cudaFree(reverse_wyniki_gpu));
 }
 
@@ -230,7 +258,7 @@ int main(int argc, char** argv){
   while(!feof(plik_slownika))
     {
       char buf[1024];
-      fscanf(plik_slownika,"%s",buf);
+      int res = fscanf(plik_slownika,"%s",buf);
       int dl = strlen(buf);
 #ifdef DEBUG
       printf("Długość słowa: %d\nSłowo: %s\n", dl, buf);
@@ -243,8 +271,9 @@ int main(int argc, char** argv){
 
   /* wczytujemy słownik faktycznie */
   rewind(plik_slownika);
-  size_t slownik_size = sizeof(char) * MAX_L * ilosc;
-  char * slownik = (char *) malloc(slownik_size);
+  size_t slownik_size = align_up(sizeof(char) * MAX_L * ilosc, 32);
+  char * slownik;
+  slownik = (char *) malloc(slownik_size);
   int slownik_rozmiar;
   memset(slownik, 0, slownik_size);
 
@@ -252,8 +281,8 @@ int main(int argc, char** argv){
   while(!feof(plik_slownika))
     {
       char buf[1024];
-      buf[0] = 0;
-      fscanf(plik_slownika, "%s", buf);
+      memset(buf, 0, 1024);
+      int res = fscanf(plik_slownika, "%s", buf);
       if ( !strcmp(buf,"") )
         continue;
 
@@ -296,6 +325,12 @@ int main(int argc, char** argv){
 #endif
     }
 
+  /* kopiujemy argumenty na GPU */
+  //cutilSafeCall(cudaGetSymbolAddress(&arguments_gpu_const, "arguments_gpu"));
+  for(int i = 2; i < argc; i++)
+    {
+      cutilSafeCall(cudaMemcpyToSymbol(arguments_gpu_const, arguments[i], MAX_L,MAX_L*i));
+    }
 
   // --------------------------------------------------------------------
   // -GPU:---------------------------------------------------------------
@@ -306,10 +341,20 @@ int main(int argc, char** argv){
   cutilSafeCall(cudaMalloc(&slownik_GPU, slownik_size));
   cutilSafeCall(cudaMemcpy(slownik_GPU, slownik, slownik_size, cudaMemcpyHostToDevice));
 
+  cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<char>();
+
+  // set texture parameters
+  slownik_tex.addressMode[0] = cudaAddressModeWrap;
+  slownik_tex.filterMode = cudaFilterModePoint;
+  slownik_tex.normalized = false;    // access with normalized texture coordinates
+
+  cutilSafeCall(cudaBindTexture(0, slownik_tex, slownik_GPU, channelDesc));
+
+
   //texture<char> slownik_Tex;
   //const struct textureReference texRef = slownik_Tex;
-  //cutilCheckError(cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<char>());
-  //cutilCheckError(cudaBindTexture(0, &texRef, (void *)slownik_GPU, &channelDesc, slownik_size));
+  //cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<char>();
+  //cutilSafeCall(cudaBindTexture(0, &texRef, (void *)slownik_GPU, &slownik_Tex.channelDesc, slownik_size));
 
   // Pętla dla CPU
   {
@@ -338,16 +383,19 @@ int main(int argc, char** argv){
     double totalTime;
     dim3 results[MAX_ARG];
 
+    cutilSafeCall(cudaThreadSynchronize());
     cutilCheckError( cutCreateTimer( &timer));
     cutilCheckError( cutStartTimer( timer));
     for(int argNum = 2; argNum < argc; argNum++)
       {
         char * slowo = arguments[argNum];
         int numer_slowa = 0, odleglosc = 999;
-        runGPU( slowo, slownik_GPU, slownik_rozmiar, &numer_slowa, &odleglosc );
+        runGPU( argNum, slowo, slownik_GPU, slownik_rozmiar, &numer_slowa, &odleglosc );
         results[argNum].x = numer_slowa;
         results[argNum].y = odleglosc;
       }
+    // zawsze na początku i końcu uruchomienia timera robimy synchronizację. patrz 'best practices guide'
+    cutilSafeCall(cudaThreadSynchronize());
     totalTime = cutGetTimerValue(timer);
     printOverallResults( argc, "GPU", slownik, totalTime, results, arguments );
     cutilCheckError(cutDeleteTimer(timer));
