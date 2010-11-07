@@ -190,7 +190,8 @@ void kernelGPU_OE(int numer_argumentu, char * slownik, int rozmiar_slownika, int
 
 #if 0
   reverse_wyniki[val] = idx;
-#else
+#else // metoda równie szybka co powyższa, ale dla odmiany zachowuje zgodność z obliczeniami na CPU... zwykle.
+      // Czasami nie chce działać, tzn. obliczenia się mimo wszystko rozjeżdżają.
   if ( reverse_wyniki[val] == SPECIAL(rozmiar_slownika) )
     atomicMin(&reverse_wyniki[val], idx);
 #endif
