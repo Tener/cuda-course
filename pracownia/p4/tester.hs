@@ -65,7 +65,8 @@ runTest nazwaProgramu slownik slowa = do
                                putStrLn "Error occured:"
                                mapM_ putStrLn (map snd errors)
                                putStrLn "Try it yourself:"
-                               putStrLn (unwords ([nazwaProgramu,slownik]++ map fst errors))
+                               let unsetEnv = "env --unset=PORCELAIN "
+                               putStrLn (unsetEnv ++ unwords ([nazwaProgramu,slownik]++ map fst errors))
                                error "fail"
                              )
   mapM_ checkResults [p1,p2]
