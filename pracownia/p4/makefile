@@ -17,7 +17,7 @@ rs:
 	rsync --delete -avz -e "ssh -C -p 8889" OdlegloscEdycyjna.cu makefile tester.hs localhost:/home/tener/cuda/p4
 
 kno:
-	7z -tzip a kno_krzysztof_skrzetnicki_p4_`date +%s`.zip UWAGI.txt OdlegloscEdycyjna.cu makefile tester.hs slowa_small.txt
+	7z -tzip a kno_krzysztof_skrzetnicki_p4_`date +%s`.zip readme.txt OdlegloscEdycyjna.cu makefile tester.hs slowa_small.txt
 
 clean:
 	rm -vf *.o *.hi a.out *~
