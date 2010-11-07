@@ -17,7 +17,6 @@ import Text.EditDistance
 
 import qualified Codec.Binary.UTF8.String as UTF8
 {-
-
 Format porcelany:
 
 TOTAL=CPU=1305.641968
@@ -42,7 +41,7 @@ runTest nazwaProgramu slownik slowa = do
               res = map oneResult results
           in
               ((proc, res),rest')
-      oneResult line = 
+      oneResult line =
           let [_proc,w1,w2,dist] = splitOn ";" line
           in
               (w1,w2,read dist :: Int)
@@ -77,21 +76,23 @@ validate input output distance = let dist' = levenshteinDistance (EditCosts 1 1 
 
 main = do
   [slownik, nazwaProgramu] <- getArgs
-
   -- test ze słownika -- TODO
 
   -- test losowy
   letters <- randomRs ('a','z') <$> newStdGen
   wordLenghts <- randomRs (3,10) <$> newStdGen
-  let batchCount = 100
-      batchSize = 28
+  let batchCount = 10
+      batchSize = 10
       batches = take batchCount $ splitEvery batchSize (cut letters wordLenghts)
 
       cut xs (z:zs) = let (a,b) = splitAt z xs in a : cut b zs
 
   mapM_ (\b -> runTest slownik nazwaProgramu b >> putStr "." >> hFlush stdout) batches
 
+  putStr "\nTEST LOSOWY OK\n"
   -- test wybranych kombinacji słów
   runTest slownik nazwaProgramu ["testowość", "przewlokły", "woretewr", "żywotnikowiek", "gżegżułka"]
+  runTest slownik nazwaProgramu ["iydnez"]
+  putStr "TEST KOMBINACJI OK\n"
 
   return ()
