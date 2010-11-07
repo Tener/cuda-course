@@ -345,7 +345,6 @@ int main(int argc, char** argv){
     }
 
   /* kopiujemy argumenty na GPU */
-  //cutilSafeCall(cudaGetSymbolAddress(&arguments_gpu_const, "arguments_gpu"));
   for(int i = 2; i < argc; i++)
     {
       cutilSafeCall(cudaMemcpyToSymbol(arguments_gpu_const, arguments[i], MAX_L,MAX_L*i));
@@ -368,12 +367,6 @@ int main(int argc, char** argv){
   slownik_tex.normalized = false;    // access with normalized texture coordinates
 
   cutilSafeCall(cudaBindTexture(0, slownik_tex, slownik_GPU, channelDesc));
-
-
-  //texture<char> slownik_Tex;
-  //const struct textureReference texRef = slownik_Tex;
-  //cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<char>();
-  //cutilSafeCall(cudaBindTexture(0, &texRef, (void *)slownik_GPU, &slownik_Tex.channelDesc, slownik_size));
 
   // Pętla dla CPU
   {
