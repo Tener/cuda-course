@@ -178,7 +178,7 @@ void kernelGPU_OE(int numer_argumentu, char * slownik, int rozmiar_slownika, int
     {
       char c;
       c = tex1Dfetch( slownik_tex, MAX_L*idx+i);
-      //      c = slownik[MAX_L*idx+i];
+      //c = slownik[MAX_L*idx+i];
       if (!c)
         {
           aN = i;
