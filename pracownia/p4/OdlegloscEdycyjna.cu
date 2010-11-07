@@ -234,7 +234,7 @@ void runGPU( int numer_argumentu,
 
 int main(int argc, char** argv){
   porcelain = getenv("PORCELAIN") ? 1 : 0;
-#ifdef PORCELAIN_ONLY
+#ifdef ALWAYS_PORCELAIN
   porcelain = 1;
 #endif
 
