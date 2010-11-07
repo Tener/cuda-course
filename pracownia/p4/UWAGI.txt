@@ -15,12 +15,12 @@ CZAS CAŁKOWITY (GPU): 222.748993
 
 4. To co się zmieści dajemy do __const__, jak nie to do tekstury i odwołujemy się przez tex1Dfetch, w ostateczności zmienna w __global__.
 
-5. Optymalizacja:
+5. Optymalizacja działa:
 
 >>> a=410.515991+379.635986+379.143005
->>> b=65.890999
+>>> b=51.917999
 >>> a/b
-17.745898525533054
+22.521957789628985
 
 a - wersja pierwsza
 b - aktualna
@@ -33,12 +33,11 @@ MAX_ARG=16
 TILE=256
 Maksymalna długość: 14
 Wczytano 795875 słów, 795876 nowych linii
-CZAS CAŁKOWITY (CPU): 302.078003
+CZAS CAŁKOWITY (CPU): 309.966003
    1.                 fooo ->                 foot :    1
    2.                  bar ->                  bar :    0
    3.                  baz ->                  baz :    0
-CZAS CAŁKOWITY (GPU): 65.946999
+CZAS CAŁKOWITY (GPU): 51.917999
    1.                 fooo ->                 foto :    1
    2.                  bar ->                  bar :    0
    3.                  baz ->                  baz :    0
-
