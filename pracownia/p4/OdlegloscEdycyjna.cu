@@ -31,7 +31,7 @@ T align_up( T x, T2 y )
 }
 
 const int MAX_L = 16;  // Maksymalna dlugosc slowa (łącznie z 0 na końcu napisu)
-const int MAX_ARG = 16; // Maksymalna liczba argumentów
+const int MAX_ARG = 32; // Maksymalna liczba argumentów
 const int TILE = 256;
 
 __device__ __constant__ char arguments_gpu_const[MAX_ARG * MAX_L];
