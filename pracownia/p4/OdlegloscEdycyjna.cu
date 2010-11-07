@@ -36,9 +36,19 @@ const int TILE = 256;
 
 __device__ __constant__ char arguments_gpu_const[MAX_ARG * MAX_L];
 
-__device__ __host__ inline int minimum(const int a,const int b,const int c){
-  return a<b? (c<a?c:a): (c<b?c:b);
+__device__ __host__ inline int minimum3(const int a,const int b,const int c){
+  return a<b ? (c<a?c:a): (c<b?c:b);
 }
+
+__device__ __host__ inline int minimum2(const int a,const int b){
+  return a<b ? a : b;
+}
+
+__device__ __host__ inline int maximum2(const int a,const int b ){
+  return a>b ? a : b;
+}
+
+
 
 char * iconv_wrapper( iconv_t conversion, char * slowo )
 {
@@ -100,8 +110,6 @@ void printOverallResults( int argc, char * proc, char * slownik, double totalTim
     }
 }
 
-inline int maximum( int a, int b ){ return a > b ? a : b; }
-
 /////////////// CPU ///////////////
 // Odległosc edycyjna Levenshtein'a
 __host__ __device__ inline
@@ -117,9 +125,9 @@ int OE_CPU(const char *a,const int aN,const char *b,const int bN){
   for (int i=1;i<=aN;i++) {
     d2[0] = i;
     for (int j=1;j<=bN;j++) {
-      d2[j] = minimum(d1[j  ] + 1,                        // deletion
-                      d2[j-1] + 1,                        // insertion
-                      d1[j-1] + ((a[i-1]==b[j-1])? 0:1)); // substitution
+      d2[j] = minimum3(d1[j  ] + 1,                        // deletion
+                       d2[j-1] + 1,                        // insertion
+                       d1[j-1] + ((a[i-1]==b[j-1])? 0:1)); // substitution
     }
     d1 = (d1==gt1C)? gt2C:gt1C; // table exchange 1<>2
     d2 = (d2==gt2C)? gt1C:gt2C; // table exchange 1<>2
@@ -277,7 +285,7 @@ int main(int argc, char** argv){
 #ifdef DEBUG
       printf("Długość słowa: %d\nSłowo: %s\n", dl, buf);
 #endif
-      max_dl = maximum( max_dl, dl );
+      max_dl = maximum2( max_dl, dl );
       ilosc++;
     }
   if (!porcelain)
