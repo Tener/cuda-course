@@ -7,5 +7,5 @@ all:
 	nvcc -O3 -code=compute_11 -arch=compute_11 -I${CUDA_SDK}/C/common/inc -L${CUDA_SDK}/C/lib -lcutil_${CUDA_PLATFORM} OdlegloscEdycyjna.cu
 
 kno:
-	7z -tzip a kno_krzysztof_skrzetnicki_p4_`date +%s`.zip makefile OdlegloscEdycyjna.cu
+	7z -tzip a kno_krzysztof_skrzetnicki_p4_`date +%s`.zip makefile OdlegloscEdycyjna.cu UWAGI.txt
 

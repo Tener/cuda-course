@@ -48,8 +48,6 @@ const int TILE = 256;
 
 __device__ __constant__ char arguments_gpu_const[MAX_ARG * MAX_L];
 
-__device__ __constant__ char slowo_const[MAX_L * 2];
-
 __device__ __host__ inline int minimum(const int a,const int b,const int c){
   return a<b? (c<a?c:a): (c<b?c:b);
 }
@@ -167,7 +165,7 @@ void kernelGPU_OE(int numer_argumentu, char * slownik, int rozmiar_slownika, int
     {
       char c;
       c = tex1Dfetch( slownik_tex, MAX_L*idx+i);
-      c = slownik[MAX_L*idx+i];
+      //      c = slownik[MAX_L*idx+i];
       if (!c)
         {
           aN = i;
@@ -193,11 +191,9 @@ void runGPU( int numer_argumentu,
 
   const int SPECIAL = rozmiar_slownika+5;
 
-  cutilSafeCall(cudaMemcpyToSymbol(slowo_const, slowo, MAX_L, cudaMemcpyHostToDevice));
-  cudaThreadSynchronize();
-
-  int * reverse_wyniki_gpu;
-  cutilSafeCall(cudaMalloc(&reverse_wyniki_gpu, sizeof(int) * (MAX_L+1)));
+  static int * reverse_wyniki_gpu = NULL;
+  if (!reverse_wyniki_gpu)
+    cutilSafeCall(cudaMalloc(&reverse_wyniki_gpu, sizeof(int) * (MAX_L+1)));
 
   int reverse_wyniki[MAX_L+1];
   for(int i = 0; i < MAX_L+1; i++)
@@ -212,6 +208,7 @@ void runGPU( int numer_argumentu,
   kernelGPU_OE<<<dimGrid, dimBlock>>>(numer_argumentu, slownik_gpu, rozmiar_slownika, strlen(slowo), reverse_wyniki_gpu);
   cutilSafeCall(cudaMemcpy(reverse_wyniki, reverse_wyniki_gpu, MAX_L+1, cudaMemcpyDeviceToHost));
 
+#pragma unroll 16
   for(int i = 0; i < MAX_L+1; i++)
     {
       if (reverse_wyniki[i] != SPECIAL)
@@ -222,7 +219,7 @@ void runGPU( int numer_argumentu,
         }
     }
 
-  cutilSafeCall(cudaFree(reverse_wyniki_gpu));
+  //cutilSafeCall(cudaFree(reverse_wyniki_gpu));
 }
 
 
