@@ -217,14 +217,14 @@ void runGPU( int numer_argumentu,
     {
       reverse_wyniki[i] = SPECIAL(rozmiar_slownika);
     }
-  cutilSafeCall(cudaMemcpy(reverse_wyniki_gpu, reverse_wyniki, MAX_L+1, cudaMemcpyHostToDevice));
+  cutilSafeCall(cudaMemcpy(reverse_wyniki_gpu, reverse_wyniki, sizeof(int) * REVERSE_SIZE, cudaMemcpyHostToDevice));
 
   // Wywołanie jądra
   dim3 dimGrid(liczba_watkow / TILE);
   dim3 dimBlock(TILE);
-  kernelGPU_OE<<<dimGrid, dimBlock>>>(numer_argumentu, slownik_gpu, rozmiar_slownika, strlen(slowo), reverse_wyniki_gpu);
-  cutilSafeCall(cudaMemcpy(reverse_wyniki, reverse_wyniki_gpu, MAX_L+1, cudaMemcpyDeviceToHost));
 
+  kernelGPU_OE<<<dimGrid, dimBlock>>>(numer_argumentu, slownik_gpu, rozmiar_slownika, strlen(slowo), reverse_wyniki_gpu);
+  cutilSafeCall(cudaMemcpy(reverse_wyniki, reverse_wyniki_gpu, sizeof(int) * REVERSE_SIZE, cudaMemcpyDeviceToHost));
 
   for(int i = 0; i < REVERSE_SIZE; i++)
     {
