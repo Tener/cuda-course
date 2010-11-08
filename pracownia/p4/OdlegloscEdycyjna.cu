@@ -20,9 +20,11 @@
 iconv_t iconv_from_utf8;
 iconv_t iconv_to_utf8;
 texture<char, 1, cudaReadModeElementType> slownik_tex;
-// porcelain: kontrolowane przez zmienną środowiskową PORCELAIN.
+// env_porcelain: kontrolowane przez zmienną środowiskową PORCELAIN.
 // jeżeli jest ustawiona, to wyjście programu jest w formie łatwej do sparsowania przez programy.
-bool porcelain;
+bool env_porcelain;
+// SKIP_CPU=1 -> rozmiar słownika dla CPU ustawiany jest na małą liczbę (np. 16), przez co nie CPU nie spowalnia nam obliczeń
+bool env_skip_cpu;
 
 template< typename T, typename T2 >
 T align_up( T x, T2 y )
@@ -37,6 +39,8 @@ const int MAX_ARG = 32; // Maksymalna liczba argumentów
 #ifndef TILE
 const int TILE = 64;
 #endif
+
+
 
 __device__ __constant__ char arguments_gpu_const[MAX_ARG * MAX_L];
 
@@ -87,14 +91,14 @@ char * to_ISO_8859_2( char * slowo )
 
 void printOverallResults( int argc, char * proc, char * slownik, double totalTime, dim3 results[MAX_ARG], char * arguments[MAX_ARG] )
 {
-  if (porcelain)
+  if (env_porcelain)
     printf("TOTAL=%s=%d=%2.6f\n", proc, argc-2, totalTime);
   else
     printf("CZAS CAŁKOWITY (%s): %2.6f\n", proc, totalTime);
 
   for(int argNum = 2; argNum < argc; argNum++)
     {
-      if (porcelain)
+      if (env_porcelain)
         {
           printf("%s;%s;%s;%d\n",
                  proc,
@@ -266,12 +270,13 @@ void runGPU( int numer_argumentu,
 
 
 int main(int argc, char** argv){
-  porcelain = getenv("PORCELAIN") ? 1 : 0;
+  env_porcelain = getenv("PORCELAIN") ? 1 : 0;
 #ifdef ALWAYS_PORCELAIN
-  porcelain = 1;
+  env_porcelain = 1;
 #endif
+  env_skip_cpu = getenv("SKIP_CPU") ? 1 : 0;
 
-  if ( !porcelain )
+  if ( !env_porcelain )
     {
       printf("MAX_L=%d\n", MAX_L);
       printf("MAX_ARG=%d\n", MAX_ARG);
@@ -313,7 +318,7 @@ int main(int argc, char** argv){
       max_dl = maximum2( max_dl, dl );
       ilosc++;
     }
-  if (!porcelain)
+  if (!env_porcelain)
     printf("Maksymalna długość: %d\n", max_dl);
 
   assert( max_dl < MAX_L ); // zakładamy że słowa są krótsze niż MAX_L bajty
@@ -343,7 +348,7 @@ int main(int argc, char** argv){
     }
   slownik_rozmiar = cnt;
 
-  if (!porcelain)
+  if (!env_porcelain)
     printf("Wczytano %d słów, %d nowych linii\n", cnt, ilosc);
 
   /* konwertujemy argumenty */
@@ -411,7 +416,7 @@ int main(int argc, char** argv){
       {
         char * slowo = arguments[argNum];
         int numer_slowa = 0, odleglosc = 999;
-        runCPU( slowo, slownik, 16 /* slownik_rozmiar */, &numer_slowa, &odleglosc );
+        runCPU( slowo, slownik, env_skip_cpu ? 16 : slownik_rozmiar, &numer_slowa, &odleglosc );
         results[argNum].x = numer_slowa;
         results[argNum].y = odleglosc;
       }

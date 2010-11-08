@@ -13,8 +13,8 @@ all:
 test:
 	ghc -O3 --make tester
 	make all
-	env PORCELAIN=1 ./tester ./a.out slowa_small.txt
-	env PORCELAIN=1 ./tester ./a.out slowa.txt
+	env PORCELAIN=1 SKIP_CPU=1 ./tester ./a.out slowa_small.txt
+	env PORCELAIN=1 SKIP_CPU=1 ./tester ./a.out slowa.txt
 
 # rsync with remote machine
 rs:
