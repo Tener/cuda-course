@@ -115,14 +115,41 @@ void printOverallResults( int argc, char * proc, char * slownik, double totalTim
 }
 
 /////////////// CPU ///////////////
-// Odległosc edycyjna Levenshtein'a
-__host__ __device__ inline
-int OE_CPU(const char *a,const int aN,const char *b,const int bN){
+__device__ __host__ inline
+int OE_CPU(const char *a,const int aN,
+           const char *b,const int bN)
+{
   int gt1C[MAX_L];
   int gt2C[MAX_L];
 
   int *d1 = gt1C;
   int *d2 = gt2C;
+
+  for (int j=0;j<=bN;j++) d1[j]=j;
+
+  for (int i=1;i<=aN;i++) {
+    d2[0] = i;
+    for (int j=1;j<=bN;j++) {
+      d2[j] = minimum3(d1[j  ] + 1,                        // deletion
+                       d2[j-1] + 1,                        // insertion
+                       d1[j-1] + ((a[i-1]==b[j-1])? 0:1)); // substitution
+    }
+    d1 = (d1==gt1C)? gt2C:gt1C; // table exchange 1<>2
+    d2 = (d2==gt2C)? gt1C:gt2C; // table exchange 1<>2
+  }
+
+  return d1[bN];
+}
+
+__device__ inline
+char OE_GPU(const char * __restrict__ a,const int aN,
+            const char * __restrict__ b,const int bN)
+{
+  char gt1C[MAX_L];
+  char gt2C[MAX_L];
+
+  char *d1 = gt1C;
+  char *d2 = gt2C;
 
   for (int j=0;j<=bN;j++) d1[j]=j;
 
@@ -189,7 +216,7 @@ void kernelGPU_OE(int numer_argumentu, char * slownik, int rozmiar_slownika, int
       a[i] = c;
     }
 
-  int val = OE_CPU( a, aN, (const char*)(arguments_gpu_const+numer_argumentu*MAX_L), dlugosc_slowa );
+  char val = OE_GPU( a, aN, (const char*)(arguments_gpu_const+numer_argumentu*MAX_L), dlugosc_slowa );
 
 #if 0
   reverse_wyniki[val] = idx;
@@ -384,7 +411,7 @@ int main(int argc, char** argv){
       {
         char * slowo = arguments[argNum];
         int numer_slowa = 0, odleglosc = 999;
-        runCPU( slowo, slownik, slownik_rozmiar, &numer_slowa, &odleglosc );
+        runCPU( slowo, slownik, 16 /* slownik_rozmiar */, &numer_slowa, &odleglosc );
         results[argNum].x = numer_slowa;
         results[argNum].y = odleglosc;
       }

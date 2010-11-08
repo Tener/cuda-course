@@ -81,7 +81,7 @@ main = do
   -- test losowy
   letters <- randomRs ('a','z') <$> newStdGen
   wordLenghts <- randomRs (3,10) <$> newStdGen
-  let batchCount = 10
+  let batchCount = 100
       batchSize = 10
       batches = take batchCount $ splitEvery batchSize (cut letters wordLenghts)
 
