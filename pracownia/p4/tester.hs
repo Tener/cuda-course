@@ -75,7 +75,7 @@ runTest nazwaProgramu slownik slowa = do
 validate input output distance = let dist' = levenshteinDistance (EditCosts 1 1 1 1) input output in (dist', dist' == distance)
 
 main = do
-  [slownik, nazwaProgramu] <- getArgs
+  [nazwaProgramu, plikSlownika] <- getArgs
   -- test ze słownika -- TODO
 
   -- test losowy
@@ -87,12 +87,12 @@ main = do
 
       cut xs (z:zs) = let (a,b) = splitAt z xs in a : cut b zs
 
-  mapM_ (\b -> runTest slownik nazwaProgramu b >> putStr "." >> hFlush stdout) batches
+  mapM_ (\b -> runTest nazwaProgramu plikSlownika b >> putStr "." >> hFlush stdout) batches
 
   putStr "\nTEST LOSOWY OK\n"
   -- test wybranych kombinacji słów
-  runTest slownik nazwaProgramu ["testowość", "przewlokły", "woretewr", "żywotnikowiek", "gżegżułka"]
-  runTest slownik nazwaProgramu ["iydnez"]
+  runTest nazwaProgramu plikSlownika ["testowość", "przewlokły", "woretewr", "żywotnikowiek", "gżegżułka"]
+  runTest nazwaProgramu plikSlownika ["iydnez"]
   putStr "TEST KOMBINACJI OK\n"
 
   return ()
