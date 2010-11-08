@@ -33,7 +33,10 @@ T align_up( T x, T2 y )
 #define SPECIAL( x ) (x + 5) // specjalna wartość do oznaczania niezajętych jeszcze pól
 const int MAX_L = 16;  // Maksymalna dlugosc slowa (łącznie z 0 na końcu napisu)
 const int MAX_ARG = 32; // Maksymalna liczba argumentów
-const int TILE = 256;
+
+#ifndef TILE
+const int TILE = 64;
+#endif
 
 __device__ __constant__ char arguments_gpu_const[MAX_ARG * MAX_L];
 

@@ -3,8 +3,12 @@
 CUDA_SDK ?= /home/tener/localopt/NVIDIA_GPU_Computing_SDK/C
 CUDA_PLATFORM ?= $(shell uname -m)
 
+ifdef tile
+TILE_OPT = -DTILE=${tile}
+endif
+
 all:
-	nvcc -O3 -code=compute_11 -arch=compute_11 -I${CUDA_SDK}/C/common/inc -L${CUDA_SDK}/C/lib -lcutil_${CUDA_PLATFORM} OdlegloscEdycyjna.cu
+	nvcc -O3 ${TILE_OPT} -code=compute_11 -arch=compute_11 -I${CUDA_SDK}/C/common/inc -L${CUDA_SDK}/C/lib -lcutil_${CUDA_PLATFORM} OdlegloscEdycyjna.cu
 
 test:
 	ghc -O3 --make tester
