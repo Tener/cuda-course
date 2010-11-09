@@ -42,9 +42,10 @@ CZAS CAŁKOWITY (GPU): 51.917999
    2.                  bar ->                  bar :    0
    3.                  baz ->                  baz :    0
 
-7. Tester napisany w Haskellu, działa dla: GHC 6.12.3, edit-distance == 0.1.2, split == 0.1.2.1
+7. Tester napisany w Haskellu, działa dla: GHC 6.12.3, edit-distance == 0.1.2, split == 0.1.2.1, iconv == 0.4.0.2
    - GHC z paczki dla systemu
    - cabal install edit-distance
    - cabal install split
+   - cabal install iconv
 
 8. Zmienna systemowa PORCELAIN sprawia, że wyjście programu jest parsowalne maszynowo.
