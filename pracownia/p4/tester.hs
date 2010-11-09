@@ -19,18 +19,6 @@ import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Lazy as ByteStringL
 import qualified Codec.Text.IConv as IConv
 
-{-
-Format porcelany:
-
-TOTAL=CPU=1305.641968
-CPU;alsdkjal;alaska;4
-CPU;qwlkejql;alej;5
-TOTAL=GPU=216.992004
-GPU;alsdkjal;a;999
-GPU;qwlkejql;a;999
-
--}
-
 runTest nazwaProgramu slownik slowa = do
   -- uruchamiamy proces
   cont <- readProcess nazwaProgramu (map UTF8.encodeString $ slownik:slowa) ""
@@ -55,8 +43,6 @@ runTest nazwaProgramu slownik slowa = do
   case nothing of
     [] -> return ()
     _ -> error "Nie sparsowane do końca wejście"
-
---  return (p1,p2)
 
   let formatBatch (proc, res) = (map (\(w1,w2,dist) -> printf "%s ==> %s -> %s : %d %s" proc w1 w2 dist (show $ validate w1 w2 dist)) res)
       formatOneResult proc (w1,w2,dist) (dist2,match) = printf "%s ==> %s -> %s : %d(%d) %s" proc w1 w2 dist dist2 (show match)
