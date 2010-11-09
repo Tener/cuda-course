@@ -1,7 +1,6 @@
 module Main where
 
 import System.Environment
-import System.Directory
 import System.FilePath
 import System.Random
 import System.Process
