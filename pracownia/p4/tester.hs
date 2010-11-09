@@ -15,6 +15,10 @@ import Text.Printf
 import Text.EditDistance
 
 import qualified Codec.Binary.UTF8.String as UTF8
+import qualified Data.ByteString as ByteString
+import qualified Data.ByteString.Lazy as ByteStringL
+import qualified Codec.Text.IConv as IConv
+
 {-
 Format porcelany:
 
@@ -73,25 +77,47 @@ runTest nazwaProgramu slownik slowa = do
 
 validate input output distance = let dist' = levenshteinDistance (EditCosts 1 1 1 1) input output in (dist', dist' == distance)
 
+wczytajSlownik :: FilePath -> IO [ByteStringL.ByteString]
+wczytajSlownik zrodlo = (ByteStringL.split (fromIntegral $ fromEnum '\n')
+                       . IConv.convert "ISO-8859-2" "UTF-8"
+                       . ByteStringL.fromChunks
+                       . (:[]))
+                     <$> ByteString.readFile zrodlo
+
 main = do
   [nazwaProgramu, plikSlownika] <- getArgs
-  -- test ze słownika -- TODO
+  -- test ze słownika
+  let slownik = do
+         slownik <- wczytajSlownik plikSlownika
+         let dlugSlownika = length slownik
+         putStrLn (printf "Wczytano %d słów ze słownika %s" dlugSlownika plikSlownika)
+         wordsTaken <- randomRs (0, dlugSlownika-1) <$> newStdGen
+         let batchCount = 10
+             batchSize = 10
+             batches = take batchCount $ splitEvery batchSize (map (\i -> UTF8.decode $ ByteStringL.unpack $ slownik !! i) wordsTaken)
+         mapM_ (\b -> runTest nazwaProgramu plikSlownika b >> putStr "." >> hFlush stdout) batches
+         putStr "\nTEST SŁOWNIKOWY OK\n"
 
   -- test losowy
-  letters <- randomRs ('a','z') <$> newStdGen
-  wordLenghts <- randomRs (3,10) <$> newStdGen
-  let batchCount = 100
-      batchSize = 10
-      batches = take batchCount $ splitEvery batchSize (cut letters wordLenghts)
+  let losowy = do
+         letters <- randomRs ('a','z') <$> newStdGen
+         wordLenghts <- randomRs (1,14) <$> newStdGen
+         let batchCount = 10
+             batchSize = 10
+             batches = take batchCount $ splitEvery batchSize (cut letters wordLenghts)
 
-      cut xs (z:zs) = let (a,b) = splitAt z xs in a : cut b zs
+             cut xs (z:zs) = let (a,b) = splitAt z xs in a : cut b zs
 
-  mapM_ (\b -> runTest nazwaProgramu plikSlownika b >> putStr "." >> hFlush stdout) batches
+         mapM_ (\b -> runTest nazwaProgramu plikSlownika b >> putStr "." >> hFlush stdout) batches
 
-  putStr "\nTEST LOSOWY OK\n"
+         putStr "\nTEST LOSOWY OK\n"
   -- test wybranych kombinacji słów
-  runTest nazwaProgramu plikSlownika ["testowość", "przewlokły", "woretewr", "żywotnikowiek", "gżegżułka"]
-  runTest nazwaProgramu plikSlownika ["iydnez"]
-  putStr "TEST KOMBINACJI OK\n"
+  let wybrane = do
+         runTest nazwaProgramu plikSlownika ["testowość", "przewlokły", "woretewr", "żywotnikowiek", "gżegżułka"]
+         runTest nazwaProgramu plikSlownika ["iydnez"]
+         putStr "TEST KOMBINACJI OK\n"
 
-  return ()
+  -- uruchomienie wcześniej zdefiniowanych testów
+  slownik
+  losowy
+  wybrane
