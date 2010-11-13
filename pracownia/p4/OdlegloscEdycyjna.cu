@@ -40,7 +40,12 @@ const int MAX_ARG = 32; // Maksymalna liczba argumentów
 const int TILE = 64;
 #endif
 
-
+typedef struct slownik_entry
+{
+  char dlugosc;
+  char common;
+  char slowo[MAX_L];
+} slownik_entry;
 
 __device__ __constant__ char arguments_gpu_const[MAX_ARG * MAX_L];
 
@@ -89,7 +94,7 @@ char * to_ISO_8859_2( char * slowo )
   return iconv_wrapper( iconv_from_utf8, slowo );
 }
 
-void printOverallResults( int argc, char * proc, char * slownik, double totalTime, dim3 results[MAX_ARG], char * arguments[MAX_ARG] )
+void printOverallResults( int argc, char * proc, slownik_entry * slownik, double totalTime, dim3 results[MAX_ARG], char * arguments[MAX_ARG] )
 {
   if (env_porcelain)
     printf("TOTAL=%s=%d=%2.6f\n", proc, argc-2, totalTime);
@@ -103,7 +108,7 @@ void printOverallResults( int argc, char * proc, char * slownik, double totalTim
           printf("%s;%s;%s;%d\n",
                  proc,
                  to_UTF_8(arguments[argNum]),
-                 to_UTF_8(slownik+MAX_L*results[argNum].x),
+                 to_UTF_8(slownik[results[argNum].x].slowo),
                  results[argNum].y // odległość
                  );
         }
@@ -112,7 +117,7 @@ void printOverallResults( int argc, char * proc, char * slownik, double totalTim
           printf("%4d. %20s -> %20s : %4d\n",
                  argNum-1,
                  to_UTF_8(arguments[argNum]),
-                 to_UTF_8(slownik+MAX_L*results[argNum].x),
+                 to_UTF_8(slownik[results[argNum].x].slowo),
                  results[argNum].y);
         }
     }
@@ -171,14 +176,14 @@ char OE_GPU(const char * __restrict__ a,const int aN,
   return d1[bN];
 }
 
-void runCPU( char * slowo, char * slownik, int rozmiar_slownika,
+void runCPU( char * slowo, slownik_entry * slownik, int rozmiar_slownika,
              int * najblizsze_slowo, int * odleglosc)
 {
   char *s = slowo;
   int minlCPU=999999, miniCPU;
   for (int i=0; i<rozmiar_slownika; i++)
     {
-      char *d=slownik+MAX_L*i;
+      char *d=slownik[i].slowo; //+MAX_L*i;
       int   l = OE_CPU(s,  strlen(s),    d,  strlen(d));
       if (l<minlCPU){   minlCPU=l;  miniCPU=i; }
 #ifdef DEBUG
@@ -197,7 +202,7 @@ void runCPU( char * slowo, char * slownik, int rozmiar_slownika,
 
 /////////////// GPU ///////////////
 __global__
-void kernelGPU_OE(int numer_argumentu, char * slownik, int rozmiar_slownika, int dlugosc_slowa, int * reverse_wyniki)
+void kernelGPU_OE(int numer_argumentu, int rozmiar_slownika, int dlugosc_slowa, int * reverse_wyniki)
 {
   int idx = blockIdx.x * blockDim.x + threadIdx.x;
   if ( idx >= rozmiar_slownika )
@@ -211,7 +216,7 @@ void kernelGPU_OE(int numer_argumentu, char * slownik, int rozmiar_slownika, int
   for(int i=0; i < MAX_L; i++)
     {
       char c;
-      c = tex1Dfetch( slownik_tex, MAX_L*idx+i);
+      c = tex1Dfetch( slownik_tex, sizeof(slownik_entry)*idx+2+i);
       if (!c)
         {
           aN = i;
@@ -222,7 +227,7 @@ void kernelGPU_OE(int numer_argumentu, char * slownik, int rozmiar_slownika, int
 
   char val = OE_GPU( a, aN, (const char*)(arguments_gpu_const+numer_argumentu*MAX_L), dlugosc_slowa );
 
-#if 0
+#if 1
   reverse_wyniki[val] = idx;
 #else // metoda równie szybka co powyższa, ale dla odmiany zachowuje zgodność z obliczeniami na CPU... zwykle.
       // Czasami nie chce działać, tzn. obliczenia się mimo wszystko rozjeżdżają.
@@ -233,7 +238,7 @@ void kernelGPU_OE(int numer_argumentu, char * slownik, int rozmiar_slownika, int
 
 __host__
 void runGPU( int numer_argumentu,
-             char * slowo, char * slownik_gpu, int rozmiar_slownika,
+             char * slowo, int rozmiar_slownika,
              int * najblizsze_slowo, int * odleglosc)
 {
   int liczba_watkow = align_up(rozmiar_slownika,TILE);
@@ -254,7 +259,7 @@ void runGPU( int numer_argumentu,
   dim3 dimGrid(liczba_watkow / TILE);
   dim3 dimBlock(TILE);
 
-  kernelGPU_OE<<<dimGrid, dimBlock>>>(numer_argumentu, slownik_gpu, rozmiar_slownika, strlen(slowo), reverse_wyniki_gpu);
+  kernelGPU_OE<<<dimGrid, dimBlock>>>(numer_argumentu, rozmiar_slownika, strlen(slowo), reverse_wyniki_gpu);
   cutilSafeCall(cudaMemcpy(reverse_wyniki, reverse_wyniki_gpu, sizeof(int) * REVERSE_SIZE, cudaMemcpyDeviceToHost));
 
   for(int i = 0; i < REVERSE_SIZE; i++)
@@ -325,9 +330,9 @@ int main(int argc, char** argv){
 
   /* wczytujemy słownik faktycznie */
   rewind(plik_slownika);
-  size_t slownik_size = align_up(sizeof(char) * MAX_L * ilosc, 32);
-  char * slownik;
-  slownik = (char *) malloc(slownik_size);
+  size_t slownik_size = align_up(sizeof(slownik_entry) * ilosc, 32);
+  slownik_entry * slownik;
+  slownik = (slownik_entry *) malloc(slownik_size);
   int slownik_rozmiar;
   memset(slownik, 0, slownik_size);
 
@@ -340,9 +345,24 @@ int main(int argc, char** argv){
       if ( !strcmp(buf,"") )
         continue;
 
-      memcpy(slownik + cnt * MAX_L, buf, MAX_L);
+      int dl = strlen(buf);
+      int common;
+      char buf2[1024];
+      for(int i = 0; i < dl; i++)
+        {
+          if ( buf[i] != buf2[i] )
+            {
+              common = i;
+              break;
+            }
+        }
+      memcpy(buf2, buf, 1024);
+      slownik[cnt].common = common;
+      slownik[cnt].dlugosc = dl;
+
+      memcpy(slownik[cnt].slowo, buf, MAX_L);
 #ifdef DEBUG
-      printf("SŁOWO: %s\n", slownik + cnt * MAX_L);
+      printf("SŁOWO: %s\n", slownik[cnt].slowo);
 #endif
       cnt++;
     }
@@ -438,7 +458,7 @@ int main(int argc, char** argv){
       {
         char * slowo = arguments[argNum];
         int numer_slowa = 0, odleglosc = 999;
-        runGPU( argNum, slowo, slownik_GPU, slownik_rozmiar, &numer_slowa, &odleglosc );
+        runGPU( argNum, slowo, slownik_rozmiar, &numer_slowa, &odleglosc );
         results[argNum].x = numer_slowa;
         results[argNum].y = odleglosc;
       }
