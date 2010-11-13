@@ -7,6 +7,7 @@
 // nvcc -I$CUDA_SDK/C/common/inc -L$CUDA_SDK/C/lib -lcutil_i386 OdlegloscEdycyjna.cu
 // Kompilacja:  ^.^
 #include <stdlib.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -35,6 +36,10 @@ T align_up( T x, T2 y )
 #define SPECIAL( x ) (x + 5) // specjalna wartość do oznaczania niezajętych jeszcze pól
 const int MAX_L = 16;  // Maksymalna dlugosc slowa (łącznie z 0 na końcu napisu)
 const int MAX_ARG = 32; // Maksymalna liczba argumentów
+
+#ifndef WORDS_PER_THREAD
+const int WORDS_PER_THREAD = 1;
+#endif
 
 #ifndef TILE
 const int TILE = 64;
@@ -211,29 +216,28 @@ void kernelGPU_OE(int numer_argumentu, int rozmiar_slownika, int dlugosc_slowa, 
     }
 
   char a[MAX_L];
-  int aN = 0; // calculated below
+  char aN = 0; // calculated below
 
-  for(int i=0; i < MAX_L; i++)
+  for(int w=0; w < WORDS_PER_THREAD; w++)
     {
-      char c;
-      c = tex1Dfetch( slownik_tex, sizeof(slownik_entry)*idx+2+i);
-      if (!c)
+      aN = tex1Dfetch( slownik_tex, sizeof(slownik_entry)*idx+offsetof(slownik_entry,dlugosc));
+      for(int i=0; i < aN; i++)
         {
-          aN = i;
-          break;
+          char c;
+          c = tex1Dfetch( slownik_tex, sizeof(slownik_entry)*idx+offsetof(slownik_entry,slowo)+i);
+          a[i] = c;
         }
-      a[i] = c;
-    }
 
-  char val = OE_GPU( a, aN, (const char*)(arguments_gpu_const+numer_argumentu*MAX_L), dlugosc_slowa );
+      char val = OE_GPU( a, aN, (const char*)(arguments_gpu_const+numer_argumentu*MAX_L), dlugosc_slowa );
 
 #if 1
-  reverse_wyniki[val] = idx;
+      reverse_wyniki[val] = idx;
 #else // metoda równie szybka co powyższa, ale dla odmiany zachowuje zgodność z obliczeniami na CPU... zwykle.
       // Czasami nie chce działać, tzn. obliczenia się mimo wszystko rozjeżdżają.
-  if ( reverse_wyniki[val] == SPECIAL(rozmiar_slownika) )
-    atomicMin(&reverse_wyniki[val], idx);
+      if ( reverse_wyniki[val] == SPECIAL(rozmiar_slownika) )
+        atomicMin(&reverse_wyniki[val], idx);
 #endif
+    }
 }
 
 __host__
@@ -241,7 +245,7 @@ void runGPU( int numer_argumentu,
              char * slowo, int rozmiar_slownika,
              int * najblizsze_slowo, int * odleglosc)
 {
-  int liczba_watkow = align_up(rozmiar_slownika,TILE);
+  int liczba_watkow = align_up(align_up(rozmiar_slownika,TILE),WORDS_PER_THREAD);
   const size_t REVERSE_SIZE = MAX_L+1;
 
   static int * reverse_wyniki_gpu = NULL;
@@ -256,7 +260,7 @@ void runGPU( int numer_argumentu,
   cutilSafeCall(cudaMemcpy(reverse_wyniki_gpu, reverse_wyniki, sizeof(int) * REVERSE_SIZE, cudaMemcpyHostToDevice));
 
   // Wywołanie jądra
-  dim3 dimGrid(liczba_watkow / TILE);
+  dim3 dimGrid(liczba_watkow/(TILE*WORDS_PER_THREAD));
   dim3 dimBlock(TILE);
 
   kernelGPU_OE<<<dimGrid, dimBlock>>>(numer_argumentu, rozmiar_slownika, strlen(slowo), reverse_wyniki_gpu);
