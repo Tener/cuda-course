@@ -253,7 +253,7 @@ void runGPU( int numer_argumentu,
              char * slowo, int rozmiar_slownika,
              int * najblizsze_slowo, int * odleglosc)
 {
-  int liczba_watkow = align_up(align_up(rozmiar_slownika,TILE),WORDS_PER_THREAD);
+  int liczba_watkow = align_up(rozmiar_slownika, TILE*WORDS_PER_THREAD);
   const size_t REVERSE_SIZE = MAX_L+1;
 
   static int * reverse_wyniki_gpu = NULL;
