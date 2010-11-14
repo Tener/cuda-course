@@ -21,6 +21,8 @@ import qualified Codec.Text.IConv as IConv
 runTest :: FilePath -> String -> [String] -> IO ()
 runTest nazwaProgramu slownik slowa = do
   -- uruchamiamy proces
+  appendFile "run-test-dump.sh" (printf "%s %s\n" nazwaProgramu (unwords (slownik:slowa)))
+  putStrLn $  (printf "%s %s\n" nazwaProgramu (unwords (slownik:slowa)) :: String)
   cont <- readProcess nazwaProgramu (map UTF8.encodeString $ slownik:slowa) ""
   -- parsujemy wyjście programu
   let oneProc :: [String] -> ( (String,[(String,String,Int)]), [String] )
