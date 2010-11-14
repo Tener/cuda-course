@@ -267,6 +267,12 @@ void runGPU( int numer_argumentu,
   dim3 dimGrid(liczba_watkow/(TILE*WORDS_PER_THREAD));
   dim3 dimBlock(TILE);
 
+#if 0
+  printf("liczba_watkow:%d\n", liczba_watkow);
+  printf("dimGrid:(%d,%d,%d)\n", dimGrid.x, dimGrid.y, dimGrid.z);
+  printf("dimBlock:(%d,%d,%d)\n", dimBlock.x, dimBlock.y, dimBlock.z);
+#endif
+
   kernelGPU_OE<<<dimGrid, dimBlock>>>(numer_argumentu, rozmiar_slownika, strlen(slowo), reverse_wyniki_gpu);
   cutilSafeCall(cudaMemcpy(reverse_wyniki, reverse_wyniki_gpu, sizeof(int) * REVERSE_SIZE, cudaMemcpyDeviceToHost));
 
