@@ -300,6 +300,7 @@ int main(int argc, char** argv){
       printf("MAX_L=%d\n", MAX_L);
       printf("MAX_ARG=%d\n", MAX_ARG);
       printf("TILE=%d\n", TILE);
+      printf("WORDS_PER_THREAD=%d\n", WORDS_PER_THREAD);
     }
 
   if ( argc < 3 )
@@ -331,7 +332,7 @@ int main(int argc, char** argv){
       char buf[1024];
       int res = fscanf(plik_slownika,"%s",buf);
       int dl = strlen(buf);
-#ifdef DEBUG
+#if 0
       printf("Długość słowa: %d\nSłowo: %s\n", dl, buf);
 #endif
       max_dl = maximum2( max_dl, dl );
