@@ -156,8 +156,8 @@ int OE_CPU(const char *a,const int aN,
 }
 
 __device__ inline
-char OE_GPU(const char * __restrict__ a,const int aN,
-            const char * __restrict__ b,const int bN)
+char OE_GPU(const char * a,const int aN,
+            const char * b,const int bN)
 {
   char gt1C[MAX_L];
   char gt2C[MAX_L];
