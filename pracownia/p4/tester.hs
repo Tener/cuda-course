@@ -74,6 +74,8 @@ wczytajSlownik zrodlo = (ByteStringL.split (fromIntegral $ fromEnum '\n')
 
 main :: IO ()
 main = do
+  let numMachines = 1
+
   [nazwaProgramu, plikSlownika] <- getArgs
   -- test ze słownika
   let slownikowy = do
@@ -81,7 +83,7 @@ main = do
          let dlugSlownika = length slownik
          putStrLn (printf "Wczytano %d słów ze słownika %s" dlugSlownika plikSlownika)
          wordsTaken <- randomRs (0, dlugSlownika-1) <$> newStdGen
-         let batchCount = 10
+         let batchCount = 10 `div` numMachines
              batchSize = 10
              batches = take batchCount $ splitEvery batchSize (map (\i -> UTF8.decode $ ByteStringL.unpack $ slownik !! i) wordsTaken)
          mapM_ (\b -> runTest nazwaProgramu plikSlownika b >> putStr "." >> hFlush stdout) batches
@@ -91,7 +93,7 @@ main = do
   let losowy = do
          letters <- randomRs ('a','z') <$> newStdGen
          wordLenghts <- randomRs (1,14) <$> newStdGen
-         let batchCount = 10
+         let batchCount = 10 `div` numMachines
              batchSize = 10
              batches = take batchCount $ splitEvery batchSize (cut letters wordLenghts)
 
