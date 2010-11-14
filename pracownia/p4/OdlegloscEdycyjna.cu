@@ -361,7 +361,7 @@ int main(int argc, char** argv){
         continue;
 
       int dl = strlen(buf);
-      int common;
+      int common=0;
       char buf2[1024];
       for(int i = 0; i < dl; i++)
         {
@@ -372,12 +372,12 @@ int main(int argc, char** argv){
             }
         }
       memcpy(buf2, buf, 1024);
-      slownik[cnt].common = common;
+      slownik[cnt].common = cnt ? common : 0;
       slownik[cnt].dlugosc = dl;
 
       memcpy(slownik[cnt].slowo, buf, MAX_L);
 #ifdef DEBUG
-      printf("SŁOWO: %s\n", slownik[cnt].slowo);
+      printf("SŁOWO: %s/%d/%d\n", slownik[cnt].slowo, slownik[cnt].dlugosc, slownik[cnt].common);
 #endif
       cnt++;
     }
