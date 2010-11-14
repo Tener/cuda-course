@@ -189,7 +189,11 @@ void runCPU( char * slowo, slownik_entry * slownik, int rozmiar_slownika,
   for (int i=0; i<rozmiar_slownika; i++)
     {
       char *d=slownik[i].slowo; //+MAX_L*i;
+#if 1
       int   l = OE_CPU(s,  strlen(s),    d,  strlen(d));
+#else
+      int   l = OE_CPU(d,  strlen(d),    s,  strlen(s));
+#endif
       if (l<minlCPU){   minlCPU=l;  miniCPU=i; }
 #ifdef DEBUG
       printf("%02d: %d%s", i, l, (i+1) % 4 ? "\t" : "\n" );
