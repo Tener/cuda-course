@@ -129,7 +129,7 @@ void printOverallResults( int argc, char * proc, slownik_entry * slownik, double
 }
 
 /////////////// CPU ///////////////
-__device__ __host__ inline
+__host__  inline
 int OE_CPU(const char *a,const int aN,
            const char *b,const int bN)
 {
@@ -139,6 +139,8 @@ int OE_CPU(const char *a,const int aN,
   int *d1 = gt1C;
   int *d2 = gt2C;
 
+  printf("OE_CPU\n");
+
   for (int j=0;j<=bN;j++) d1[j]=j;
 
   for (int i=1;i<=aN;i++) {
@@ -147,7 +149,9 @@ int OE_CPU(const char *a,const int aN,
       d2[j] = minimum3(d1[j  ] + 1,                        // deletion
                        d2[j-1] + 1,                        // insertion
                        d1[j-1] + ((a[i-1]==b[j-1])? 0:1)); // substitution
+      printf("%2d ", d2[j]);
     }
+    printf("\n");
     d1 = (d1==gt1C)? gt2C:gt1C; // table exchange 1<>2
     d2 = (d2==gt2C)? gt1C:gt2C; // table exchange 1<>2
   }
