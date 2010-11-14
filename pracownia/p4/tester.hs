@@ -18,6 +18,7 @@ import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Lazy as ByteStringL
 import qualified Codec.Text.IConv as IConv
 
+runTest :: FilePath -> String -> [String] -> IO ()
 runTest nazwaProgramu slownik slowa = do
   -- uruchamiamy proces
   cont <- readProcess nazwaProgramu (map UTF8.encodeString $ slownik:slowa) ""
@@ -25,12 +26,12 @@ runTest nazwaProgramu slownik slowa = do
   let oneProc :: [String] -> ( (String,[(String,String,Int)]), [String] )
       oneProc [] = error "null args"
       oneProc (header:rest) =
-          let ["TOTAL", proc, cnt', time] = splitOn "=" header
+          let ["TOTAL", pro, cnt', _time] = splitOn "=" header
               cnt = read cnt' :: Int
               (results,rest') = splitAt cnt rest
               res = map oneResult results
           in
-              ((proc, res),rest')
+              ((pro, res),rest')
       oneResult line =
           let [_proc,w1,w2,dist] = splitOn ";" line
           in
@@ -43,11 +44,10 @@ runTest nazwaProgramu slownik slowa = do
     [] -> return ()
     _ -> error "Nie sparsowane do końca wejście"
 
-  let formatBatch (proc, res) = (map (\(w1,w2,dist) -> printf "%s ==> %s -> %s : %d %s" proc w1 w2 dist (show $ validate w1 w2 dist)) res)
-      formatOneResult proc (w1,w2,dist) (dist2,match) = printf "%s ==> %s -> %s : %d(%d) %s" proc w1 w2 dist dist2 (show match)
+  let formatOneResult pro (w1,w2,dist) (dist2,match) = printf "%s ==> %s -> %s : %d(%d) %s" pro w1 w2 dist dist2 (show match)
 
-  let checkResults (proc,res) = do
-        let errors = [ (w1,formatOneResult proc r v) | r@(w1,w2,dist) <- res, v@(dist2,match) <- [validate w1 w2 dist], not match]
+  let checkResults (pro,res) = do
+        let errors = [ (w1,formatOneResult pro r v) | r@(w1,w2,dist) <- res, v@(_dist2,match) <- [validate w1 w2 dist], not match]
         unless (null errors) (do
                                putStrLn "Error occured:"
                                mapM_ putStrLn (map snd errors)
@@ -60,6 +60,7 @@ runTest nazwaProgramu slownik slowa = do
 
 
 
+validate :: String -> String -> Int -> (Int, Bool)
 validate input output distance = let dist' = levenshteinDistance (EditCosts 1 1 1 1) input output in (dist', dist' == distance)
 
 wczytajSlownik :: FilePath -> IO [ByteStringL.ByteString]
@@ -69,10 +70,11 @@ wczytajSlownik zrodlo = (ByteStringL.split (fromIntegral $ fromEnum '\n')
                        . (:[]))
                      <$> ByteString.readFile zrodlo
 
+main :: IO ()
 main = do
   [nazwaProgramu, plikSlownika] <- getArgs
   -- test ze słownika
-  let slownik = do
+  let slownikowy = do
          slownik <- wczytajSlownik plikSlownika
          let dlugSlownika = length slownik
          putStrLn (printf "Wczytano %d słów ze słownika %s" dlugSlownika plikSlownika)
@@ -92,6 +94,7 @@ main = do
              batches = take batchCount $ splitEvery batchSize (cut letters wordLenghts)
 
              cut xs (z:zs) = let (a,b) = splitAt z xs in a : cut b zs
+             cut _ _ = error "what?"
 
          mapM_ (\b -> runTest nazwaProgramu plikSlownika b >> putStr "." >> hFlush stdout) batches
 
@@ -103,6 +106,6 @@ main = do
          putStr "TEST KOMBINACJI OK\n"
 
   -- uruchomienie wcześniej zdefiniowanych testów
-  slownik
+  slownikowy
   losowy
   wybrane
