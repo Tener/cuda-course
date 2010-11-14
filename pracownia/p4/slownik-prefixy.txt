@@ -1,0 +1,14 @@
+   5059 Common prefix lenght: 0
+    531 Common prefix lenght: 1
+   3905 Common prefix lenght: 2
+  15684 Common prefix lenght: 3
+  33628 Common prefix lenght: 4
+  54239 Common prefix lenght: 5
+  77956 Common prefix lenght: 6
+  97265 Common prefix lenght: 7
+ 114403 Common prefix lenght: 8
+ 120743 Common prefix lenght: 9
+ 111918 Common prefix lenght: 10
+  86203 Common prefix lenght: 11
+  53553 Common prefix lenght: 12
+  20789 Common prefix lenght: 13
