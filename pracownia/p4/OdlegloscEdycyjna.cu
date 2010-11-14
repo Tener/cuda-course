@@ -218,34 +218,53 @@ __global__
 void kernelGPU_OE(int numer_argumentu, int rozmiar_slownika, int dlugosc_slowa, int * reverse_wyniki)
 {
   int idx = blockIdx.x * blockDim.x + threadIdx.x;
-  if ( idx >= rozmiar_slownika )
-    {
-      return;
-    }
+//  if ( idx*WORDS_PER_THREAD >= rozmiar_slownika )
+//    {
+//      return;
+//    }
 
-  char a[MAX_L];
-  char aN = 0; // calculated below
+  char a[MAX_L]; // word
+  char aN; // word's length
+  //char aCommon; // number of characters common with previous word
 
-  for(int w=0; w < WORDS_PER_THREAD; w++)
+  int val_min = 255;
+  int idx_min = 0;
+
+  for(char w=0; w < WORDS_PER_THREAD; w++)
     {
-      aN = tex1Dfetch( slownik_tex, sizeof(slownik_entry)*idx+offsetof(slownik_entry,dlugosc));
+      size_t word_idx = idx*WORDS_PER_THREAD+w;
+      if (word_idx >= rozmiar_slownika)
+        continue;
+
+      size_t base_texture_offset = sizeof(slownik_entry)*(word_idx);
+
+      aN = tex1Dfetch( slownik_tex, base_texture_offset+offsetof(slownik_entry,dlugosc));
+      //aCommon = tex1Dfetch( slownik_tex, base_texture_offset+offsetof(slownik_entry,common));
       for(int i=0; i < aN; i++)
         {
           char c;
-          c = tex1Dfetch( slownik_tex, sizeof(slownik_entry)*idx+offsetof(slownik_entry,slowo)+i);
+          c = tex1Dfetch( slownik_tex, base_texture_offset+offsetof(slownik_entry,slowo)+i);
           a[i] = c;
         }
 
       char val = OE_GPU( a, aN, (const char*)(arguments_gpu_const+numer_argumentu*MAX_L), dlugosc_slowa );
 
+      if (val < val_min)
+        {
+          val_min = val;
+          idx_min = word_idx;
+        }
+    }
+  
+  {
 #if 1
-      reverse_wyniki[val] = idx;
+    reverse_wyniki[val_min] = idx_min;
 #else // metoda równie szybka co powyższa, ale dla odmiany zachowuje zgodność z obliczeniami na CPU... zwykle.
       // Czasami nie chce działać, tzn. obliczenia się mimo wszystko rozjeżdżają.
-      if ( reverse_wyniki[val] == SPECIAL(rozmiar_slownika) )
-        atomicMin(&reverse_wyniki[val], idx);
+    if ( reverse_wyniki[val_min] == SPECIAL(rozmiar_slownika) )
+      atomicMin(&reverse_wyniki[val_min], idx_min);
 #endif
-    }
+  }
 }
 
 __host__
