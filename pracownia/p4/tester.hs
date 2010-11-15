@@ -1,6 +1,7 @@
 module Main where
 
 import System.Environment
+import System.Posix.Env
 import System.Random
 import System.Process
 import System.IO
@@ -74,6 +75,10 @@ wczytajSlownik zrodlo = (ByteStringL.split (fromIntegral $ fromEnum '\n')
 
 main :: IO ()
 main = do
+  -- zmienne środowiskowe wymagane przez tester
+  setEnv "PORCELAIN" "1" True 
+  setEnv "SKIP_CPU" "1" True
+
   let numMachines = 1
 
   [nazwaProgramu, plikSlownika] <- getArgs

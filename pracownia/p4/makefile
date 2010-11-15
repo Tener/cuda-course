@@ -1,5 +1,4 @@
 
-
 CUDA_SDK ?= /home/tener/localopt/NVIDIA_GPU_Computing_SDK/C
 CUDA_PLATFORM ?= $(shell uname -m)
 
@@ -21,8 +20,8 @@ compile-tester:
 	make all
 test:
 	make compile-tester
-	env PORCELAIN=1 SKIP_CPU=1 ${PROG_TESTER} ${PROG_NAME} slowa_small.txt
-	env PORCELAIN=1 SKIP_CPU=1 ${PROG_TESTER} ${PROG_NAME} slowa.txt
+	${PROG_TESTER} ${PROG_NAME} slowa_small.txt
+	${PROG_TESTER} ${PROG_NAME} slowa.txt
 
 # rsync with remote machine
 rs:
