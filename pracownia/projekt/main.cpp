@@ -3,11 +3,11 @@
 #include "hull.hpp"
 #include "graphics.hpp"
 
-int main(int argn, char ** argv)
+int main(int argc, char ** argv)
 {
-  if ( argn < 3 )
+  if ( argc < 3 )
     {
-      std::cerr << "Za mało argumentów. Oczekiwano minimum 2, było: " << argn-1 << endl;
+      std::cerr << "Za mało argumentów. Oczekiwano minimum 2, było: " << argc-1 << endl;
       return 1;
     }
 
@@ -28,7 +28,7 @@ int main(int argn, char ** argv)
     }
 
   vector< int > num_points;
-  for(int i = 2; i < argn; i++)
+  for(int i = 2; i < argc; i++)
     {
       int np;
       sscanf(argv[i], "%d", &np);
@@ -36,7 +36,7 @@ int main(int argn, char ** argv)
 	num_points.push_back( np );
     }
 
-  hull::graphics::initGlWindow();
+  hull::graphics::initGlWindow(argc, argv);
 
   for(vector< int >::iterator it = num_points.begin(); it < num_points.end(); it++)
     {

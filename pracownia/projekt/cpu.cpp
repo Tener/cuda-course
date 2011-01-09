@@ -34,13 +34,27 @@ namespace cpu {
   void calculateConvexHull( int n_points )
   {
     std::vector< Point > points(1000 * n_points);
+    
+    int run = true;
 
-    for(int i = 0; i < n_points; i++)
-      for(int j = 0; j < 1000; j++)
-	{
-	  points[i * 1000 + j] = random_point();
-	}
- 
+    while( run )
+      {
+
+	for(int i = 0; i < n_points; i++)
+	  for(int j = 0; j < 1000; j++)
+	    {
+	      points[i * 1000 + j] = random_point();
+	    }
+	
+	// draw initial points
+	  {
+	    glClear(GL_COLOR_BUFFER_BIT);
+	    draw_point(points);	    
+	    glfwSwapBuffers();
+	  }
+
+	  run = !glfwGetKey( GLFW_KEY_ESC ) && glfwGetWindowParam( GLFW_OPENED );
+      }
   }
 
 } // cpu
