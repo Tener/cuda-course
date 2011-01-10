@@ -22,6 +22,14 @@ namespace cpu {
   typedef struct Point {
     double x;
     double y;
+
+    inline bool operator< (const Point &other) const { 
+      if (y < other.y)
+	return true;
+      if (y > other.y)
+	return false;
+      return x < other.x;
+    }
   } Point;
 
   Point random_point();

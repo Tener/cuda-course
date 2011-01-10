@@ -47,13 +47,19 @@ namespace cpu {
 	    }
 	
 	// draw initial points
-	  {
-	    glClear(GL_COLOR_BUFFER_BIT);
-	    draw_point(points);	    
-	    glfwSwapBuffers();
-	  }
+	{
+	  glClear(GL_COLOR_BUFFER_BIT);
+	  draw_point(points);	    
+	  glfwSwapBuffers();
+	}
 
-	  run = !glfwGetKey( GLFW_KEY_ESC ) && glfwGetWindowParam( GLFW_OPENED );
+	// find leftmost, downmost point
+	std::vector< Point >::iterator minimal_el =  min_element( points.begin(), points.end() );
+
+	cout << minimal_el->x << " " << minimal_el->y << endl;
+
+	// are we finished?	
+	run = !glfwGetKey( GLFW_KEY_ESC ) && glfwGetWindowParam( GLFW_OPENED );
       }
   }
 
