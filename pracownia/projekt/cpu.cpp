@@ -52,8 +52,9 @@ namespace cpu {
     glEnd();
   }
 
-  void draw_point( const std::vector< Point > & vp )
+  void draw_point( const std::vector< Point > & vp, GLfloat size = 1.0 )
   {
+    glPointSize(size);
     glBegin(GL_POINTS);
     {
       for(std::vector< Point >::const_iterator it = vp.begin(); 

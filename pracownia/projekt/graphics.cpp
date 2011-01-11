@@ -23,10 +23,12 @@ namespace graphics {
 	cerr << "Failed to open window" << endl;
 	exit( 1 );
       }
+    
+    glEnable(GL_POINT_SMOOTH);
 
     glViewport(0, 0, height, width);
     glLoadIdentity();
-    glOrtho(0.0, 1.0, 0.0, 1.0, 0.0, 1.0);
+    glOrtho(-1.0, 1.0, -1.0, 1.0, 0.0, 1.0);
     
   };
   
