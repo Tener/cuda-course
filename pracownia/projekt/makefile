@@ -11,7 +11,7 @@ OBJ = obj/
 
 O_FILES := $(addprefix $(OBJ),$(patsubst %.cpp,%.o,$(wildcard *.cpp)))
 
-NVCC_FLAGS = -O3 -use_fast_math -code=${COMPUTE} -arch=${COMPUTE} ${LIBS} -I${CUDA_SDK}/C/common/inc -L${CUDA_SDK}/C/lib -lcutil_${CUDA_PLATFORM} --compiler-options -fopenmp
+NVCC_FLAGS = -O3 -use_fast_math -code=${COMPUTE} -arch=${COMPUTE} ${LIBS} -I${CUDA_SDK}/C/common/inc -L${CUDA_SDK}/C/lib -lcutil_${CUDA_PLATFORM} --compiler-options -mtune=native,-march=native,-ggdb3
 
 all: $(O_FILES)
 	nvcc ${NVCC_FLAGS} *.cu $(O_FILES) -o hull
