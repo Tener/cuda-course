@@ -15,13 +15,13 @@ namespace cpu {
 
   typedef boost::mt19937 RNGType;
 
-  RNGType rng( time( 0 ) ); // produces randomness out of thin air
-  boost::uniform_real<> uniform_0_2pi( 0, 2 * M_PI );
-  boost::uniform_real<> uniform_0_1( 0, 1 );
-  boost::uniform_real<> uniform_m1_1( -1, 1 );
-  boost::variate_generator< RNGType, boost::uniform_real<> > random_angle( rng, uniform_0_2pi );
-  boost::variate_generator< RNGType, boost::uniform_real<> > random_radius( rng, uniform_0_1 );
-  boost::variate_generator< RNGType, boost::uniform_real<> > random_coord( rng, uniform_m1_1 );
+  static RNGType rng( time( 0 ) ); // produces randomness out of thin air
+  static boost::uniform_real<> uniform_0_2pi( 0, 2 * M_PI );
+  static boost::uniform_real<> uniform_0_1( 0, 1 );
+  static boost::uniform_real<> uniform_m1_1( -1, 1 );
+  static boost::variate_generator< RNGType, boost::uniform_real<> > random_angle( rng, uniform_0_2pi );
+  static boost::variate_generator< RNGType, boost::uniform_real<> > random_radius( rng, uniform_0_1 );
+  static boost::variate_generator< RNGType, boost::uniform_real<> > random_coord( rng, uniform_m1_1 );
 
   typedef struct Point {
     double x;
