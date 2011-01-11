@@ -98,7 +98,7 @@ namespace cpu {
     return H;
   }
   
-  void calculateConvexHull( int n_points )
+  void calculateConvexHull( int n_points, bool loopMode )
   {
     std::vector< Point > points(1000 * n_points);
     
@@ -132,7 +132,7 @@ namespace cpu {
 	glfwSwapBuffers();
 
 	// are we finished?	
-	run = !glfwGetKey( GLFW_KEY_ESC ) && glfwGetWindowParam( GLFW_OPENED );
+	run = loopMode && !glfwGetKey( GLFW_KEY_ESC ) && glfwGetWindowParam( GLFW_OPENED );
       }
   }
 

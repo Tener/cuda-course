@@ -41,7 +41,7 @@ namespace cpu {
   void draw_point( const Point & p, GLfloat size );
   void draw_point( const std::vector< Point > & vp, GLfloat size );
   
-  void calculateConvexHull( int n_points );
+  void calculateConvexHull( int n_points, bool loopMode = false);
 
 }
 }
