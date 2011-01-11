@@ -3,6 +3,7 @@
 #include "cpu.hpp"
 
 #include <algorithm>
+#include <set>
 
 namespace hull {
 namespace alg {
@@ -66,6 +67,36 @@ namespace cpu {
     }
     glEnd();
   }  
+
+  inline double cross( const Point &o, const Point &a, const Point &b )
+  {
+    return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+  }
+
+
+  vector<Point> convex_hull(vector<Point> P)
+  {
+    int n = P.size(), k = 0;
+    vector<Point> H(2*n);
+    
+    // Sort points lexicographically
+    sort(P.begin(), P.end());
+    
+    // Build lower hull
+    for (int i = 0; i < n; i++) {
+      while (k >= 2 && cross(H[k-2], H[k-1], P[i]) <= 0) k--;
+      H[k++] = P[i];
+    }
+    
+    // Build upper hull
+    for (int i = n-2, t = k+1; i >= 0; i--) {
+      while (k >= t && cross(H[k-2], H[k-1], P[i]) <= 0) k--;
+      H[k++] = P[i];
+    }
+    
+    H.resize(k);
+    return H;
+  }
   
   void calculateConvexHull( int n_points )
   {
@@ -81,18 +112,24 @@ namespace cpu {
 	    {
 	      points[i * 1000 + j] = random_point();
 	    }
-	
+
+	// make points unique
+	{
+	  std::set< Point > s( points.begin(), points.end() );
+	  points = std::vector< Point >( s.begin(), s.end() );
+	}
+
 	// draw initial points
 	{
 	  glClear(GL_COLOR_BUFFER_BIT);
+	  glColor3f( 0.1, 0.3, 0.3 );
 	  draw_point(points);	    
-	  glfwSwapBuffers();
 	}
-
-	// find leftmost, downmost point
-	std::vector< Point >::iterator minimal_el =  min_element( points.begin(), points.end() );
-
-	cout << minimal_el->x << " " << minimal_el->y << endl;
+	
+	glColor3f( 0.9, 0.6, 0.6 );
+	draw_point(convex_hull(points), 5);
+	
+	glfwSwapBuffers();
 
 	// are we finished?	
 	run = !glfwGetKey( GLFW_KEY_ESC ) && glfwGetWindowParam( GLFW_OPENED );
