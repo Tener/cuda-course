@@ -1,7 +1,13 @@
 
+// includes
+
 namespace hull {
 namespace graphics {
-  
+
+  void createVBO(GLuint* vbo, struct cudaGraphicsResource **vbo_res, 
+		 unsigned int vbo_res_flags);
+
+  void deleteVBO(GLuint* vbo, struct cudaGraphicsResource *vbo_res);
 
   void initGlWindow(int argn, char ** argv);
   void closeGlWindow();
