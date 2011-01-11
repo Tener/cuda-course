@@ -2,7 +2,7 @@ CUDA_SDK ?= /home/tener/localopt/NVIDIA_GPU_Computing_SDK
 CUDA_PLATFORM ?= $(shell uname -m)
 
 FILES := makefile main.cpp
-LIBS := -lGL -lglfw -lboost_random
+LIBS := -lGL -lglfw -lboost_random -lGLEW
 COMPUTE := compute_12
 
 PTX := --ptxas-options '--verbose -O4'
