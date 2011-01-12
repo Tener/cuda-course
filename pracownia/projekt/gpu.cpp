@@ -17,9 +17,6 @@ namespace hull {
       GLuint vbo;
       struct cudaGraphicsResource *cuda_vbo_resource;
       void *d_vbo_buffer = NULL;
-  void calculateConvexHull( int n_points )
-  {
-  }
 
       ////////////////////////////////////////////////////////////////////////////////
       //! Create VBO
@@ -58,6 +55,44 @@ namespace hull {
 	*vbo = 0;
       }
 
-}
-}
+
+      void calculateConvexHull( int n_points )
+      {
+	createVBO( &vbo, &cuda_vbo_resource, cudaGraphicsMapFlagsWriteDiscard, n_points * 1024 );
+
+	// map OpenGL buffer object for writing from CUDA
+	float4 *dptr;
+	cutilSafeCall(cudaGraphicsMapResources(1, &cuda_vbo_resource, 0));
+	size_t num_bytes; 
+	cutilSafeCall(cudaGraphicsResourceGetMappedPointer((void **)&dptr, &num_bytes,  
+							   cuda_vbo_resource));
+
+	launch_kernel_random_points(dptr, n_points);
+    
+	cutilSafeCall(cudaGraphicsUnmapResources(1, &cuda_vbo_resource, 0));
+
+	// draw on screen
+
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	// render from the vbo
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glVertexPointer(4, GL_FLOAT, 0, 0);
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glColor3f(1.0, 0.0, 0.0);
+	glDrawArrays(GL_POINTS, 0, n_points * 1024);
+	glDisableClientState(GL_VERTEX_ARRAY);
+
+	glfwSwapBuffers();
+
+	sleep(2);
+   
+	// cleanup
+
+	deleteVBO(&vbo, cuda_vbo_resource);
+      }
+
+    }
+  }
 }
