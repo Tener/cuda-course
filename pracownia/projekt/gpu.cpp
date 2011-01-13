@@ -85,12 +85,11 @@ namespace hull {
 	glDisableClientState(GL_VERTEX_ARRAY);
 
 	glfwSwapBuffers();
-
-	sleep(2);
    
 	// cleanup
-
 	deleteVBO(&vbo, cuda_vbo_resource);
+
+	//sleep(2);
       }
 
     }

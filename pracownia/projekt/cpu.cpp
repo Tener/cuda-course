@@ -105,7 +105,6 @@ namespace cpu {
 
     glfwSwapBuffers();
 
-    sleep(2);
   }
   
 } // cpu
