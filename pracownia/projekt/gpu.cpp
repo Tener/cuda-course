@@ -47,7 +47,7 @@ namespace hull {
       void deleteVBO(GLuint* vbo, struct cudaGraphicsResource *vbo_res)
       {
 	// unregister this buffer object with CUDA
-	cudaGraphicsUnregisterResource(vbo_res);
+	cutilSafeCall(cudaGraphicsUnregisterResource(vbo_res));
 	
 	glBindBuffer(1, *vbo);
 	glDeleteBuffers(1, vbo);
@@ -58,8 +58,8 @@ namespace hull {
 
       void calculateConvexHull( int n_points )
       {
-	createVBO( &vbo, &cuda_vbo_resource, cudaGraphicsMapFlagsWriteDiscard, n_points * 1024 );
-
+	createVBO( &vbo, &cuda_vbo_resource, cudaGraphicsMapFlagsWriteDiscard, n_points * 1024 );    
+	
 	// map OpenGL buffer object for writing from CUDA
 	float4 *dptr;
 	cutilSafeCall(cudaGraphicsMapResources(1, &cuda_vbo_resource, 0));
