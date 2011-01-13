@@ -33,7 +33,7 @@ namespace hull {
 	  exit( 1 );
 	}
     
-      glEnable(GL_POINT_SMOOTH);
+      //glEnable(GL_POINT_SMOOTH);
 
       glViewport(0, 0, height, width);
       glLoadIdentity();
