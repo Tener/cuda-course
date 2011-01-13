@@ -38,6 +38,9 @@ int main(int argc, char ** argv)
 
   hull::graphics::initGlWindow(argc, argv);
 
+  // are we finished?	
+  //run = loopMode && !glfwGetKey( GLFW_KEY_ESC ) && glfwGetWindowParam( GLFW_OPENED );
+
   for(vector< int >::iterator it = num_points.begin(); it < num_points.end(); it++)
     {
       hull::alg::calculateConvexHull( proc, *it );
