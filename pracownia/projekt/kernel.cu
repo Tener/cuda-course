@@ -147,8 +147,10 @@ extern "C" void launch_kernel_random_points(float4* vbo, unsigned int points)
   thrust::device_vector<float> outputPoints_x(points);
   thrust::device_vector<float> outputPoints_y(points);
 
-  thrust::device_vector<float> randomPoints_r(thrust::device_ptr< float >(randomPoints), thrust::device_ptr< float >(randomPoints) + points);
-  thrust::device_vector<float> randomPoints_theta(randomPoints + points, randomPoints + 2*points);
+  thrust::device_ptr< float > randomPoints_devPtr(randomPoints);
+
+  thrust::device_vector<float> randomPoints_r(randomPoints_devPtr, randomPoints_devPtr + points);
+  thrust::device_vector<float> randomPoints_theta(randomPoints_devPtr + points, randomPoints_devPtr + 2*points);
 
   thrust::counting_iterator<float4*> vbo_cnt_iter(vbo);
 
