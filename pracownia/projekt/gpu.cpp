@@ -9,6 +9,8 @@
 #include <cuda_gl_interop.h>
 #include <vector_types.h>
 
+#include <algorithm>
+
 namespace hull {
   namespace alg {
     namespace gpu {
@@ -55,11 +57,22 @@ namespace hull {
 	*vbo = 0;
       }
 
+      void calculateConvexHull( vector< int > n_points )
+      {
+	int max_n_points = *max_element( n_points.begin(), n_points.end() );
 
+	createVBO( &vbo, &cuda_vbo_resource, cudaGraphicsMapFlagsWriteDiscard, max_n_points * 1024 );
+
+	for(vector<int>::iterator it = n_points.begin(); it < n_points.end(); it++)
+	  {
+	    calculateConvexHull(*it);
+	  }
+
+	deleteVBO(&vbo, cuda_vbo_resource);
+      }
+      
       void calculateConvexHull( int n_points )
       {
-	createVBO( &vbo, &cuda_vbo_resource, cudaGraphicsMapFlagsWriteDiscard, n_points * 1024 );    
-	
 	// map OpenGL buffer object for writing from CUDA
 	float4 *dptr;
 	cutilSafeCall(cudaGraphicsMapResources(1, &cuda_vbo_resource, 0));
@@ -85,11 +98,6 @@ namespace hull {
 	glDisableClientState(GL_VERTEX_ARRAY);
 
 	glfwSwapBuffers();
-   
-	// cleanup
-	deleteVBO(&vbo, cuda_vbo_resource);
-
-	//sleep(2);
       }
 
     }

@@ -5,6 +5,7 @@ namespace hull {
   namespace alg {
     namespace gpu {
 
+      void calculateConvexHull( vector< int > n_points );
       void calculateConvexHull( int n_points );
 
       void createVBO(GLuint* vbo, struct cudaGraphicsResource **vbo_res, 

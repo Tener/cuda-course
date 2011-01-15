@@ -4,7 +4,7 @@
 namespace hull {
 namespace alg {
 
-  void calculateConvexHull( Processor proc, int points )
+  void calculateConvexHull( Processor proc, vector< int > points )
   {
     switch( proc )
       {

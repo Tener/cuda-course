@@ -77,14 +77,21 @@ namespace cpu {
     return H;
   }
   
+  void calculateConvexHull( vector< int > n_points )
+  {
+    for(vector<int>::iterator it = n_points.begin(); it < n_points.end(); it++)
+      {
+	calculateConvexHull(*it);
+      }
+  }
+
   void calculateConvexHull( int n_points )
   {
-    std::vector< Point > points(1000 * n_points);
+    std::vector< Point > points(1024 * n_points);
     
-    for(int i = 0; i < n_points; i++)
-      for(int j = 0; j < 1000; j++)
+    for(int i = 0; i < n_points*1024; i++)
 	{
-	  points[i * 1000 + j] = random_point();
+	  points[i] = random_point();
 	}
     
     // make points unique

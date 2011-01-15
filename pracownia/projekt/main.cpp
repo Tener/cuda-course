@@ -3,6 +3,8 @@
 #include "hull.hpp"
 #include "graphics.hpp"
 
+#include <boost/lexical_cast.hpp>
+
 int main(int argc, char ** argv)
 {
   if ( argc < 3 )
@@ -29,11 +31,19 @@ int main(int argc, char ** argv)
 
   vector< int > num_points;
   for(int i = 2; i < argc; i++)
-    {
-      int np;
-      sscanf(argv[i], "%d", &np);
-      if( np > 0 )
-	num_points.push_back( np );
+    { 
+      using boost::lexical_cast;
+      using boost::bad_lexical_cast;
+
+      try
+	{
+	  num_points.push_back(lexical_cast< int >(argv[i]));
+	}
+      catch(bad_lexical_cast &)
+        {
+	  cerr << __FILE__ << " " << __LINE__ << " " << "Zły argument: " << string(argv[i]) << endl;
+	  exit(1);
+        }
     }
 
   hull::graphics::initGlWindow(argc, argv);
@@ -41,10 +51,7 @@ int main(int argc, char ** argv)
   // are we finished?	
   //run = loopMode && !glfwGetKey( GLFW_KEY_ESC ) && glfwGetWindowParam( GLFW_OPENED );
 
-  for(vector< int >::iterator it = num_points.begin(); it < num_points.end(); it++)
-    {
-      hull::alg::calculateConvexHull( proc, *it );
-    }
+  hull::alg::calculateConvexHull( proc, num_points );
 
   hull::graphics::closeGlWindow();
 
