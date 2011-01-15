@@ -16,13 +16,14 @@
 #include <thrust/copy.h>
 #include <thrust/device_ptr.h>
 #include <thrust/device_vector.h>
+#include <thrust/for_each.h>
 #include <thrust/gather.h>
 #include <thrust/generate.h>
 #include <thrust/host_vector.h>
+#include <thrust/iterator/zip_iterator.h>
+#include <thrust/remove.h>
 #include <thrust/sequence.h>
 #include <thrust/sort.h>
-#include <thrust/for_each.h>
-#include <thrust/iterator/zip_iterator.h>
 
 
 #define CUDA_CALL(x) do { if((x) != cudaSuccess) { \
@@ -39,33 +40,6 @@ inline void CURAND_CALL_(curandStatus st, char * file, int line )
     }
 }
 
-struct arbitrary_functor
-{
-  typedef thrust::tuple< thrust::counting_iterator< int >, // ix
-			 thrust::device_vector< float >::iterator , // x
-			 thrust::device_vector< float >::iterator > // y
-  ArgTuple;
-
-  thrust::device_ptr< float > randomData;
-  thrust::device_ptr< float4 > vertexData;
-
-  __host__ __device__
-  void operator()(ArgTuple t)
-  {
-    float r = sqrtf(randomData[ 2*(*thrust::get<0>(t)) ]);
-    float theta = randomData[2*(*thrust::get<0>(t)) + 1] * 2 * ((float)M_PI);
-
-    float x = r * cos(theta);
-    float y = r * sin(theta);
-
-    *thrust::get<1>(t) = x;
-    *thrust::get<2>(t) = y;
-
-    vertexData[ *thrust::get<0>(t) ] = make_float4(x, y, 0.0f, 1.0f);
-  }
-};
-
-//__global__ void kernel_random_points(float * randomData, float * outputPoints_x, float * outputPoints_y, float4* pos)
 __global__ void kernel_random_points(float * randomData, 
 				     float * outputPoints_x, 
 				     float * outputPoints_y, 
@@ -86,45 +60,6 @@ __global__ void kernel_random_points(float * randomData,
   pos[x] = make_float4(x_, y_, 0.0f, 1.0f);
 }
 
-struct compare_float2
-{
-  __host__ __device__ bool operator() (const float2 & e1, const float2 & e2)
-  {
-    if (e1.y < e2.y)
-      return true;
-    if (e1.y > e2.y)
-      return false;
-    return e1.x < e2.x;
-  }
-};
-
-struct compare_float2 comp2;
-
-/*
-__global__ void convex_hull(vector<float2> P)
-{
-  int n = P.size(), k = 0;
-  vector<float2> H(2*n);
-  
-  // Sort points lexicographically - this should be done on the 'outside'
-  //sort(P.begin(), P.end(), comp2);
-    
-  // Build lower hull
-  for (int i = 0; i < n; i++) {
-    while (k >= 2 && cross(H[k-2], H[k-1], P[i]) <= 0) k--;
-    H[k++] = P[i];
-  }
-    
-  // Build upper hull
-  for (int i = n-2, t = k+1; i >= 0; i--) {
-    while (k >= t && cross(H[k-2], H[k-1], P[i]) <= 0) k--;
-    H[k++] = P[i];
-  }
-    
-  H.resize(k);
-  return H;
-}
-*/
 
 template <typename KeyVector, typename PermutationVector>
 void update_permutation(KeyVector& keys, PermutationVector& permutation)
@@ -159,65 +94,31 @@ float3 getCoreCount()
 			    deviceProp.multiProcessorCount * ConvertSMVer2Cores(deviceProp.major, deviceProp.minor));
 }
 
-//struct DotProduct : public thrust::unary_function<float4*, float, float, float, float>
 
-struct KernelMakePointsDisplay
+
+typedef thrust::tuple< float, float, float4* > ArgTuple_1; // r, theta, ptr to vertex buffer object
+typedef thrust::tuple< float, float > ResultTuple_1; // x, y
+
+struct KernelMakePointsDisplay : public thrust::unary_function< ArgTuple_1 , ResultTuple_1>
 {
-
-  typedef thrust::tuple< 
-                        thrust::device_vector< float >::iterator, // r
-                        thrust::device_vector< float >::iterator, // theta
-                        thrust::device_vector< float >::iterator, // x
-                        thrust::device_vector< float >::iterator, // y
-                        float4* // vertex buffer
-                       > 
-  
-          ArgTuple;
-
-  __host__ __device__ void operator()( ArgTuple t )
+  __host__ __device__ ResultTuple_1 operator()( ArgTuple_1 t )
   {
     float x, y, r, theta;
 
     r = sqrtf(thrust::get<0>(t));
-    theta = 2 * ((float)M_PI) * thrust::get<1>(t);
+    theta = 2 * ((float)M_PI) * (thrust::get<1>(t));
 
     x = r * cos(theta);
     y = r * sin(theta);
     
-    *thrust::get<2>(t) = x;
-    *thrust::get<3>(t) = y;
-    *thrust::get<4>(t) = make_float4( x, y, 0.0f, 1.0f );    
+    *thrust::get<2>(t) = make_float4( x, y, 0.0f, 1.0f );
+
+    return thrust::make_tuple( x, y );//, ;
   }
 };         
 
-
-__global__ void kernel_random_points(float * randomData, 
-				     float * outputPoints_x, 
-				     float * outputPoints_y, 
-				     float4 * pos)
-{
-  unsigned int x = blockIdx.x*blockDim.x + threadIdx.x;
-  
-  float r = sqrtf(randomData[2*x]);
-  float theta = randomData[2*x+1] * 2 * ((float)M_PI);
-  
-  float x_ = r * cos(theta);
-  float y_ = r * sin(theta);
-
-  outputPoints_x[x] = x_;
-  outputPoints_y[x] = y_;
- 
-  // write output vertex
-  pos[x] = make_float4(x_, y_, 0.0f, 1.0f);
-}
-
-
-
-}
-
-
 // Wrapper for the __global__ call that sets up the kernel call
-extern "C" void launch_kernel_random_points(float4* pos, unsigned int points)
+extern "C" void launch_kernel_random_points(float4* vbo, unsigned int points)
 {
   //  std::cout << "cores: " << getCoreCount() << std::endl;
 
@@ -243,23 +144,23 @@ extern "C" void launch_kernel_random_points(float4* pos, unsigned int points)
   CUT_CHECK_ERROR("Kernel error");
 
   // calculate actual points, display them on the screen
-  thrust::counting_iterator< float4* > vertexBufferPtr(pos);
-
   thrust::device_vector<float> outputPoints_x(points);
   thrust::device_vector<float> outputPoints_y(points);
 
-  thrust::device_vector<float> randomPoints_r(randomPoints, randomPoints + points);
+  thrust::device_vector<float> randomPoints_r(thrust::device_ptr< float >(randomPoints), thrust::device_ptr< float >(randomPoints) + points);
   thrust::device_vector<float> randomPoints_theta(randomPoints + points, randomPoints + 2*points);
 
-  thrust::transform( make_tuple( vertexBufferPtr, 
-				 outputPoints_x, outputPoints_y,
-				 randomPoints_r, randomPoints_theta ),
+  thrust::counting_iterator<float4*> vbo_cnt_iter(vbo);
+
+  thrust::transform( thrust::make_zip_iterator(make_tuple( randomPoints_r.begin(), randomPoints_theta.begin(), vbo_cnt_iter )),
+		     thrust::make_zip_iterator(make_tuple( randomPoints_r.end(), randomPoints_theta.end(), vbo_cnt_iter+points)),
+		     thrust::make_zip_iterator(make_tuple( outputPoints_x.begin(), outputPoints_y.begin())),
 		     KernelMakePointsDisplay() );
 				 
   
   //  dim3 block(512, 1, 1);
   //  dim3 grid(points / 512, 1, 1);
-  //  kernel_random_points<<< grid, block>>>(randomPoints, outputPoints_x, outputPoints_y, pos);
+  //  kernel_random_points<<< grid, block>>>(randomPoints, outputPoints_x, outputPoints_y, vbo);
   //  CUT_CHECK_ERROR("Kernel error");
 
   // sort points
@@ -275,18 +176,8 @@ extern "C" void launch_kernel_random_points(float4* pos, unsigned int points)
   apply_permutation(outputPoints_y, permutation);
   apply_permutation(outputPoints_x, permutation);
 
-
-//  
-//  
-//  thrust::device_ptr<float2> outputPoints_dev(outputPoints);
-// 
-//  struct compare_float2 comp2;
-//  
-//  thrust::device_vector<float2> vec(outputPoints_dev, outputPoints_dev+points);
-//  thrust::sort( vec.begin(), vec.end(), comp2 );
-  
   //CURAND_CALL(curandDestroyGenerator(gen));
   CUDA_CALL(cudaFree(randomPoints));
-  CUDA_CALL(cudaFree(outputPoints_x));
-  CUDA_CALL(cudaFree(outputPoints_y));
+  //CUDA_CALL(cudaFree(outputPoints_x));
+  //CUDA_CALL(cudaFree(outputPoints_y));
 }
