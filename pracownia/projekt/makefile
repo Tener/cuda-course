@@ -2,7 +2,7 @@ CUDA_SDK ?= /home/tener/localopt/NVIDIA_GPU_Computing_SDK
 CUDA_PLATFORM ?= $(shell uname -m)
 
 FILES := makefile main.cpp
-LIBS := -lGL -lglfw -lboost_random -lGLEW -lcurand
+LIBS := -L${CUDA_SDK}/C/lib -lcutil_${CUDA_PLATFORM} -lGL -lglfw -lboost_random -lGLEW -lcurand
 GENCODE := 	-gencode arch=compute_10,code=sm_10 \
 		-gencode arch=compute_10,code=sm_11 \
 		-gencode arch=compute_10,code=sm_12 \
@@ -27,8 +27,8 @@ OBJ = obj/
 O_FILES := $(addprefix $(OBJ),$(patsubst %.cpp,%.o,$(wildcard *.cpp)))
 
 INCLUDES := -I${CUDA_SDK}/C/common/inc -I${CUDA_SDK}/shared/inc/ -I.
-GCC_FLAGS := --compiler-options -mtune=native,-march=native,-ffast-math,-pg
-NVCC_FLAGS = -O3 -g -G -use_fast_math ${KEEP} ${LIBS} ${GENCODE_F} ${INCLUDES} -L${CUDA_SDK}/C/lib -lcutil_${CUDA_PLATFORM} ${GCC_FLAGS} --linker-options -pg
+GCC_FLAGS := --compiler-options -mtune=native,-march=native,-ffast-math,-fomit-frame-pointer
+NVCC_FLAGS = -O3 -use_fast_math ${LIBS} ${GENCODE_F} ${INCLUDES} ${GCC_FLAGS}
 
 all: $(O_FILES)
 	nvcc ${NVCC_FLAGS} *.cu $(O_FILES) -o hull
