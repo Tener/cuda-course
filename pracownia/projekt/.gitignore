@@ -1,3 +1,5 @@
 projekt/
 nbproject/
+keep/
 *.*_
+*.log
