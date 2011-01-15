@@ -7,6 +7,8 @@
 
 int main(int argc, char ** argv)
 {
+  srand(time(0));
+
   if ( argc < 3 )
     {
       std::cerr << "Za mało argumentów. Oczekiwano minimum 2, było: " << argc-1 << endl;
