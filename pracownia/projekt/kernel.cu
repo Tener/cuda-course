@@ -21,6 +21,7 @@
 #include <thrust/generate.h>
 #include <thrust/host_vector.h>
 #include <thrust/iterator/zip_iterator.h>
+#include <thrust/random.h>
 #include <thrust/remove.h>
 #include <thrust/sequence.h>
 #include <thrust/sort.h>
@@ -96,22 +97,29 @@ float3 getCoreCount()
 
 
 
-typedef thrust::tuple< float, float, float4* > ArgTuple_1; // r, theta, ptr to vertex buffer object
+typedef thrust::tuple< int > ArgTuple_1; // r, theta, ptr to vertex buffer object
 typedef thrust::tuple< float, float > ResultTuple_1; // x, y
 
 struct KernelMakePointsDisplay : public thrust::unary_function< ArgTuple_1 , ResultTuple_1>
 {
+  float * randomPoints;
+  float4 * vbo;
+
+  KernelMakePointsDisplay(float * randomPoints, float4 * vbo)
+    : randomPoints(randomPoints), vbo(vbo) {}
+
   __host__ __device__ ResultTuple_1 operator()( ArgTuple_1 t )
   {
     float x, y, r, theta;
+    int ix = thrust::get<0>(t);
 
-    r = sqrtf(thrust::get<0>(t));
-    theta = 2 * ((float)M_PI) * (thrust::get<1>(t));
+    r = sqrtf(randomPoints[ix*2]);
+    theta = 2 * ((float)M_PI) * (randomPoints[ix*2+1]);
 
     x = r * cos(theta);
     y = r * sin(theta);
     
-    *thrust::get<2>(t) = make_float4( x, y, 0.0f, 1.0f );
+    vbo[ix] = make_float4( x, y, 0.0f, 1.0f );
 
     return thrust::make_tuple( x, y );//, ;
   }
@@ -124,29 +132,34 @@ extern "C" void launch_kernel_random_points(float4* vbo, unsigned int points)
 
   points *= 1024;
 
-  // generate random numbers
-  float * randomPoints;
-  static curandGenerator_t gen;
-  static bool gen_set = false;
-  CUDA_CALL(cudaMalloc((void **)&randomPoints, points * 2 * sizeof(float)));
+//  // generate random numbers
+//  float * randomPoints;
+//  static curandGenerator_t gen;
+//  static bool gen_set = false;
+//  CUDA_CALL(cudaMalloc((void **)&randomPoints, points * 2 * sizeof(float)));
+// 
+//  if (!gen_set)
+//    {
+//      /* Create pseudo-random number generator */
+//      CURAND_CALL(curandCreateGenerator(&gen,
+// 					CURAND_RNG_PSEUDO_DEFAULT));
+//  
+//      /* Set seed */
+//      CURAND_CALL(curandSetPseudoRandomGeneratorSeed(gen, time(0)));
+//      gen_set = true;
+//    }
+//  CURAND_CALL(curandGenerateUniform(gen, randomPoints, points * 2));
+//  CUT_CHECK_ERROR("Kernel error");
 
-  if (!gen_set)
-    {
-      /* Create pseudo-random number generator */
-      CURAND_CALL(curandCreateGenerator(&gen,
-					CURAND_RNG_PSEUDO_DEFAULT));
-  
-      /* Set seed */
-      CURAND_CALL(curandSetPseudoRandomGeneratorSeed(gen, time(0)));
-      gen_set = true;
-    }
-  CURAND_CALL(curandGenerateUniform(gen, randomPoints, points * 2));
-  CUT_CHECK_ERROR("Kernel error");
+  // random gen stuff
+  // static thrust::default_random_engine rng(time(0));
+ 
 
   // calculate actual points, display them on the screen
   thrust::device_vector<float> outputPoints_x(points);
   thrust::device_vector<float> outputPoints_y(points);
 
+#if 0
   thrust::device_ptr< float > randomPoints_devPtr(randomPoints);
 
   thrust::device_vector<float> randomPoints_r(randomPoints_devPtr, randomPoints_devPtr + points);
@@ -157,8 +170,13 @@ extern "C" void launch_kernel_random_points(float4* vbo, unsigned int points)
   thrust::transform( thrust::make_zip_iterator(make_tuple( randomPoints_r.begin(), randomPoints_theta.begin(), vbo_cnt_iter )),
 		     thrust::make_zip_iterator(make_tuple( randomPoints_r.end(), randomPoints_theta.end(), vbo_cnt_iter+points)),
 		     thrust::make_zip_iterator(make_tuple( outputPoints_x.begin(), outputPoints_y.begin())),
-		     KernelMakePointsDisplay() );
-				 
+		     KernelMakePointsDisplay(randomPoints, vbo) );
+#endif
+  thrust::transform( thrust::counting_iterator< int >(0),
+		     thrust::counting_iterator< int >(points),
+		     thrust::make_zip_iterator(make_tuple( outputPoints_x.begin(), outputPoints_y.begin())),
+		     KernelMakePointsDisplay(randomPoints, vbo) );
+		     
   
   //  dim3 block(512, 1, 1);
   //  dim3 grid(points / 512, 1, 1);
@@ -166,6 +184,8 @@ extern "C" void launch_kernel_random_points(float4* vbo, unsigned int points)
   //  CUT_CHECK_ERROR("Kernel error");
 
   // sort points
+
+#if 0
   
   thrust::device_vector<float> permutation(points);
   thrust::sequence(permutation.begin(), permutation.end());
@@ -177,6 +197,8 @@ extern "C" void launch_kernel_random_points(float4* vbo, unsigned int points)
   // permute the key arrays by the final permuation
   apply_permutation(outputPoints_y, permutation);
   apply_permutation(outputPoints_x, permutation);
+
+#endif
 
   //CURAND_CALL(curandDestroyGenerator(gen));
   CUDA_CALL(cudaFree(randomPoints));
