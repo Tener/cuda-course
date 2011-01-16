@@ -22,6 +22,8 @@ using namespace std;
 typedef enum Processor { CPU = 1, GPU = 2 } 
 Processor;
 
-extern "C" void launch_kernel_random_points(float4* pos, unsigned int points);
+extern "C" void launch_kernel_random_points(float4* vbo1, int* vbo1_vert_cnt,
+					    float4* vbo2, int* vbo2_vert_cnt,
+					    unsigned int points);
 
 #endif
