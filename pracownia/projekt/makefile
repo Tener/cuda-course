@@ -3,7 +3,7 @@ CUDA_PLATFORM ?= $(shell uname -m)
 
 FILES := makefile main.cpp
 LIBS := -L${CUDA_SDK}/C/lib -lcutil_${CUDA_PLATFORM} -lGL -lglfw -lboost_random -lGLEW -lcurand
-GENCODE := 	-gencode arch=compute_10,code=sm_10 \
+GENCODE_FULL :=	-gencode arch=compute_10,code=sm_10 \
 		-gencode arch=compute_10,code=sm_11 \
 		-gencode arch=compute_10,code=sm_12 \
 		-gencode arch=compute_10,code=sm_13 \
@@ -16,7 +16,15 @@ GENCODE := 	-gencode arch=compute_10,code=sm_10 \
 		-gencode arch=compute_20,code=sm_20 \
 		-gencode arch=compute_20,code=sm_21 
 
-GENCODE_F := -gencode arch=compute_20,code=sm_21 
+GENCODE_F := # default is empty
+ifeq ($(shell uname -n),"raptor")
+	GENCODE_F := -gencode arch=compute_20,code=sm_21
+endif
+ifeq ($(shell uname -n),"laptener")
+	GENCODE_F := -gencode arch=compute_11,code=sm_11
+endif
+
+
 
 KEEP := --keep --keep-dir keep
 
@@ -27,7 +35,7 @@ OBJ = obj/
 O_FILES := $(addprefix $(OBJ),$(patsubst %.cpp,%.o,$(wildcard *.cpp)))
 
 INCLUDES := -I${CUDA_SDK}/C/common/inc -I${CUDA_SDK}/shared/inc/ -I.
-GCC_FLAGS := --compiler-options -mtune=native,-march=native,-ffast-math,-fomit-frame-pointer
+GCC_FLAGS := --compiler-options -mtune=native,-march=native,-ffast-math
 NVCC_FLAGS = -O3 -use_fast_math ${LIBS} ${GENCODE_F} ${INCLUDES} ${GCC_FLAGS}
 
 all: $(O_FILES)
