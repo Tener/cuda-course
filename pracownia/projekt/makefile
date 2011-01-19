@@ -16,15 +16,8 @@ GENCODE_FULL :=	-gencode arch=compute_10,code=sm_10 \
 		-gencode arch=compute_20,code=sm_20 \
 		-gencode arch=compute_20,code=sm_21 
 
-GENCODE_F := # default is empty
-ifeq ($(shell uname -n),"raptor")
-	GENCODE_F := -gencode arch=compute_20,code=sm_21
-endif
-ifeq ($(shell uname -n),"laptener")
-	GENCODE_F := -gencode arch=compute_11,code=sm_11
-endif
-
-
+GENCODE_F := -gencode arch=compute_11,code=sm_11
+GENCODE_F := -gencode arch=compute_20,code=sm_21
 
 KEEP := --keep --keep-dir keep
 
