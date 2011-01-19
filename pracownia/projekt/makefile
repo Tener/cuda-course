@@ -17,7 +17,7 @@ GENCODE_FULL :=	-gencode arch=compute_10,code=sm_10 \
 		-gencode arch=compute_20,code=sm_21 
 
 GENCODE_F := -gencode arch=compute_11,code=sm_11
-GENCODE_F := -gencode arch=compute_20,code=sm_21
+#GENCODE_F := -gencode arch=compute_20,code=sm_21
 
 KEEP := --keep --keep-dir keep
 
@@ -28,8 +28,8 @@ OBJ = obj/
 O_FILES := $(addprefix $(OBJ),$(patsubst %.cpp,%.o,$(wildcard *.cpp)))
 
 INCLUDES := -I${CUDA_SDK}/C/common/inc -I${CUDA_SDK}/shared/inc/ -I.
-GCC_FLAGS := --compiler-options -mtune=native,-march=native,-ffast-math
-NVCC_FLAGS = -O3 -use_fast_math ${LIBS} ${GENCODE_F} ${INCLUDES} ${GCC_FLAGS}
+GCC_FLAGS := --compiler-options -mtune=native,-march=native,-ffast-math,-ggdb3,-fno-strict-aliasing
+NVCC_FLAGS = -O3 -use_fast_math -g ${LIBS} ${GENCODE_F} ${INCLUDES} ${GCC_FLAGS}
 
 all: $(O_FILES)
 	nvcc ${NVCC_FLAGS} *.cu $(O_FILES) -o hull
