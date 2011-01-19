@@ -1,0 +1,1420 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!--Rendered using the Haskell Html Library v0.2-->
+<HTML
+><HEAD
+><META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8"
+><TITLE
+>Foreign.CUDA.Runtime.Error</TITLE
+><LINK HREF="haddock.css" REL="stylesheet" TYPE="text/css"
+><SCRIPT SRC="haddock-util.js" TYPE="text/javascript"
+></SCRIPT
+><SCRIPT TYPE="text/javascript"
+>window.onload = function () {setSynopsis("mini_Foreign-CUDA-Runtime-Error.html")};</SCRIPT
+></HEAD
+><BODY
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="topbar"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD
+><IMG SRC="haskell_icon.gif" WIDTH="16" HEIGHT="16" ALT=" "
+></TD
+><TD CLASS="title"
+>cuda-0.3.2: FFI binding to the CUDA interface for programming NVIDIA GPUs</TD
+><TD CLASS="topbut"
+><A HREF="index.html"
+>Contents</A
+></TD
+><TD CLASS="topbut"
+><A HREF="doc-index.html"
+>Index</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="modulebar"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD
+><FONT SIZE="6"
+>Foreign.CUDA.Runtime.Error</FONT
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Description</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Error handling functions
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Synopsis</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A HREF="#t%3AStatus"
+>Status</A
+>  </TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+>= <A HREF="#v%3ASuccess"
+>Success</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AMissingConfiguration"
+>MissingConfiguration</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AMemoryAllocation"
+>MemoryAllocation</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AInitializationError"
+>InitializationError</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ALaunchFailure"
+>LaunchFailure</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3APriorLaunchFailure"
+>PriorLaunchFailure</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ALaunchTimeout"
+>LaunchTimeout</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ALaunchOutOfResources"
+>LaunchOutOfResources</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AInvalidDeviceFunction"
+>InvalidDeviceFunction</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AInvalidConfiguration"
+>InvalidConfiguration</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AInvalidDevice"
+>InvalidDevice</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AInvalidValue"
+>InvalidValue</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AInvalidPitchValue"
+>InvalidPitchValue</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AInvalidSymbol"
+>InvalidSymbol</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AMapBufferObjectFailed"
+>MapBufferObjectFailed</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AUnmapBufferObjectFailed"
+>UnmapBufferObjectFailed</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AInvalidHostPointer"
+>InvalidHostPointer</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AInvalidDevicePointer"
+>InvalidDevicePointer</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AInvalidTexture"
+>InvalidTexture</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AInvalidTextureBinding"
+>InvalidTextureBinding</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AInvalidChannelDescriptor"
+>InvalidChannelDescriptor</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AInvalidMemcpyDirection"
+>InvalidMemcpyDirection</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AAddressOfConstant"
+>AddressOfConstant</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ATextureFetchFailed"
+>TextureFetchFailed</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ATextureNotBound"
+>TextureNotBound</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ASynchronizationError"
+>SynchronizationError</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AInvalidFilterSetting"
+>InvalidFilterSetting</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AInvalidNormSetting"
+>InvalidNormSetting</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AMixedDeviceExecution"
+>MixedDeviceExecution</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ACudartUnloading"
+>CudartUnloading</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AUnknown"
+>Unknown</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ANotYetImplemented"
+>NotYetImplemented</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AMemoryValueTooLarge"
+>MemoryValueTooLarge</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AInvalidResourceHandle"
+>InvalidResourceHandle</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ANotReady"
+>NotReady</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AInsufficientDriver"
+>InsufficientDriver</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ASetOnActiveProcess"
+>SetOnActiveProcess</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AInvalidSurface"
+>InvalidSurface</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ANoDevice"
+>NoDevice</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AECCUncorrectable"
+>ECCUncorrectable</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ASharedObjectSymbolNotFound"
+>SharedObjectSymbolNotFound</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ASharedObjectInitFailed"
+>SharedObjectInitFailed</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AUnsupportedLimit"
+>UnsupportedLimit</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ADuplicateVariableName"
+>DuplicateVariableName</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ADuplicateTextureName"
+>DuplicateTextureName</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ADuplicateSurfaceName"
+>DuplicateSurfaceName</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ADevicesUnavailable"
+>DevicesUnavailable</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AInvalidKernelImage"
+>InvalidKernelImage</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ANoKernelImageForDevice"
+>NoKernelImageForDevice</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AIncompatibleDriverContext"
+>IncompatibleDriverContext</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AStartupFailure"
+>StartupFailure</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AApiFailureBase"
+>ApiFailureBase</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A HREF="#t%3ACUDAException"
+>CUDAException</A
+>  </TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+>= <A HREF="#v%3AExitCode"
+>ExitCode</A
+> <A HREF="Foreign-CUDA-Runtime-Error.html#t%3AStatus"
+>Status</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AUserError"
+>UserError</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Char.html#t%3AString"
+>String</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AcudaError"
+>cudaError</A
+> ::  <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Char.html#t%3AString"
+>String</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Adescribe"
+>describe</A
+> :: <A HREF="Foreign-CUDA-Runtime-Error.html#t%3AStatus"
+>Status</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Char.html#t%3AString"
+>String</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AresultIfOk"
+>resultIfOk</A
+> ::  (<A HREF="Foreign-CUDA-Runtime-Error.html#t%3AStatus"
+>Status</A
+>, a) -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AnothingIfOk"
+>nothingIfOk</A
+> :: <A HREF="Foreign-CUDA-Runtime-Error.html#t%3AStatus"
+>Status</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Documentation</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A NAME="t:Status"
+><A NAME="t%3AStatus"
+></A
+></A
+><B
+>Status</B
+>  </TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="ndoc"
+>Return codes from API functions
+</TD
+></TR
+><TR
+><TD CLASS="section4"
+>Constructors</TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v:Success"
+><A NAME="v%3ASuccess"
+></A
+></A
+><B
+>Success</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:MissingConfiguration"
+><A NAME="v%3AMissingConfiguration"
+></A
+></A
+><B
+>MissingConfiguration</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:MemoryAllocation"
+><A NAME="v%3AMemoryAllocation"
+></A
+></A
+><B
+>MemoryAllocation</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:InitializationError"
+><A NAME="v%3AInitializationError"
+></A
+></A
+><B
+>InitializationError</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:LaunchFailure"
+><A NAME="v%3ALaunchFailure"
+></A
+></A
+><B
+>LaunchFailure</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:PriorLaunchFailure"
+><A NAME="v%3APriorLaunchFailure"
+></A
+></A
+><B
+>PriorLaunchFailure</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:LaunchTimeout"
+><A NAME="v%3ALaunchTimeout"
+></A
+></A
+><B
+>LaunchTimeout</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:LaunchOutOfResources"
+><A NAME="v%3ALaunchOutOfResources"
+></A
+></A
+><B
+>LaunchOutOfResources</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:InvalidDeviceFunction"
+><A NAME="v%3AInvalidDeviceFunction"
+></A
+></A
+><B
+>InvalidDeviceFunction</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:InvalidConfiguration"
+><A NAME="v%3AInvalidConfiguration"
+></A
+></A
+><B
+>InvalidConfiguration</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:InvalidDevice"
+><A NAME="v%3AInvalidDevice"
+></A
+></A
+><B
+>InvalidDevice</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:InvalidValue"
+><A NAME="v%3AInvalidValue"
+></A
+></A
+><B
+>InvalidValue</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:InvalidPitchValue"
+><A NAME="v%3AInvalidPitchValue"
+></A
+></A
+><B
+>InvalidPitchValue</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:InvalidSymbol"
+><A NAME="v%3AInvalidSymbol"
+></A
+></A
+><B
+>InvalidSymbol</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:MapBufferObjectFailed"
+><A NAME="v%3AMapBufferObjectFailed"
+></A
+></A
+><B
+>MapBufferObjectFailed</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:UnmapBufferObjectFailed"
+><A NAME="v%3AUnmapBufferObjectFailed"
+></A
+></A
+><B
+>UnmapBufferObjectFailed</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:InvalidHostPointer"
+><A NAME="v%3AInvalidHostPointer"
+></A
+></A
+><B
+>InvalidHostPointer</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:InvalidDevicePointer"
+><A NAME="v%3AInvalidDevicePointer"
+></A
+></A
+><B
+>InvalidDevicePointer</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:InvalidTexture"
+><A NAME="v%3AInvalidTexture"
+></A
+></A
+><B
+>InvalidTexture</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:InvalidTextureBinding"
+><A NAME="v%3AInvalidTextureBinding"
+></A
+></A
+><B
+>InvalidTextureBinding</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:InvalidChannelDescriptor"
+><A NAME="v%3AInvalidChannelDescriptor"
+></A
+></A
+><B
+>InvalidChannelDescriptor</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:InvalidMemcpyDirection"
+><A NAME="v%3AInvalidMemcpyDirection"
+></A
+></A
+><B
+>InvalidMemcpyDirection</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:AddressOfConstant"
+><A NAME="v%3AAddressOfConstant"
+></A
+></A
+><B
+>AddressOfConstant</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:TextureFetchFailed"
+><A NAME="v%3ATextureFetchFailed"
+></A
+></A
+><B
+>TextureFetchFailed</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:TextureNotBound"
+><A NAME="v%3ATextureNotBound"
+></A
+></A
+><B
+>TextureNotBound</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:SynchronizationError"
+><A NAME="v%3ASynchronizationError"
+></A
+></A
+><B
+>SynchronizationError</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:InvalidFilterSetting"
+><A NAME="v%3AInvalidFilterSetting"
+></A
+></A
+><B
+>InvalidFilterSetting</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:InvalidNormSetting"
+><A NAME="v%3AInvalidNormSetting"
+></A
+></A
+><B
+>InvalidNormSetting</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:MixedDeviceExecution"
+><A NAME="v%3AMixedDeviceExecution"
+></A
+></A
+><B
+>MixedDeviceExecution</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:CudartUnloading"
+><A NAME="v%3ACudartUnloading"
+></A
+></A
+><B
+>CudartUnloading</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:Unknown"
+><A NAME="v%3AUnknown"
+></A
+></A
+><B
+>Unknown</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:NotYetImplemented"
+><A NAME="v%3ANotYetImplemented"
+></A
+></A
+><B
+>NotYetImplemented</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:MemoryValueTooLarge"
+><A NAME="v%3AMemoryValueTooLarge"
+></A
+></A
+><B
+>MemoryValueTooLarge</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:InvalidResourceHandle"
+><A NAME="v%3AInvalidResourceHandle"
+></A
+></A
+><B
+>InvalidResourceHandle</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:NotReady"
+><A NAME="v%3ANotReady"
+></A
+></A
+><B
+>NotReady</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:InsufficientDriver"
+><A NAME="v%3AInsufficientDriver"
+></A
+></A
+><B
+>InsufficientDriver</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:SetOnActiveProcess"
+><A NAME="v%3ASetOnActiveProcess"
+></A
+></A
+><B
+>SetOnActiveProcess</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:InvalidSurface"
+><A NAME="v%3AInvalidSurface"
+></A
+></A
+><B
+>InvalidSurface</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:NoDevice"
+><A NAME="v%3ANoDevice"
+></A
+></A
+><B
+>NoDevice</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:ECCUncorrectable"
+><A NAME="v%3AECCUncorrectable"
+></A
+></A
+><B
+>ECCUncorrectable</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:SharedObjectSymbolNotFound"
+><A NAME="v%3ASharedObjectSymbolNotFound"
+></A
+></A
+><B
+>SharedObjectSymbolNotFound</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:SharedObjectInitFailed"
+><A NAME="v%3ASharedObjectInitFailed"
+></A
+></A
+><B
+>SharedObjectInitFailed</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:UnsupportedLimit"
+><A NAME="v%3AUnsupportedLimit"
+></A
+></A
+><B
+>UnsupportedLimit</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:DuplicateVariableName"
+><A NAME="v%3ADuplicateVariableName"
+></A
+></A
+><B
+>DuplicateVariableName</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:DuplicateTextureName"
+><A NAME="v%3ADuplicateTextureName"
+></A
+></A
+><B
+>DuplicateTextureName</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:DuplicateSurfaceName"
+><A NAME="v%3ADuplicateSurfaceName"
+></A
+></A
+><B
+>DuplicateSurfaceName</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:DevicesUnavailable"
+><A NAME="v%3ADevicesUnavailable"
+></A
+></A
+><B
+>DevicesUnavailable</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:InvalidKernelImage"
+><A NAME="v%3AInvalidKernelImage"
+></A
+></A
+><B
+>InvalidKernelImage</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:NoKernelImageForDevice"
+><A NAME="v%3ANoKernelImageForDevice"
+></A
+></A
+><B
+>NoKernelImageForDevice</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:IncompatibleDriverContext"
+><A NAME="v%3AIncompatibleDriverContext"
+></A
+></A
+><B
+>IncompatibleDriverContext</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:StartupFailure"
+><A NAME="v%3AStartupFailure"
+></A
+></A
+><B
+>StartupFailure</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:ApiFailureBase"
+><A NAME="v%3AApiFailureBase"
+></A
+></A
+><B
+>ApiFailureBase</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="section4"
+><IMG SRC="minus.gif" CLASS="coll" ONCLICK="toggle(this,'i:Status')" ALT="show/hide"
+> Instances</TD
+></TR
+><TR
+><TD CLASS="body"
+><DIV ID="i:Status" STYLE="display:block;"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Prelude.html#t%3AEnum"
+>Enum</A
+> <A HREF="Foreign-CUDA-Runtime-Error.html#t%3AStatus"
+>Status</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Eq.html#t%3AEq"
+>Eq</A
+> <A HREF="Foreign-CUDA-Runtime-Error.html#t%3AStatus"
+>Status</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Text-Show.html#t%3AShow"
+>Show</A
+> <A HREF="Foreign-CUDA-Runtime-Error.html#t%3AStatus"
+>Status</A
+></TD
+></TR
+></TABLE
+></DIV
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A NAME="t:CUDAException"
+><A NAME="t%3ACUDAException"
+></A
+></A
+><B
+>CUDAException</B
+>  </TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="section4"
+>Constructors</TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v:ExitCode"
+><A NAME="v%3AExitCode"
+></A
+></A
+><B
+>ExitCode</B
+> <A HREF="Foreign-CUDA-Runtime-Error.html#t%3AStatus"
+>Status</A
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:UserError"
+><A NAME="v%3AUserError"
+></A
+></A
+><B
+>UserError</B
+> <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Char.html#t%3AString"
+>String</A
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="section4"
+><IMG SRC="minus.gif" CLASS="coll" ONCLICK="toggle(this,'i:CUDAException')" ALT="show/hide"
+> Instances</TD
+></TR
+><TR
+><TD CLASS="body"
+><DIV ID="i:CUDAException" STYLE="display:block;"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Text-Show.html#t%3AShow"
+>Show</A
+> <A HREF="Foreign-CUDA-Runtime-Error.html#t%3ACUDAException"
+>CUDAException</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Typeable.html#t%3ATypeable"
+>Typeable</A
+> <A HREF="Foreign-CUDA-Runtime-Error.html#t%3ACUDAException"
+>CUDAException</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Control-Exception-Base.html#t%3AException"
+>Exception</A
+> <A HREF="Foreign-CUDA-Runtime-Error.html#t%3ACUDAException"
+>CUDAException</A
+></TD
+></TR
+></TABLE
+></DIV
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:cudaError"
+><A NAME="v%3AcudaError"
+></A
+></A
+><B
+>cudaError</B
+> ::  <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Char.html#t%3AString"
+>String</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> a</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Raise a <TT
+><A HREF="Foreign-CUDA-Runtime-Error.html#t%3ACUDAException"
+>CUDAException</A
+></TT
+> in the IO Monad
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:describe"
+><A NAME="v%3Adescribe"
+></A
+></A
+><B
+>describe</B
+> :: <A HREF="Foreign-CUDA-Runtime-Error.html#t%3AStatus"
+>Status</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Char.html#t%3AString"
+>String</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Return the descriptive string associated with a particular error code
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:resultIfOk"
+><A NAME="v%3AresultIfOk"
+></A
+></A
+><B
+>resultIfOk</B
+> ::  (<A HREF="Foreign-CUDA-Runtime-Error.html#t%3AStatus"
+>Status</A
+>, a) -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> a</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Return the results of a function on successful execution, otherwise return
+ the error string associated with the return code
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:nothingIfOk"
+><A NAME="v%3AnothingIfOk"
+></A
+></A
+><B
+>nothingIfOk</B
+> :: <A HREF="Foreign-CUDA-Runtime-Error.html#t%3AStatus"
+>Status</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="botbar"
+>Produced by <A HREF="http://www.haskell.org/haddock/"
+>Haddock</A
+> version 2.6.1</TD
+></TR
+></TABLE
+></BODY
+></HTML
+>

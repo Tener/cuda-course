@@ -1,0 +1,2168 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!--Rendered using the Haskell Html Library v0.2-->
+<HTML
+><HEAD
+><META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8"
+><TITLE
+>Foreign.CUDA.Driver.Device</TITLE
+><LINK HREF="haddock.css" REL="stylesheet" TYPE="text/css"
+><SCRIPT SRC="haddock-util.js" TYPE="text/javascript"
+></SCRIPT
+><SCRIPT TYPE="text/javascript"
+>window.onload = function () {setSynopsis("mini_Foreign-CUDA-Driver-Device.html")};</SCRIPT
+></HEAD
+><BODY
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="topbar"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD
+><IMG SRC="haskell_icon.gif" WIDTH="16" HEIGHT="16" ALT=" "
+></TD
+><TD CLASS="title"
+>cuda-0.3.2: FFI binding to the CUDA interface for programming NVIDIA GPUs</TD
+><TD CLASS="topbut"
+><A HREF="index.html"
+>Contents</A
+></TD
+><TD CLASS="topbut"
+><A HREF="doc-index.html"
+>Index</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="modulebar"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD
+><FONT SIZE="6"
+>Foreign.CUDA.Driver.Device</FONT
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Description</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Device management for low-level driver interface
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Synopsis</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>newtype</SPAN
+>  <A HREF="#t%3ADevice"
+>Device</A
+>  = <A HREF="#v%3ADevice"
+>Device</A
+> {<TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AuseDevice"
+>useDevice</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-C-Types.html#t%3ACInt"
+>CInt</A
+></TD
+></TR
+></TABLE
+>}</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A HREF="#t%3ADeviceProperties"
+>DeviceProperties</A
+>  = <A HREF="#v%3ADeviceProperties"
+>DeviceProperties</A
+> {<TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AdeviceName"
+>deviceName</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Char.html#t%3AString"
+>String</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AcomputeCapability"
+>computeCapability</A
+> :: <A HREF="Foreign-CUDA-Analysis-Device.html#t%3ACompute"
+>Compute</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AtotalGlobalMem"
+>totalGlobalMem</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AtotalConstMem"
+>totalConstMem</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AsharedMemPerBlock"
+>sharedMemPerBlock</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AregsPerBlock"
+>regsPerBlock</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AwarpSize"
+>warpSize</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AmaxThreadsPerBlock"
+>maxThreadsPerBlock</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AmaxBlockSize"
+>maxBlockSize</A
+> :: (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>)</TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AmaxGridSize"
+>maxGridSize</A
+> :: (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>)</TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AmaxTextureDim1D"
+>maxTextureDim1D</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AmaxTextureDim2D"
+>maxTextureDim2D</A
+> :: (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>)</TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AmaxTextureDim3D"
+>maxTextureDim3D</A
+> :: (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>)</TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AclockRate"
+>clockRate</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AmultiProcessorCount"
+>multiProcessorCount</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AmemPitch"
+>memPitch</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AtextureAlignment"
+>textureAlignment</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AcomputeMode"
+>computeMode</A
+> :: <A HREF="Foreign-CUDA-Driver-Device.html#t%3AComputeMode"
+>ComputeMode</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AdeviceOverlap"
+>deviceOverlap</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AconcurrentKernels"
+>concurrentKernels</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AeccEnabled"
+>eccEnabled</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AkernelExecTimeoutEnabled"
+>kernelExecTimeoutEnabled</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3Aintegrated"
+>integrated</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AcanMapHostMemory"
+>canMapHostMemory</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+></TR
+></TABLE
+>}</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A HREF="#t%3ADeviceAttribute"
+>DeviceAttribute</A
+>  </TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+>= <A HREF="#v%3AMaxThreadsPerBlock"
+>MaxThreadsPerBlock</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AMaxBlockDimX"
+>MaxBlockDimX</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AMaxBlockDimY"
+>MaxBlockDimY</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AMaxBlockDimZ"
+>MaxBlockDimZ</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AMaxGridDimX"
+>MaxGridDimX</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AMaxGridDimY"
+>MaxGridDimY</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AMaxGridDimZ"
+>MaxGridDimZ</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AMaxSharedMemoryPerBlock"
+>MaxSharedMemoryPerBlock</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ASharedMemoryPerBlock"
+>SharedMemoryPerBlock</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ATotalConstantMemory"
+>TotalConstantMemory</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AWarpSize"
+>WarpSize</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AMaxPitch"
+>MaxPitch</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AMaxRegistersPerBlock"
+>MaxRegistersPerBlock</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ARegistersPerBlock"
+>RegistersPerBlock</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AClockRate"
+>ClockRate</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ATextureAlignment"
+>TextureAlignment</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AGpuOverlap"
+>GpuOverlap</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AMultiprocessorCount"
+>MultiprocessorCount</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AKernelExecTimeout"
+>KernelExecTimeout</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AIntegrated"
+>Integrated</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ACanMapHostMemory"
+>CanMapHostMemory</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AComputeMode"
+>ComputeMode</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AMaximumTexture1dWidth"
+>MaximumTexture1dWidth</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AMaximumTexture2dWidth"
+>MaximumTexture2dWidth</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AMaximumTexture2dHeight"
+>MaximumTexture2dHeight</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AMaximumTexture3dWidth"
+>MaximumTexture3dWidth</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AMaximumTexture3dHeight"
+>MaximumTexture3dHeight</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AMaximumTexture3dDepth"
+>MaximumTexture3dDepth</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AMaximumTexture2dArrayWidth"
+>MaximumTexture2dArrayWidth</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AMaximumTexture2dArrayHeight"
+>MaximumTexture2dArrayHeight</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AMaximumTexture2dArrayNumslices"
+>MaximumTexture2dArrayNumslices</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ASurfaceAlignment"
+>SurfaceAlignment</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AConcurrentKernels"
+>ConcurrentKernels</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AEccEnabled"
+>EccEnabled</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3APciBusId"
+>PciBusId</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3APciDeviceId"
+>PciDeviceId</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ATccDriver"
+>TccDriver</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A HREF="#t%3AComputeMode"
+>ComputeMode</A
+>  </TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+>= <A HREF="#v%3ADefault"
+>Default</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AExclusive"
+>Exclusive</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AProhibited"
+>Prohibited</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A HREF="#t%3AInitFlag"
+>InitFlag</A
+> </TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Ainitialise"
+>initialise</A
+> :: [<A HREF="Foreign-CUDA-Driver-Device.html#t%3AInitFlag"
+>InitFlag</A
+>] -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Acapability"
+>capability</A
+> :: <A HREF="Foreign-CUDA-Driver-Device.html#t%3ADevice"
+>Device</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Prelude.html#t%3ADouble"
+>Double</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Adevice"
+>device</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="Foreign-CUDA-Driver-Device.html#t%3ADevice"
+>Device</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Aattribute"
+>attribute</A
+> :: <A HREF="Foreign-CUDA-Driver-Device.html#t%3ADevice"
+>Device</A
+> -&gt; <A HREF="Foreign-CUDA-Driver-Device.html#t%3ADeviceAttribute"
+>DeviceAttribute</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Acount"
+>count</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Aname"
+>name</A
+> :: <A HREF="Foreign-CUDA-Driver-Device.html#t%3ADevice"
+>Device</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Char.html#t%3AString"
+>String</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Aprops"
+>props</A
+> :: <A HREF="Foreign-CUDA-Driver-Device.html#t%3ADevice"
+>Device</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="Foreign-CUDA-Driver-Device.html#t%3ADeviceProperties"
+>DeviceProperties</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AtotalMem"
+>totalMem</A
+> :: <A HREF="Foreign-CUDA-Driver-Device.html#t%3ADevice"
+>Device</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Documentation</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>newtype</SPAN
+>  <A NAME="t:Device"
+><A NAME="t%3ADevice"
+></A
+></A
+><B
+>Device</B
+>  </TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="section4"
+>Constructors</TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="5" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v:Device"
+><A NAME="v%3ADevice"
+></A
+></A
+><B
+>Device</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="body" COLSPAN="2"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v:useDevice"
+><A NAME="v%3AuseDevice"
+></A
+></A
+><B
+>useDevice</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-C-Types.html#t%3ACInt"
+>CInt</A
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+></TABLE
+></TD
+></TR
+></TABLE
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A NAME="t:DeviceProperties"
+><A NAME="t%3ADeviceProperties"
+></A
+></A
+><B
+>DeviceProperties</B
+>  </TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="ndoc"
+>The properties of a compute device
+</TD
+></TR
+><TR
+><TD CLASS="section4"
+>Constructors</TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="5" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v:DeviceProperties"
+><A NAME="v%3ADeviceProperties"
+></A
+></A
+><B
+>DeviceProperties</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="body" COLSPAN="2"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v:deviceName"
+><A NAME="v%3AdeviceName"
+></A
+></A
+><B
+>deviceName</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Char.html#t%3AString"
+>String</A
+></TD
+><TD CLASS="rdoc"
+>Identifier
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:computeCapability"
+><A NAME="v%3AcomputeCapability"
+></A
+></A
+><B
+>computeCapability</B
+> :: <A HREF="Foreign-CUDA-Analysis-Device.html#t%3ACompute"
+>Compute</A
+></TD
+><TD CLASS="rdoc"
+>Supported compute capability
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:totalGlobalMem"
+><A NAME="v%3AtotalGlobalMem"
+></A
+></A
+><B
+>totalGlobalMem</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+></TD
+><TD CLASS="rdoc"
+>Available global memory on the device in bytes
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:totalConstMem"
+><A NAME="v%3AtotalConstMem"
+></A
+></A
+><B
+>totalConstMem</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+></TD
+><TD CLASS="rdoc"
+>Available constant memory on the device in bytes
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:sharedMemPerBlock"
+><A NAME="v%3AsharedMemPerBlock"
+></A
+></A
+><B
+>sharedMemPerBlock</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+></TD
+><TD CLASS="rdoc"
+>Available shared memory per block in bytes
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:regsPerBlock"
+><A NAME="v%3AregsPerBlock"
+></A
+></A
+><B
+>regsPerBlock</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="rdoc"
+>32-bit registers per block
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:warpSize"
+><A NAME="v%3AwarpSize"
+></A
+></A
+><B
+>warpSize</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="rdoc"
+>Warp size in threads (SIMD width)
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:maxThreadsPerBlock"
+><A NAME="v%3AmaxThreadsPerBlock"
+></A
+></A
+><B
+>maxThreadsPerBlock</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="rdoc"
+>Max number of threads per block
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:maxBlockSize"
+><A NAME="v%3AmaxBlockSize"
+></A
+></A
+><B
+>maxBlockSize</B
+> :: (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>)</TD
+><TD CLASS="rdoc"
+>Max size of each dimension of a block
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:maxGridSize"
+><A NAME="v%3AmaxGridSize"
+></A
+></A
+><B
+>maxGridSize</B
+> :: (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>)</TD
+><TD CLASS="rdoc"
+>Max size of each dimension of a grid
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:maxTextureDim1D"
+><A NAME="v%3AmaxTextureDim1D"
+></A
+></A
+><B
+>maxTextureDim1D</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="rdoc"
+>Maximum texture dimensions
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:maxTextureDim2D"
+><A NAME="v%3AmaxTextureDim2D"
+></A
+></A
+><B
+>maxTextureDim2D</B
+> :: (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>)</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:maxTextureDim3D"
+><A NAME="v%3AmaxTextureDim3D"
+></A
+></A
+><B
+>maxTextureDim3D</B
+> :: (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>)</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:clockRate"
+><A NAME="v%3AclockRate"
+></A
+></A
+><B
+>clockRate</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="rdoc"
+>Clock frequency in kilohertz
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:multiProcessorCount"
+><A NAME="v%3AmultiProcessorCount"
+></A
+></A
+><B
+>multiProcessorCount</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="rdoc"
+>Number of multiprocessors on the device
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:memPitch"
+><A NAME="v%3AmemPitch"
+></A
+></A
+><B
+>memPitch</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+></TD
+><TD CLASS="rdoc"
+>Max pitch in bytes allowed by memory copies
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:textureAlignment"
+><A NAME="v%3AtextureAlignment"
+></A
+></A
+><B
+>textureAlignment</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+></TD
+><TD CLASS="rdoc"
+>Alignment requirement for textures
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:computeMode"
+><A NAME="v%3AcomputeMode"
+></A
+></A
+><B
+>computeMode</B
+> :: <A HREF="Foreign-CUDA-Driver-Device.html#t%3AComputeMode"
+>ComputeMode</A
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:deviceOverlap"
+><A NAME="v%3AdeviceOverlap"
+></A
+></A
+><B
+>deviceOverlap</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+><TD CLASS="rdoc"
+>Device can concurrently copy memory and execute a kernel
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:concurrentKernels"
+><A NAME="v%3AconcurrentKernels"
+></A
+></A
+><B
+>concurrentKernels</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+><TD CLASS="rdoc"
+>Device can possibly execute multiple kernels concurrently
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:eccEnabled"
+><A NAME="v%3AeccEnabled"
+></A
+></A
+><B
+>eccEnabled</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+><TD CLASS="rdoc"
+>Device supports and has enabled error correction
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:kernelExecTimeoutEnabled"
+><A NAME="v%3AkernelExecTimeoutEnabled"
+></A
+></A
+><B
+>kernelExecTimeoutEnabled</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+><TD CLASS="rdoc"
+>Whether there is a runtime limit on kernels
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:integrated"
+><A NAME="v%3Aintegrated"
+></A
+></A
+><B
+>integrated</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+><TD CLASS="rdoc"
+>As opposed to discrete
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:canMapHostMemory"
+><A NAME="v%3AcanMapHostMemory"
+></A
+></A
+><B
+>canMapHostMemory</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+><TD CLASS="rdoc"
+>Device can use pinned memory
+</TD
+></TR
+></TABLE
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="section4"
+><IMG SRC="minus.gif" CLASS="coll" ONCLICK="toggle(this,'i:DeviceProperties')" ALT="show/hide"
+> Instances</TD
+></TR
+><TR
+><TD CLASS="body"
+><DIV ID="i:DeviceProperties" STYLE="display:block;"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Text-Show.html#t%3AShow"
+>Show</A
+> <A HREF="Foreign-CUDA-Driver-Device.html#t%3ADeviceProperties"
+>DeviceProperties</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> <A HREF="Foreign-CUDA-Driver-Device.html#t%3ADeviceProperties"
+>DeviceProperties</A
+></TD
+></TR
+></TABLE
+></DIV
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A NAME="t:DeviceAttribute"
+><A NAME="t%3ADeviceAttribute"
+></A
+></A
+><B
+>DeviceAttribute</B
+>  </TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="ndoc"
+>Device attributes
+</TD
+></TR
+><TR
+><TD CLASS="section4"
+>Constructors</TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v:MaxThreadsPerBlock"
+><A NAME="v%3AMaxThreadsPerBlock"
+></A
+></A
+><B
+>MaxThreadsPerBlock</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:MaxBlockDimX"
+><A NAME="v%3AMaxBlockDimX"
+></A
+></A
+><B
+>MaxBlockDimX</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:MaxBlockDimY"
+><A NAME="v%3AMaxBlockDimY"
+></A
+></A
+><B
+>MaxBlockDimY</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:MaxBlockDimZ"
+><A NAME="v%3AMaxBlockDimZ"
+></A
+></A
+><B
+>MaxBlockDimZ</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:MaxGridDimX"
+><A NAME="v%3AMaxGridDimX"
+></A
+></A
+><B
+>MaxGridDimX</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:MaxGridDimY"
+><A NAME="v%3AMaxGridDimY"
+></A
+></A
+><B
+>MaxGridDimY</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:MaxGridDimZ"
+><A NAME="v%3AMaxGridDimZ"
+></A
+></A
+><B
+>MaxGridDimZ</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:MaxSharedMemoryPerBlock"
+><A NAME="v%3AMaxSharedMemoryPerBlock"
+></A
+></A
+><B
+>MaxSharedMemoryPerBlock</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:SharedMemoryPerBlock"
+><A NAME="v%3ASharedMemoryPerBlock"
+></A
+></A
+><B
+>SharedMemoryPerBlock</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:TotalConstantMemory"
+><A NAME="v%3ATotalConstantMemory"
+></A
+></A
+><B
+>TotalConstantMemory</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:WarpSize"
+><A NAME="v%3AWarpSize"
+></A
+></A
+><B
+>WarpSize</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:MaxPitch"
+><A NAME="v%3AMaxPitch"
+></A
+></A
+><B
+>MaxPitch</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:MaxRegistersPerBlock"
+><A NAME="v%3AMaxRegistersPerBlock"
+></A
+></A
+><B
+>MaxRegistersPerBlock</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:RegistersPerBlock"
+><A NAME="v%3ARegistersPerBlock"
+></A
+></A
+><B
+>RegistersPerBlock</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:ClockRate"
+><A NAME="v%3AClockRate"
+></A
+></A
+><B
+>ClockRate</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:TextureAlignment"
+><A NAME="v%3ATextureAlignment"
+></A
+></A
+><B
+>TextureAlignment</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:GpuOverlap"
+><A NAME="v%3AGpuOverlap"
+></A
+></A
+><B
+>GpuOverlap</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:MultiprocessorCount"
+><A NAME="v%3AMultiprocessorCount"
+></A
+></A
+><B
+>MultiprocessorCount</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:KernelExecTimeout"
+><A NAME="v%3AKernelExecTimeout"
+></A
+></A
+><B
+>KernelExecTimeout</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:Integrated"
+><A NAME="v%3AIntegrated"
+></A
+></A
+><B
+>Integrated</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:CanMapHostMemory"
+><A NAME="v%3ACanMapHostMemory"
+></A
+></A
+><B
+>CanMapHostMemory</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:ComputeMode"
+><A NAME="v%3AComputeMode"
+></A
+></A
+><B
+>ComputeMode</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:MaximumTexture1dWidth"
+><A NAME="v%3AMaximumTexture1dWidth"
+></A
+></A
+><B
+>MaximumTexture1dWidth</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:MaximumTexture2dWidth"
+><A NAME="v%3AMaximumTexture2dWidth"
+></A
+></A
+><B
+>MaximumTexture2dWidth</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:MaximumTexture2dHeight"
+><A NAME="v%3AMaximumTexture2dHeight"
+></A
+></A
+><B
+>MaximumTexture2dHeight</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:MaximumTexture3dWidth"
+><A NAME="v%3AMaximumTexture3dWidth"
+></A
+></A
+><B
+>MaximumTexture3dWidth</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:MaximumTexture3dHeight"
+><A NAME="v%3AMaximumTexture3dHeight"
+></A
+></A
+><B
+>MaximumTexture3dHeight</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:MaximumTexture3dDepth"
+><A NAME="v%3AMaximumTexture3dDepth"
+></A
+></A
+><B
+>MaximumTexture3dDepth</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:MaximumTexture2dArrayWidth"
+><A NAME="v%3AMaximumTexture2dArrayWidth"
+></A
+></A
+><B
+>MaximumTexture2dArrayWidth</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:MaximumTexture2dArrayHeight"
+><A NAME="v%3AMaximumTexture2dArrayHeight"
+></A
+></A
+><B
+>MaximumTexture2dArrayHeight</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:MaximumTexture2dArrayNumslices"
+><A NAME="v%3AMaximumTexture2dArrayNumslices"
+></A
+></A
+><B
+>MaximumTexture2dArrayNumslices</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:SurfaceAlignment"
+><A NAME="v%3ASurfaceAlignment"
+></A
+></A
+><B
+>SurfaceAlignment</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:ConcurrentKernels"
+><A NAME="v%3AConcurrentKernels"
+></A
+></A
+><B
+>ConcurrentKernels</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:EccEnabled"
+><A NAME="v%3AEccEnabled"
+></A
+></A
+><B
+>EccEnabled</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:PciBusId"
+><A NAME="v%3APciBusId"
+></A
+></A
+><B
+>PciBusId</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:PciDeviceId"
+><A NAME="v%3APciDeviceId"
+></A
+></A
+><B
+>PciDeviceId</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:TccDriver"
+><A NAME="v%3ATccDriver"
+></A
+></A
+><B
+>TccDriver</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="section4"
+><IMG SRC="minus.gif" CLASS="coll" ONCLICK="toggle(this,'i:DeviceAttribute')" ALT="show/hide"
+> Instances</TD
+></TR
+><TR
+><TD CLASS="body"
+><DIV ID="i:DeviceAttribute" STYLE="display:block;"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Prelude.html#t%3AEnum"
+>Enum</A
+> <A HREF="Foreign-CUDA-Driver-Device.html#t%3ADeviceAttribute"
+>DeviceAttribute</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Eq.html#t%3AEq"
+>Eq</A
+> <A HREF="Foreign-CUDA-Driver-Device.html#t%3ADeviceAttribute"
+>DeviceAttribute</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Text-Show.html#t%3AShow"
+>Show</A
+> <A HREF="Foreign-CUDA-Driver-Device.html#t%3ADeviceAttribute"
+>DeviceAttribute</A
+></TD
+></TR
+></TABLE
+></DIV
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A NAME="t:ComputeMode"
+><A NAME="t%3AComputeMode"
+></A
+></A
+><B
+>ComputeMode</B
+>  </TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="ndoc"
+>The compute mode the device is currently in
+</TD
+></TR
+><TR
+><TD CLASS="section4"
+>Constructors</TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v:Default"
+><A NAME="v%3ADefault"
+></A
+></A
+><B
+>Default</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:Exclusive"
+><A NAME="v%3AExclusive"
+></A
+></A
+><B
+>Exclusive</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:Prohibited"
+><A NAME="v%3AProhibited"
+></A
+></A
+><B
+>Prohibited</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="section4"
+><IMG SRC="minus.gif" CLASS="coll" ONCLICK="toggle(this,'i:ComputeMode')" ALT="show/hide"
+> Instances</TD
+></TR
+><TR
+><TD CLASS="body"
+><DIV ID="i:ComputeMode" STYLE="display:block;"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Prelude.html#t%3AEnum"
+>Enum</A
+> <A HREF="Foreign-CUDA-Driver-Device.html#t%3AComputeMode"
+>ComputeMode</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Eq.html#t%3AEq"
+>Eq</A
+> <A HREF="Foreign-CUDA-Driver-Device.html#t%3AComputeMode"
+>ComputeMode</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Text-Show.html#t%3AShow"
+>Show</A
+> <A HREF="Foreign-CUDA-Driver-Device.html#t%3AComputeMode"
+>ComputeMode</A
+></TD
+></TR
+></TABLE
+></DIV
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A NAME="t:InitFlag"
+><A NAME="t%3AInitFlag"
+></A
+></A
+><B
+>InitFlag</B
+>  </TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="ndoc"
+>Possible option flags for CUDA initialisation. Dummy instance until the API
+ exports actual option values.
+</TD
+></TR
+><TR
+><TD CLASS="section4"
+><IMG SRC="minus.gif" CLASS="coll" ONCLICK="toggle(this,'i:InitFlag')" ALT="show/hide"
+> Instances</TD
+></TR
+><TR
+><TD CLASS="body"
+><DIV ID="i:InitFlag" STYLE="display:block;"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Prelude.html#t%3AEnum"
+>Enum</A
+> <A HREF="Foreign-CUDA-Driver-Device.html#t%3AInitFlag"
+>InitFlag</A
+></TD
+></TR
+></TABLE
+></DIV
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:initialise"
+><A NAME="v%3Ainitialise"
+></A
+></A
+><B
+>initialise</B
+> :: [<A HREF="Foreign-CUDA-Driver-Device.html#t%3AInitFlag"
+>InitFlag</A
+>] -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Initialise the CUDA driver API. Must be called before any other driver
+ function.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:capability"
+><A NAME="v%3Acapability"
+></A
+></A
+><B
+>capability</B
+> :: <A HREF="Foreign-CUDA-Driver-Device.html#t%3ADevice"
+>Device</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Prelude.html#t%3ADouble"
+>Double</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Return the compute compatibility revision supported by the device
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:device"
+><A NAME="v%3Adevice"
+></A
+></A
+><B
+>device</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="Foreign-CUDA-Driver-Device.html#t%3ADevice"
+>Device</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Return a device handle
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:attribute"
+><A NAME="v%3Aattribute"
+></A
+></A
+><B
+>attribute</B
+> :: <A HREF="Foreign-CUDA-Driver-Device.html#t%3ADevice"
+>Device</A
+> -&gt; <A HREF="Foreign-CUDA-Driver-Device.html#t%3ADeviceAttribute"
+>DeviceAttribute</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Return the selected attribute for the given device
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:count"
+><A NAME="v%3Acount"
+></A
+></A
+><B
+>count</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Return the number of device with compute capability &gt; 1.0
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:name"
+><A NAME="v%3Aname"
+></A
+></A
+><B
+>name</B
+> :: <A HREF="Foreign-CUDA-Driver-Device.html#t%3ADevice"
+>Device</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Char.html#t%3AString"
+>String</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Name of the device
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:props"
+><A NAME="v%3Aprops"
+></A
+></A
+><B
+>props</B
+> :: <A HREF="Foreign-CUDA-Driver-Device.html#t%3ADevice"
+>Device</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="Foreign-CUDA-Driver-Device.html#t%3ADeviceProperties"
+>DeviceProperties</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Return the properties of the selected device
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:totalMem"
+><A NAME="v%3AtotalMem"
+></A
+></A
+><B
+>totalMem</B
+> :: <A HREF="Foreign-CUDA-Driver-Device.html#t%3ADevice"
+>Device</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Total memory available on the device (bytes)
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="botbar"
+>Produced by <A HREF="http://www.haskell.org/haddock/"
+>Haddock</A
+> version 2.6.1</TD
+></TR
+></TABLE
+></BODY
+></HTML
+>

@@ -1,0 +1,781 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!--Rendered using the Haskell Html Library v0.2-->
+<HTML
+><HEAD
+><META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8"
+><TITLE
+>Foreign.CUDA.Analysis.Occupancy</TITLE
+><LINK HREF="haddock.css" REL="stylesheet" TYPE="text/css"
+><SCRIPT SRC="haddock-util.js" TYPE="text/javascript"
+></SCRIPT
+><SCRIPT TYPE="text/javascript"
+>window.onload = function () {setSynopsis("mini_Foreign-CUDA-Analysis-Occupancy.html")};</SCRIPT
+></HEAD
+><BODY
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="topbar"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD
+><IMG SRC="haskell_icon.gif" WIDTH="16" HEIGHT="16" ALT=" "
+></TD
+><TD CLASS="title"
+>cuda-0.3.2: FFI binding to the CUDA interface for programming NVIDIA GPUs</TD
+><TD CLASS="topbut"
+><A HREF="index.html"
+>Contents</A
+></TD
+><TD CLASS="topbut"
+><A HREF="doc-index.html"
+>Index</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="modulebar"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD
+><FONT SIZE="6"
+>Foreign.CUDA.Analysis.Occupancy</FONT
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Description</TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+>Occupancy calculations for CUDA kernels
+</P
+><P
+><A HREF="http://developer.download.nvidia.com/compute/cuda/3_0/sdk/docs/CUDA_Occupancy_calculator.xls"
+>http://developer.download.nvidia.com/compute/cuda/3_0/sdk/docs/CUDA_Occupancy_calculator.xls</A
+>
+</P
+><P
+><EM
+>Determining Registers Per Thread and Shared Memory Per Block</EM
+>
+</P
+><P
+>To determine the number of registers used per thread in your kernel, simply
+ compile the kernel code using the option
+</P
+><PRE
+> --ptxas-options=-v
+</PRE
+><P
+>to nvcc.  This will output information about register, local memory, shared
+ memory, and constant memory usage for each kernel in the <TT
+>.cu</TT
+> file.
+ Alternatively, you can compile with the <TT
+>-cubin</TT
+> option to nvcc.  This will
+ generate a <TT
+>.cubin</TT
+> file, which you can open in a text editor.  Look for the
+ <TT
+>code</TT
+> section with your kernel's name.  Within the curly braces (<TT
+>{ ... }</TT
+>)
+ for that code block, you will see a line with <TT
+>reg = X</TT
+>, where <TT
+>x</TT
+> is the
+ number of registers used by your kernel.  You can also see the amount of
+ shared memory used as <TT
+>smem = Y</TT
+>.  However, if your kernel declares any
+ external shared memory that is allocated dynamically, you will need to add
+ the number in the <TT
+>.cubin</TT
+> file to the amount you dynamically allocate at run
+ time to get the correct shared memory usage.
+</P
+><P
+><EM
+>Notes About Occupancy</EM
+>
+</P
+><P
+>Higher occupancy does not necessarily mean higher performance.  If a kernel
+ is not bandwidth bound, then increasing occupancy will not necessarily
+ increase performance.  If a kernel invocation is already running at least one
+ thread block per multiprocessor in the GPU, and it is bottlenecked by
+ computation and not by global memory accesses, then increasing occupancy may
+ have no effect.  In fact, making changes just to increase occupancy can have
+ other effects, such as additional instructions, spills to local memory (which
+ is off chip), divergent branches, etc.  As with any optimization, you should
+ experiment to see how changes affect the *wall clock time* of the kernel
+ execution.  For bandwidth bound applications, on the other hand, increasing
+ occupancy can help better hide the latency of memory accesses, and therefore
+ improve performance.
+</P
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Synopsis</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A HREF="#t%3AOccupancy"
+>Occupancy</A
+>  = <A HREF="#v%3AOccupancy"
+>Occupancy</A
+> {<TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AactiveThreads"
+>activeThreads</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AactiveThreadBlocks"
+>activeThreadBlocks</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AactiveWarps"
+>activeWarps</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3Aoccupancy100"
+>occupancy100</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Prelude.html#t%3ADouble"
+>Double</A
+></TD
+></TR
+></TABLE
+>}</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Aoccupancy"
+>occupancy</A
+> :: <A HREF="Foreign-CUDA-Analysis-Device.html#t%3ADeviceProperties"
+>DeviceProperties</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="Foreign-CUDA-Analysis-Occupancy.html#t%3AOccupancy"
+>Occupancy</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AoptimalBlockSize"
+>optimalBlockSize</A
+> :: <A HREF="Foreign-CUDA-Analysis-Device.html#t%3ADeviceProperties"
+>DeviceProperties</A
+> -&gt; (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>) -&gt; (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>) -&gt; (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="Foreign-CUDA-Analysis-Occupancy.html#t%3AOccupancy"
+>Occupancy</A
+>)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AoptimalBlockSizeBy"
+>optimalBlockSizeBy</A
+> :: <A HREF="Foreign-CUDA-Analysis-Device.html#t%3ADeviceProperties"
+>DeviceProperties</A
+> -&gt; (<A HREF="Foreign-CUDA-Analysis-Device.html#t%3ADeviceProperties"
+>DeviceProperties</A
+> -&gt; [<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>]) -&gt; (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>) -&gt; (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>) -&gt; (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="Foreign-CUDA-Analysis-Occupancy.html#t%3AOccupancy"
+>Occupancy</A
+>)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AmaxResidentBlocks"
+>maxResidentBlocks</A
+> :: <A HREF="Foreign-CUDA-Analysis-Device.html#t%3ADeviceProperties"
+>DeviceProperties</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AincPow2"
+>incPow2</A
+> :: <A HREF="Foreign-CUDA-Analysis-Device.html#t%3ADeviceProperties"
+>DeviceProperties</A
+> -&gt; [<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AincWarp"
+>incWarp</A
+> :: <A HREF="Foreign-CUDA-Analysis-Device.html#t%3ADeviceProperties"
+>DeviceProperties</A
+> -&gt; [<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>]</TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Documentation</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A NAME="t:Occupancy"
+><A NAME="t%3AOccupancy"
+></A
+></A
+><B
+>Occupancy</B
+>  </TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="section4"
+>Constructors</TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="5" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v:Occupancy"
+><A NAME="v%3AOccupancy"
+></A
+></A
+><B
+>Occupancy</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="body" COLSPAN="2"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v:activeThreads"
+><A NAME="v%3AactiveThreads"
+></A
+></A
+><B
+>activeThreads</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="rdoc"
+>Active threads per multiprocessor
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:activeThreadBlocks"
+><A NAME="v%3AactiveThreadBlocks"
+></A
+></A
+><B
+>activeThreadBlocks</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="rdoc"
+>Active thread blocks per multiprocessor
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:activeWarps"
+><A NAME="v%3AactiveWarps"
+></A
+></A
+><B
+>activeWarps</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="rdoc"
+>Active warps per multiprocessor
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:occupancy100"
+><A NAME="v%3Aoccupancy100"
+></A
+></A
+><B
+>occupancy100</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Prelude.html#t%3ADouble"
+>Double</A
+></TD
+><TD CLASS="rdoc"
+>Occupancy of each multiprocessor (percent)
+</TD
+></TR
+></TABLE
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="section4"
+><IMG SRC="minus.gif" CLASS="coll" ONCLICK="toggle(this,'i:Occupancy')" ALT="show/hide"
+> Instances</TD
+></TR
+><TR
+><TD CLASS="body"
+><DIV ID="i:Occupancy" STYLE="display:block;"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Eq.html#t%3AEq"
+>Eq</A
+> <A HREF="Foreign-CUDA-Analysis-Occupancy.html#t%3AOccupancy"
+>Occupancy</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> <A HREF="Foreign-CUDA-Analysis-Occupancy.html#t%3AOccupancy"
+>Occupancy</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Text-Show.html#t%3AShow"
+>Show</A
+> <A HREF="Foreign-CUDA-Analysis-Occupancy.html#t%3AOccupancy"
+>Occupancy</A
+></TD
+></TR
+></TABLE
+></DIV
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:occupancy"
+><A NAME="v%3Aoccupancy"
+></A
+></A
+><B
+>occupancy</B
+></TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+>:: <A HREF="Foreign-CUDA-Analysis-Device.html#t%3ADeviceProperties"
+>DeviceProperties</A
+></TD
+><TD CLASS="rdoc"
+>Properties of the card in question
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+>-&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="rdoc"
+>Threads per block
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+>-&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="rdoc"
+>Registers per thread
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+>-&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="rdoc"
+>Shared memory per block (bytes)
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+>-&gt; <A HREF="Foreign-CUDA-Analysis-Occupancy.html#t%3AOccupancy"
+>Occupancy</A
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="ndoc" COLSPAN="2"
+>Calculate occupancy data for a given GPU and kernel resource usage
+</TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:optimalBlockSize"
+><A NAME="v%3AoptimalBlockSize"
+></A
+></A
+><B
+>optimalBlockSize</B
+></TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+>:: <A HREF="Foreign-CUDA-Analysis-Device.html#t%3ADeviceProperties"
+>DeviceProperties</A
+></TD
+><TD CLASS="rdoc"
+>Architecture to optimise for
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+>-&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="rdoc"
+>Register count as a function of thread block size
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+>-&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="rdoc"
+>Shared memory usage (bytes) as a function of thread block size
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+>-&gt; (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="Foreign-CUDA-Analysis-Occupancy.html#t%3AOccupancy"
+>Occupancy</A
+>)</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="ndoc" COLSPAN="2"
+>Optimise multiprocessor occupancy as a function of thread block size and
+ resource usage. This returns the smallest satisfying block size in increments
+ of a single warp.
+</TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:optimalBlockSizeBy"
+><A NAME="v%3AoptimalBlockSizeBy"
+></A
+></A
+><B
+>optimalBlockSizeBy</B
+> :: <A HREF="Foreign-CUDA-Analysis-Device.html#t%3ADeviceProperties"
+>DeviceProperties</A
+> -&gt; (<A HREF="Foreign-CUDA-Analysis-Device.html#t%3ADeviceProperties"
+>DeviceProperties</A
+> -&gt; [<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>]) -&gt; (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>) -&gt; (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>) -&gt; (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="Foreign-CUDA-Analysis-Occupancy.html#t%3AOccupancy"
+>Occupancy</A
+>)</TD
+></TR
+><TR
+><TD CLASS="doc"
+>As <TT
+><A HREF="Foreign-CUDA-Analysis-Occupancy.html#v%3AoptimalBlockSize"
+>optimalBlockSize</A
+></TT
+>, but with a generator that produces the specific thread
+ block sizes that should be tested. The generated list can produce values in
+ any order, but should be monotonically decreasing to return the smallest
+ satisfying block size (and vice-versa).
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:maxResidentBlocks"
+><A NAME="v%3AmaxResidentBlocks"
+></A
+></A
+><B
+>maxResidentBlocks</B
+></TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+>:: <A HREF="Foreign-CUDA-Analysis-Device.html#t%3ADeviceProperties"
+>DeviceProperties</A
+></TD
+><TD CLASS="rdoc"
+>Properties of the card in question
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+>-&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="rdoc"
+>Threads per block
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+>-&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="rdoc"
+>Registers per thread
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+>-&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="rdoc"
+>Shared memory per block (bytes)
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+>-&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="rdoc"
+>Maximum number of resident blocks
+</TD
+></TR
+><TR
+><TD CLASS="ndoc" COLSPAN="2"
+>Determine the maximum number of CTAs that can be run simultaneously for a
+ given kernel / device combination.
+</TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:incPow2"
+><A NAME="v%3AincPow2"
+></A
+></A
+><B
+>incPow2</B
+> :: <A HREF="Foreign-CUDA-Analysis-Device.html#t%3ADeviceProperties"
+>DeviceProperties</A
+> -&gt; [<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>]</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Decrements in powers-of-two, over the range of supported thread block sizes
+ for the given device.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:incWarp"
+><A NAME="v%3AincWarp"
+></A
+></A
+><B
+>incWarp</B
+> :: <A HREF="Foreign-CUDA-Analysis-Device.html#t%3ADeviceProperties"
+>DeviceProperties</A
+> -&gt; [<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>]</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Decrements in the warp size of the device, over the range of supported
+ thread block sizes.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="botbar"
+>Produced by <A HREF="http://www.haskell.org/haddock/"
+>Haddock</A
+> version 2.6.1</TD
+></TR
+></TABLE
+></BODY
+></HTML
+>

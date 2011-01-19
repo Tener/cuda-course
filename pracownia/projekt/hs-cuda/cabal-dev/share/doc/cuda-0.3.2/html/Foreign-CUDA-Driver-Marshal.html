@@ -1,0 +1,1462 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!--Rendered using the Haskell Html Library v0.2-->
+<HTML
+><HEAD
+><META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8"
+><TITLE
+>Foreign.CUDA.Driver.Marshal</TITLE
+><LINK HREF="haddock.css" REL="stylesheet" TYPE="text/css"
+><SCRIPT SRC="haddock-util.js" TYPE="text/javascript"
+></SCRIPT
+><SCRIPT TYPE="text/javascript"
+>window.onload = function () {setSynopsis("mini_Foreign-CUDA-Driver-Marshal.html")};</SCRIPT
+></HEAD
+><BODY
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="topbar"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD
+><IMG SRC="haskell_icon.gif" WIDTH="16" HEIGHT="16" ALT=" "
+></TD
+><TD CLASS="title"
+>cuda-0.3.2: FFI binding to the CUDA interface for programming NVIDIA GPUs</TD
+><TD CLASS="topbut"
+><A HREF="index.html"
+>Contents</A
+></TD
+><TD CLASS="topbut"
+><A HREF="doc-index.html"
+>Index</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="modulebar"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD
+><FONT SIZE="6"
+>Foreign.CUDA.Driver.Marshal</FONT
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="section4"
+><B
+>Contents</B
+></TD
+></TR
+><TR
+><TD
+><DL
+><DT
+><A HREF="#1"
+>Host Allocation
+</A
+></DT
+><DT
+><A HREF="#2"
+>Device Allocation
+</A
+></DT
+><DT
+><A HREF="#3"
+>Marshalling
+</A
+></DT
+><DT
+><A HREF="#4"
+>Combined Allocation and Marshalling
+</A
+></DT
+><DT
+><A HREF="#5"
+>Utility
+</A
+></DT
+></DL
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Description</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Memory management for low-level driver interface
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Synopsis</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A HREF="#t%3AAllocFlag"
+>AllocFlag</A
+>  </TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+>= <A HREF="#v%3APortable"
+>Portable</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ADeviceMapped"
+>DeviceMapped</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AWriteCombined"
+>WriteCombined</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AmallocHostArray"
+>mallocHostArray</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; [<A HREF="Foreign-CUDA-Driver-Marshal.html#t%3AAllocFlag"
+>AllocFlag</A
+>] -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> (<A HREF="Foreign-CUDA-Ptr.html#t%3AHostPtr"
+>HostPtr</A
+> a)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AfreeHost"
+>freeHost</A
+> ::  <A HREF="Foreign-CUDA-Ptr.html#t%3AHostPtr"
+>HostPtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AmallocArray"
+>mallocArray</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> (<A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AallocaArray"
+>allocaArray</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; (<A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> b) -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> b</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Afree"
+>free</A
+> ::  <A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3ApeekArray"
+>peekArray</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Ptr.html#t%3APtr"
+>Ptr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3ApeekArrayAsync"
+>peekArrayAsync</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; <A HREF="Foreign-CUDA-Ptr.html#t%3AHostPtr"
+>HostPtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> <A HREF="Foreign-CUDA-Driver-Stream.html#t%3AStream"
+>Stream</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3ApeekListArray"
+>peekListArray</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> [a]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3ApokeArray"
+>pokeArray</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Ptr.html#t%3APtr"
+>Ptr</A
+> a -&gt; <A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3ApokeArrayAsync"
+>pokeArrayAsync</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="Foreign-CUDA-Ptr.html#t%3AHostPtr"
+>HostPtr</A
+> a -&gt; <A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> <A HREF="Foreign-CUDA-Driver-Stream.html#t%3AStream"
+>Stream</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3ApokeListArray"
+>pokeListArray</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; [a] -&gt; <A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AcopyArrayAsync"
+>copyArrayAsync</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; <A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AnewListArray"
+>newListArray</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; [a] -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> (<A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AnewListArrayLen"
+>newListArrayLen</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; [a] -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> (<A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AwithListArray"
+>withListArray</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; [a] -&gt; (<A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> b) -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> b</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AwithListArrayLen"
+>withListArrayLen</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; [a] -&gt; (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> b) -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> b</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Amemset"
+>memset</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; <A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AgetDevicePtr"
+>getDevicePtr</A
+> ::  [<A HREF="Foreign-CUDA-Driver-Marshal.html#t%3AAllocFlag"
+>AllocFlag</A
+>] -&gt; <A HREF="Foreign-CUDA-Ptr.html#t%3AHostPtr"
+>HostPtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> (<A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AgetBasePtr"
+>getBasePtr</A
+> ::  <A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> (<A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+>)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AgetMemInfo"
+>getMemInfo</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+>)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AuseDeviceHandle"
+>useDeviceHandle</A
+> ::  <A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; DeviceHandle</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3ApeekDeviceHandle"
+>peekDeviceHandle</A
+> ::  <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Ptr.html#t%3APtr"
+>Ptr</A
+> DeviceHandle -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> (<A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a)</TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+><A NAME="1"
+><A NAME="1"
+>Host Allocation
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A NAME="t:AllocFlag"
+><A NAME="t%3AAllocFlag"
+></A
+></A
+><B
+>AllocFlag</B
+>  </TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="ndoc"
+>Options for host allocation
+</TD
+></TR
+><TR
+><TD CLASS="section4"
+>Constructors</TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v:Portable"
+><A NAME="v%3APortable"
+></A
+></A
+><B
+>Portable</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:DeviceMapped"
+><A NAME="v%3ADeviceMapped"
+></A
+></A
+><B
+>DeviceMapped</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:WriteCombined"
+><A NAME="v%3AWriteCombined"
+></A
+></A
+><B
+>WriteCombined</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="section4"
+><IMG SRC="minus.gif" CLASS="coll" ONCLICK="toggle(this,'i:AllocFlag')" ALT="show/hide"
+> Instances</TD
+></TR
+><TR
+><TD CLASS="body"
+><DIV ID="i:AllocFlag" STYLE="display:block;"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Prelude.html#t%3AEnum"
+>Enum</A
+> <A HREF="Foreign-CUDA-Driver-Marshal.html#t%3AAllocFlag"
+>AllocFlag</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Eq.html#t%3AEq"
+>Eq</A
+> <A HREF="Foreign-CUDA-Driver-Marshal.html#t%3AAllocFlag"
+>AllocFlag</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Text-Show.html#t%3AShow"
+>Show</A
+> <A HREF="Foreign-CUDA-Driver-Marshal.html#t%3AAllocFlag"
+>AllocFlag</A
+></TD
+></TR
+></TABLE
+></DIV
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:mallocHostArray"
+><A NAME="v%3AmallocHostArray"
+></A
+></A
+><B
+>mallocHostArray</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; [<A HREF="Foreign-CUDA-Driver-Marshal.html#t%3AAllocFlag"
+>AllocFlag</A
+>] -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> (<A HREF="Foreign-CUDA-Ptr.html#t%3AHostPtr"
+>HostPtr</A
+> a)</TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+>Allocate a section of linear memory on the host which is page-locked and
+ directly accessible from the device. The storage is sufficient to hold the
+ given number of elements of a storable type.
+</P
+><P
+>Note that since the amount of pageable memory is thusly reduced, overall
+ system performance may suffer. This is best used sparingly to allocate
+ staging areas for data exchange.
+</P
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:freeHost"
+><A NAME="v%3AfreeHost"
+></A
+></A
+><B
+>freeHost</B
+> ::  <A HREF="Foreign-CUDA-Ptr.html#t%3AHostPtr"
+>HostPtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Free a section of page-locked host memory
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+><A NAME="2"
+><A NAME="2"
+>Device Allocation
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:mallocArray"
+><A NAME="v%3AmallocArray"
+></A
+></A
+><B
+>mallocArray</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> (<A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a)</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Allocate a section of linear memory on the device, and return a reference to
+ it. The memory is sufficient to hold the given number of elements of storable
+ type. It is suitably aligned for any type, and is not cleared.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:allocaArray"
+><A NAME="v%3AallocaArray"
+></A
+></A
+><B
+>allocaArray</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; (<A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> b) -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> b</TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+>Execute a computation on the device, passing a pointer to a temporarily
+ allocated block of memory sufficient to hold the given number of elements of
+ storable type. The memory is freed when the computation terminates (normally
+ or via an exception), so the pointer must not be used after this.
+</P
+><P
+>Note that kernel launches can be asynchronous, so you may want to add a
+ synchronisation point using sync as part of the computation.
+</P
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:free"
+><A NAME="v%3Afree"
+></A
+></A
+><B
+>free</B
+> ::  <A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Release a section of device memory
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+><A NAME="3"
+><A NAME="3"
+>Marshalling
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:peekArray"
+><A NAME="v%3ApeekArray"
+></A
+></A
+><B
+>peekArray</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Ptr.html#t%3APtr"
+>Ptr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Copy a number of elements from the device to host memory. This is a
+ synchronous operation
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:peekArrayAsync"
+><A NAME="v%3ApeekArrayAsync"
+></A
+></A
+><B
+>peekArrayAsync</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; <A HREF="Foreign-CUDA-Ptr.html#t%3AHostPtr"
+>HostPtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> <A HREF="Foreign-CUDA-Driver-Stream.html#t%3AStream"
+>Stream</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Copy memory from the device asynchronously, possibly associated with a
+ particular stream. The destination host memory must be page-locked.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:peekListArray"
+><A NAME="v%3ApeekListArray"
+></A
+></A
+><B
+>peekListArray</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> [a]</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Copy a number of elements from the device into a new Haskell list. Note that
+ this requires two memory copies: firstly from the device into a heap
+ allocated array, and from there marshalled into a list.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:pokeArray"
+><A NAME="v%3ApokeArray"
+></A
+></A
+><B
+>pokeArray</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Ptr.html#t%3APtr"
+>Ptr</A
+> a -&gt; <A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Copy a number of elements onto the device. This is a synchronous operation
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:pokeArrayAsync"
+><A NAME="v%3ApokeArrayAsync"
+></A
+></A
+><B
+>pokeArrayAsync</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="Foreign-CUDA-Ptr.html#t%3AHostPtr"
+>HostPtr</A
+> a -&gt; <A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> <A HREF="Foreign-CUDA-Driver-Stream.html#t%3AStream"
+>Stream</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Copy memory onto the device asynchronously, possibly associated with a
+ particular stream. The source host memory must be page-locked.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:pokeListArray"
+><A NAME="v%3ApokeListArray"
+></A
+></A
+><B
+>pokeListArray</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; [a] -&gt; <A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Write a list of storable elements into a device array. The device array must
+ be sufficiently large to hold the entire list. This requires two marshalling
+ operations.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:copyArrayAsync"
+><A NAME="v%3AcopyArrayAsync"
+></A
+></A
+><B
+>copyArrayAsync</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; <A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Copy the given number of elements from the first device array (source) to the
+ second (destination). The copied areas may not overlap. This operation is
+ asynchronous with respect to the host, but will never overlap with kernel
+ execution.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+><A NAME="4"
+><A NAME="4"
+>Combined Allocation and Marshalling
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:newListArray"
+><A NAME="v%3AnewListArray"
+></A
+></A
+><B
+>newListArray</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; [a] -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> (<A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a)</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Write a list of storable elements into a newly allocated device array. This
+ is <TT
+><A HREF="Foreign-CUDA-Driver-Marshal.html#v%3AnewListArrayLen"
+>newListArrayLen</A
+></TT
+> composed with <TT
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Tuple.html#v%3Afst"
+>fst</A
+></TT
+>.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:newListArrayLen"
+><A NAME="v%3AnewListArrayLen"
+></A
+></A
+><B
+>newListArrayLen</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; [a] -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> (<A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>)</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Write a list of storable elements into a newly allocated device array,
+ returning the device pointer together with the number of elements that were
+ written. Note that this requires two memory copies: firstly from a Haskell
+ list to a heap allocated array, and from there onto the graphics device. The
+ memory should be <TT
+><A HREF="Foreign-CUDA-Driver-Marshal.html#v%3Afree"
+>free</A
+></TT
+>d when no longer required.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:withListArray"
+><A NAME="v%3AwithListArray"
+></A
+></A
+><B
+>withListArray</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; [a] -&gt; (<A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> b) -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> b</TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+>Temporarily store a list of elements into a newly allocated device array. An
+ IO action is applied to to the array, the result of which is returned.
+ Similar to <TT
+><A HREF="Foreign-CUDA-Driver-Marshal.html#v%3AnewListArray"
+>newListArray</A
+></TT
+>, this requires copying the data twice.
+</P
+><P
+>As with <TT
+><A HREF="Foreign-CUDA-Driver-Marshal.html#v%3AallocaArray"
+>allocaArray</A
+></TT
+>, the memory is freed once the action completes, so you
+ should not return the pointer from the action, and be wary of asynchronous
+ kernel execution.
+</P
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:withListArrayLen"
+><A NAME="v%3AwithListArrayLen"
+></A
+></A
+><B
+>withListArrayLen</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; [a] -&gt; (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> b) -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> b</TD
+></TR
+><TR
+><TD CLASS="doc"
+>A variant of <TT
+><A HREF="Foreign-CUDA-Driver-Marshal.html#v%3AwithListArray"
+>withListArray</A
+></TT
+> which also supplies the number of elements in
+ the array to the applied function
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+><A NAME="5"
+><A NAME="5"
+>Utility
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:memset"
+><A NAME="v%3Amemset"
+></A
+></A
+><B
+>memset</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; <A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Set a number of data elements to the specified value, which may be either 8-,
+ 16-, or 32-bits wide.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:getDevicePtr"
+><A NAME="v%3AgetDevicePtr"
+></A
+></A
+><B
+>getDevicePtr</B
+> ::  [<A HREF="Foreign-CUDA-Driver-Marshal.html#t%3AAllocFlag"
+>AllocFlag</A
+>] -&gt; <A HREF="Foreign-CUDA-Ptr.html#t%3AHostPtr"
+>HostPtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> (<A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a)</TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+>Return the device pointer associated with a mapped, pinned host buffer, which
+ was allocated with the <TT
+><A HREF="Foreign-CUDA-Driver-Marshal.html#v%3ADeviceMapped"
+>DeviceMapped</A
+></TT
+> option by <TT
+><A HREF="Foreign-CUDA-Driver-Marshal.html#v%3AmallocHostArray"
+>mallocHostArray</A
+></TT
+>.
+</P
+><P
+>Currently, no options are supported and this must be empty.
+</P
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:getBasePtr"
+><A NAME="v%3AgetBasePtr"
+></A
+></A
+><B
+>getBasePtr</B
+> ::  <A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> (<A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+>)</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Return the base address and allocation size of the given device pointer
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:getMemInfo"
+><A NAME="v%3AgetMemInfo"
+></A
+></A
+><B
+>getMemInfo</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+>)</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Return the amount of free and total memory respectively available to the
+ current context (bytes)
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:useDeviceHandle"
+><A NAME="v%3AuseDeviceHandle"
+></A
+></A
+><B
+>useDeviceHandle</B
+> ::  <A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a -&gt; DeviceHandle</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:peekDeviceHandle"
+><A NAME="v%3ApeekDeviceHandle"
+></A
+></A
+><B
+>peekDeviceHandle</B
+> ::  <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Ptr.html#t%3APtr"
+>Ptr</A
+> DeviceHandle -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> (<A HREF="Foreign-CUDA-Ptr.html#t%3ADevicePtr"
+>DevicePtr</A
+> a)</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="botbar"
+>Produced by <A HREF="http://www.haskell.org/haddock/"
+>Haddock</A
+> version 2.6.1</TD
+></TR
+></TABLE
+></BODY
+></HTML
+>

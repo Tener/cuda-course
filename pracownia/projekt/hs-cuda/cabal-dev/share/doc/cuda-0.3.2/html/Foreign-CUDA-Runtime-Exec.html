@@ -1,0 +1,943 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!--Rendered using the Haskell Html Library v0.2-->
+<HTML
+><HEAD
+><META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8"
+><TITLE
+>Foreign.CUDA.Runtime.Exec</TITLE
+><LINK HREF="haddock.css" REL="stylesheet" TYPE="text/css"
+><SCRIPT SRC="haddock-util.js" TYPE="text/javascript"
+></SCRIPT
+><SCRIPT TYPE="text/javascript"
+>window.onload = function () {setSynopsis("mini_Foreign-CUDA-Runtime-Exec.html")};</SCRIPT
+></HEAD
+><BODY
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="topbar"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD
+><IMG SRC="haskell_icon.gif" WIDTH="16" HEIGHT="16" ALT=" "
+></TD
+><TD CLASS="title"
+>cuda-0.3.2: FFI binding to the CUDA interface for programming NVIDIA GPUs</TD
+><TD CLASS="topbut"
+><A HREF="index.html"
+>Contents</A
+></TD
+><TD CLASS="topbut"
+><A HREF="doc-index.html"
+>Index</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="modulebar"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD
+><FONT SIZE="6"
+>Foreign.CUDA.Runtime.Exec</FONT
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Description</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Kernel execution control for C-for-CUDA runtime interface
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Synopsis</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A HREF="#t%3AFunAttributes"
+>FunAttributes</A
+>  = <A HREF="#v%3AFunAttributes"
+>FunAttributes</A
+> {<TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AconstSizeBytes"
+>constSizeBytes</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AlocalSizeBytes"
+>localSizeBytes</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AsharedSizeBytes"
+>sharedSizeBytes</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AmaxKernelThreadsPerBlock"
+>maxKernelThreadsPerBlock</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AnumRegs"
+>numRegs</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+></TABLE
+>}</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A HREF="#t%3AFunParam"
+>FunParam</A
+>  <SPAN CLASS="keyword"
+>where</SPAN
+></TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AIArg"
+>IArg</A
+> ::  <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="Foreign-CUDA-Runtime-Exec.html#t%3AFunParam"
+>FunParam</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AFArg"
+>FArg</A
+> ::  <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Prelude.html#t%3AFloat"
+>Float</A
+> -&gt; <A HREF="Foreign-CUDA-Runtime-Exec.html#t%3AFunParam"
+>FunParam</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3ADArg"
+>DArg</A
+> ::  <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Prelude.html#t%3ADouble"
+>Double</A
+> -&gt; <A HREF="Foreign-CUDA-Runtime-Exec.html#t%3AFunParam"
+>FunParam</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AVArg"
+>VArg</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; a -&gt; <A HREF="Foreign-CUDA-Runtime-Exec.html#t%3AFunParam"
+>FunParam</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A HREF="#t%3ACacheConfig"
+>CacheConfig</A
+>  </TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+>= <A HREF="#v%3ANone"
+>None</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AShared"
+>Shared</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AL1"
+>L1</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Aattributes"
+>attributes</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Char.html#t%3AString"
+>String</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="Foreign-CUDA-Runtime-Exec.html#t%3AFunAttributes"
+>FunAttributes</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AsetConfig"
+>setConfig</A
+> :: (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>) -&gt; (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>) -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> <A HREF="Foreign-CUDA-Runtime-Stream.html#t%3AStream"
+>Stream</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AsetParams"
+>setParams</A
+> :: [<A HREF="Foreign-CUDA-Runtime-Exec.html#t%3AFunParam"
+>FunParam</A
+>] -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AsetCacheConfig"
+>setCacheConfig</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Char.html#t%3AString"
+>String</A
+> -&gt; <A HREF="Foreign-CUDA-Runtime-Exec.html#t%3ACacheConfig"
+>CacheConfig</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Alaunch"
+>launch</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Char.html#t%3AString"
+>String</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Documentation</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A NAME="t:FunAttributes"
+><A NAME="t%3AFunAttributes"
+></A
+></A
+><B
+>FunAttributes</B
+>  </TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="section4"
+>Constructors</TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="5" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v:FunAttributes"
+><A NAME="v%3AFunAttributes"
+></A
+></A
+><B
+>FunAttributes</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="body" COLSPAN="2"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v:constSizeBytes"
+><A NAME="v%3AconstSizeBytes"
+></A
+></A
+><B
+>constSizeBytes</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:localSizeBytes"
+><A NAME="v%3AlocalSizeBytes"
+></A
+></A
+><B
+>localSizeBytes</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:sharedSizeBytes"
+><A NAME="v%3AsharedSizeBytes"
+></A
+></A
+><B
+>sharedSizeBytes</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:maxKernelThreadsPerBlock"
+><A NAME="v%3AmaxKernelThreadsPerBlock"
+></A
+></A
+><B
+>maxKernelThreadsPerBlock</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="rdoc"
+>maximum block size that can be successively launched (based on register usage)
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:numRegs"
+><A NAME="v%3AnumRegs"
+></A
+></A
+><B
+>numRegs</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="rdoc"
+>number of registers required for each thread
+</TD
+></TR
+></TABLE
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="section4"
+><IMG SRC="minus.gif" CLASS="coll" ONCLICK="toggle(this,'i:FunAttributes')" ALT="show/hide"
+> Instances</TD
+></TR
+><TR
+><TD CLASS="body"
+><DIV ID="i:FunAttributes" STYLE="display:block;"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Text-Show.html#t%3AShow"
+>Show</A
+> <A HREF="Foreign-CUDA-Runtime-Exec.html#t%3AFunAttributes"
+>FunAttributes</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> <A HREF="Foreign-CUDA-Runtime-Exec.html#t%3AFunAttributes"
+>FunAttributes</A
+></TD
+></TR
+></TABLE
+></DIV
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A NAME="t:FunParam"
+><A NAME="t%3AFunParam"
+></A
+></A
+><B
+>FunParam</B
+>  <SPAN CLASS="keyword"
+>where</SPAN
+></TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="ndoc"
+>Kernel function parameters. Doubles will be converted to an internal float
+ representation on devices that do not support doubles natively.
+</TD
+></TR
+><TR
+><TD CLASS="section4"
+>Constructors</TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v:IArg"
+><A NAME="v%3AIArg"
+></A
+></A
+><B
+>IArg</B
+> ::  <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="Foreign-CUDA-Runtime-Exec.html#t%3AFunParam"
+>FunParam</A
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:FArg"
+><A NAME="v%3AFArg"
+></A
+></A
+><B
+>FArg</B
+> ::  <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Prelude.html#t%3AFloat"
+>Float</A
+> -&gt; <A HREF="Foreign-CUDA-Runtime-Exec.html#t%3AFunParam"
+>FunParam</A
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:DArg"
+><A NAME="v%3ADArg"
+></A
+></A
+><B
+>DArg</B
+> ::  <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Prelude.html#t%3ADouble"
+>Double</A
+> -&gt; <A HREF="Foreign-CUDA-Runtime-Exec.html#t%3AFunParam"
+>FunParam</A
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:VArg"
+><A NAME="v%3AVArg"
+></A
+></A
+><B
+>VArg</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> a =&gt; a -&gt; <A HREF="Foreign-CUDA-Runtime-Exec.html#t%3AFunParam"
+>FunParam</A
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+></TABLE
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A NAME="t:CacheConfig"
+><A NAME="t%3ACacheConfig"
+></A
+></A
+><B
+>CacheConfig</B
+>  </TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="ndoc"
+>Cache configuration preference
+</TD
+></TR
+><TR
+><TD CLASS="section4"
+>Constructors</TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v:None"
+><A NAME="v%3ANone"
+></A
+></A
+><B
+>None</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:Shared"
+><A NAME="v%3AShared"
+></A
+></A
+><B
+>Shared</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:L1"
+><A NAME="v%3AL1"
+></A
+></A
+><B
+>L1</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="section4"
+><IMG SRC="minus.gif" CLASS="coll" ONCLICK="toggle(this,'i:CacheConfig')" ALT="show/hide"
+> Instances</TD
+></TR
+><TR
+><TD CLASS="body"
+><DIV ID="i:CacheConfig" STYLE="display:block;"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Prelude.html#t%3AEnum"
+>Enum</A
+> <A HREF="Foreign-CUDA-Runtime-Exec.html#t%3ACacheConfig"
+>CacheConfig</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Eq.html#t%3AEq"
+>Eq</A
+> <A HREF="Foreign-CUDA-Runtime-Exec.html#t%3ACacheConfig"
+>CacheConfig</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Text-Show.html#t%3AShow"
+>Show</A
+> <A HREF="Foreign-CUDA-Runtime-Exec.html#t%3ACacheConfig"
+>CacheConfig</A
+></TD
+></TR
+></TABLE
+></DIV
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:attributes"
+><A NAME="v%3Aattributes"
+></A
+></A
+><B
+>attributes</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Char.html#t%3AString"
+>String</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="Foreign-CUDA-Runtime-Exec.html#t%3AFunAttributes"
+>FunAttributes</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Obtain the attributes of the named <TT
+>__global__</TT
+> device function. This
+ itemises the requirements to successfully launch the given kernel.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:setConfig"
+><A NAME="v%3AsetConfig"
+></A
+></A
+><B
+>setConfig</B
+></TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+>:: (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>)</TD
+><TD CLASS="rdoc"
+>grid dimensions
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+>-&gt; (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>)</TD
+><TD CLASS="rdoc"
+>block dimensions
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+>-&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+></TD
+><TD CLASS="rdoc"
+>shared memory per block (bytes)
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+>-&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> <A HREF="Foreign-CUDA-Runtime-Stream.html#t%3AStream"
+>Stream</A
+></TD
+><TD CLASS="rdoc"
+>associated processing stream
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+>-&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="ndoc" COLSPAN="2"
+>Specify the grid and block dimensions for a device call. Used in conjunction
+ with <TT
+><A HREF="Foreign-CUDA-Runtime-Exec.html#v%3AsetParams"
+>setParams</A
+></TT
+>, this pushes data onto the execution stack that will be
+ popped when a function is <TT
+><A HREF="Foreign-CUDA-Runtime-Exec.html#v%3Alaunch"
+>launch</A
+></TT
+>ed.
+</TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:setParams"
+><A NAME="v%3AsetParams"
+></A
+></A
+><B
+>setParams</B
+> :: [<A HREF="Foreign-CUDA-Runtime-Exec.html#t%3AFunParam"
+>FunParam</A
+>] -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Set the argument parameters that will be passed to the next kernel
+ invocation. This is used in conjunction with <TT
+><A HREF="Foreign-CUDA-Runtime-Exec.html#v%3AsetConfig"
+>setConfig</A
+></TT
+> to control kernel
+ execution.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:setCacheConfig"
+><A NAME="v%3AsetCacheConfig"
+></A
+></A
+><B
+>setCacheConfig</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Char.html#t%3AString"
+>String</A
+> -&gt; <A HREF="Foreign-CUDA-Runtime-Exec.html#t%3ACacheConfig"
+>CacheConfig</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+>On devices where the L1 cache and shared memory use the same hardware
+ resources, this sets the preferred cache configuration for the given device
+ function. This is only a preference; the driver is free to choose a different
+ configuration as required to execute the function.
+</P
+><P
+>Switching between configuration modes may insert a device-side
+ synchronisation point for streamed kernel launches
+</P
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:launch"
+><A NAME="v%3Alaunch"
+></A
+></A
+><B
+>launch</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Char.html#t%3AString"
+>String</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Invoke the named kernel on the device, which must have been declared
+ <TT
+>__global__</TT
+>. This must be preceded by a call to <TT
+><A HREF="Foreign-CUDA-Runtime-Exec.html#v%3AsetConfig"
+>setConfig</A
+></TT
+> and (if
+ appropriate) <TT
+><A HREF="Foreign-CUDA-Runtime-Exec.html#v%3AsetParams"
+>setParams</A
+></TT
+>.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="botbar"
+>Produced by <A HREF="http://www.haskell.org/haddock/"
+>Haddock</A
+> version 2.6.1</TD
+></TR
+></TABLE
+></BODY
+></HTML
+>

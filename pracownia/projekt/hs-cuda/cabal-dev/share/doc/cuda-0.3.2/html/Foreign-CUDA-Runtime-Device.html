@@ -1,0 +1,1452 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!--Rendered using the Haskell Html Library v0.2-->
+<HTML
+><HEAD
+><META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8"
+><TITLE
+>Foreign.CUDA.Runtime.Device</TITLE
+><LINK HREF="haddock.css" REL="stylesheet" TYPE="text/css"
+><SCRIPT SRC="haddock-util.js" TYPE="text/javascript"
+></SCRIPT
+><SCRIPT TYPE="text/javascript"
+>window.onload = function () {setSynopsis("mini_Foreign-CUDA-Runtime-Device.html")};</SCRIPT
+></HEAD
+><BODY
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="topbar"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD
+><IMG SRC="haskell_icon.gif" WIDTH="16" HEIGHT="16" ALT=" "
+></TD
+><TD CLASS="title"
+>cuda-0.3.2: FFI binding to the CUDA interface for programming NVIDIA GPUs</TD
+><TD CLASS="topbut"
+><A HREF="index.html"
+>Contents</A
+></TD
+><TD CLASS="topbut"
+><A HREF="doc-index.html"
+>Index</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="modulebar"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD
+><FONT SIZE="6"
+>Foreign.CUDA.Runtime.Device</FONT
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="section4"
+><B
+>Contents</B
+></TD
+></TR
+><TR
+><TD
+><DL
+><DT
+><A HREF="#1"
+>Device management
+</A
+></DT
+></DL
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Description</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Device management routines
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Synopsis</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A HREF="#t%3AComputeMode"
+>ComputeMode</A
+>  </TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+>= <A HREF="#v%3ADefault"
+>Default</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AExclusive"
+>Exclusive</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AProhibited"
+>Prohibited</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A HREF="#t%3ADeviceFlag"
+>DeviceFlag</A
+>  </TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+>= <A HREF="#v%3AScheduleAuto"
+>ScheduleAuto</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AScheduleSpin"
+>ScheduleSpin</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AScheduleYield"
+>ScheduleYield</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ABlockingSync"
+>BlockingSync</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3AMapHost"
+>MapHost</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ALMemResizeToMax"
+>LMemResizeToMax</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A HREF="#t%3ADeviceProperties"
+>DeviceProperties</A
+>  = <A HREF="#v%3ADeviceProperties"
+>DeviceProperties</A
+> {<TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AdeviceName"
+>deviceName</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Char.html#t%3AString"
+>String</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AcomputeCapability"
+>computeCapability</A
+> :: <A HREF="Foreign-CUDA-Analysis-Device.html#t%3ACompute"
+>Compute</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AtotalGlobalMem"
+>totalGlobalMem</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AtotalConstMem"
+>totalConstMem</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AsharedMemPerBlock"
+>sharedMemPerBlock</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AregsPerBlock"
+>regsPerBlock</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AwarpSize"
+>warpSize</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AmaxThreadsPerBlock"
+>maxThreadsPerBlock</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AmaxBlockSize"
+>maxBlockSize</A
+> :: (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>)</TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AmaxGridSize"
+>maxGridSize</A
+> :: (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>)</TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AmaxTextureDim1D"
+>maxTextureDim1D</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AmaxTextureDim2D"
+>maxTextureDim2D</A
+> :: (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>)</TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AmaxTextureDim3D"
+>maxTextureDim3D</A
+> :: (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>)</TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AclockRate"
+>clockRate</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AmultiProcessorCount"
+>multiProcessorCount</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AmemPitch"
+>memPitch</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AtextureAlignment"
+>textureAlignment</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AcomputeMode"
+>computeMode</A
+> :: <A HREF="Foreign-CUDA-Runtime-Device.html#t%3AComputeMode"
+>ComputeMode</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AdeviceOverlap"
+>deviceOverlap</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AconcurrentKernels"
+>concurrentKernels</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AeccEnabled"
+>eccEnabled</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AkernelExecTimeoutEnabled"
+>kernelExecTimeoutEnabled</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3Aintegrated"
+>integrated</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AcanMapHostMemory"
+>canMapHostMemory</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+></TR
+></TABLE
+>}</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Achoose"
+>choose</A
+> :: <A HREF="Foreign-CUDA-Runtime-Device.html#t%3ADeviceProperties"
+>DeviceProperties</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Aget"
+>get</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Acount"
+>count</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Aprops"
+>props</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="Foreign-CUDA-Runtime-Device.html#t%3ADeviceProperties"
+>DeviceProperties</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Aset"
+>set</A
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AsetFlags"
+>setFlags</A
+> :: [<A HREF="Foreign-CUDA-Runtime-Device.html#t%3ADeviceFlag"
+>DeviceFlag</A
+>] -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AsetOrder"
+>setOrder</A
+> :: [<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>] -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Documentation</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A NAME="t:ComputeMode"
+><A NAME="t%3AComputeMode"
+></A
+></A
+><B
+>ComputeMode</B
+>  </TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="ndoc"
+>The compute mode the device is currently in
+</TD
+></TR
+><TR
+><TD CLASS="section4"
+>Constructors</TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v:Default"
+><A NAME="v%3ADefault"
+></A
+></A
+><B
+>Default</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:Exclusive"
+><A NAME="v%3AExclusive"
+></A
+></A
+><B
+>Exclusive</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:Prohibited"
+><A NAME="v%3AProhibited"
+></A
+></A
+><B
+>Prohibited</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="section4"
+><IMG SRC="minus.gif" CLASS="coll" ONCLICK="toggle(this,'i:ComputeMode')" ALT="show/hide"
+> Instances</TD
+></TR
+><TR
+><TD CLASS="body"
+><DIV ID="i:ComputeMode" STYLE="display:block;"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Prelude.html#t%3AEnum"
+>Enum</A
+> <A HREF="Foreign-CUDA-Runtime-Device.html#t%3AComputeMode"
+>ComputeMode</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Eq.html#t%3AEq"
+>Eq</A
+> <A HREF="Foreign-CUDA-Runtime-Device.html#t%3AComputeMode"
+>ComputeMode</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Text-Show.html#t%3AShow"
+>Show</A
+> <A HREF="Foreign-CUDA-Runtime-Device.html#t%3AComputeMode"
+>ComputeMode</A
+></TD
+></TR
+></TABLE
+></DIV
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A NAME="t:DeviceFlag"
+><A NAME="t%3ADeviceFlag"
+></A
+></A
+><B
+>DeviceFlag</B
+>  </TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="ndoc"
+>Device execution flags
+</TD
+></TR
+><TR
+><TD CLASS="section4"
+>Constructors</TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v:ScheduleAuto"
+><A NAME="v%3AScheduleAuto"
+></A
+></A
+><B
+>ScheduleAuto</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:ScheduleSpin"
+><A NAME="v%3AScheduleSpin"
+></A
+></A
+><B
+>ScheduleSpin</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:ScheduleYield"
+><A NAME="v%3AScheduleYield"
+></A
+></A
+><B
+>ScheduleYield</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:BlockingSync"
+><A NAME="v%3ABlockingSync"
+></A
+></A
+><B
+>BlockingSync</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:MapHost"
+><A NAME="v%3AMapHost"
+></A
+></A
+><B
+>MapHost</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:LMemResizeToMax"
+><A NAME="v%3ALMemResizeToMax"
+></A
+></A
+><B
+>LMemResizeToMax</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="section4"
+><IMG SRC="minus.gif" CLASS="coll" ONCLICK="toggle(this,'i:DeviceFlag')" ALT="show/hide"
+> Instances</TD
+></TR
+><TR
+><TD CLASS="body"
+><DIV ID="i:DeviceFlag" STYLE="display:block;"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Prelude.html#t%3AEnum"
+>Enum</A
+> <A HREF="Foreign-CUDA-Runtime-Device.html#t%3ADeviceFlag"
+>DeviceFlag</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Eq.html#t%3AEq"
+>Eq</A
+> <A HREF="Foreign-CUDA-Runtime-Device.html#t%3ADeviceFlag"
+>DeviceFlag</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Text-Show.html#t%3AShow"
+>Show</A
+> <A HREF="Foreign-CUDA-Runtime-Device.html#t%3ADeviceFlag"
+>DeviceFlag</A
+></TD
+></TR
+></TABLE
+></DIV
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A NAME="t:DeviceProperties"
+><A NAME="t%3ADeviceProperties"
+></A
+></A
+><B
+>DeviceProperties</B
+>  </TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="ndoc"
+>The properties of a compute device
+</TD
+></TR
+><TR
+><TD CLASS="section4"
+>Constructors</TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="5" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v:DeviceProperties"
+><A NAME="v%3ADeviceProperties"
+></A
+></A
+><B
+>DeviceProperties</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="body" COLSPAN="2"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v:deviceName"
+><A NAME="v%3AdeviceName"
+></A
+></A
+><B
+>deviceName</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Char.html#t%3AString"
+>String</A
+></TD
+><TD CLASS="rdoc"
+>Identifier
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:computeCapability"
+><A NAME="v%3AcomputeCapability"
+></A
+></A
+><B
+>computeCapability</B
+> :: <A HREF="Foreign-CUDA-Analysis-Device.html#t%3ACompute"
+>Compute</A
+></TD
+><TD CLASS="rdoc"
+>Supported compute capability
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:totalGlobalMem"
+><A NAME="v%3AtotalGlobalMem"
+></A
+></A
+><B
+>totalGlobalMem</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+></TD
+><TD CLASS="rdoc"
+>Available global memory on the device in bytes
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:totalConstMem"
+><A NAME="v%3AtotalConstMem"
+></A
+></A
+><B
+>totalConstMem</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+></TD
+><TD CLASS="rdoc"
+>Available constant memory on the device in bytes
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:sharedMemPerBlock"
+><A NAME="v%3AsharedMemPerBlock"
+></A
+></A
+><B
+>sharedMemPerBlock</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+></TD
+><TD CLASS="rdoc"
+>Available shared memory per block in bytes
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:regsPerBlock"
+><A NAME="v%3AregsPerBlock"
+></A
+></A
+><B
+>regsPerBlock</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="rdoc"
+>32-bit registers per block
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:warpSize"
+><A NAME="v%3AwarpSize"
+></A
+></A
+><B
+>warpSize</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="rdoc"
+>Warp size in threads (SIMD width)
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:maxThreadsPerBlock"
+><A NAME="v%3AmaxThreadsPerBlock"
+></A
+></A
+><B
+>maxThreadsPerBlock</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="rdoc"
+>Max number of threads per block
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:maxBlockSize"
+><A NAME="v%3AmaxBlockSize"
+></A
+></A
+><B
+>maxBlockSize</B
+> :: (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>)</TD
+><TD CLASS="rdoc"
+>Max size of each dimension of a block
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:maxGridSize"
+><A NAME="v%3AmaxGridSize"
+></A
+></A
+><B
+>maxGridSize</B
+> :: (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>)</TD
+><TD CLASS="rdoc"
+>Max size of each dimension of a grid
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:maxTextureDim1D"
+><A NAME="v%3AmaxTextureDim1D"
+></A
+></A
+><B
+>maxTextureDim1D</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="rdoc"
+>Maximum texture dimensions
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:maxTextureDim2D"
+><A NAME="v%3AmaxTextureDim2D"
+></A
+></A
+><B
+>maxTextureDim2D</B
+> :: (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>)</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:maxTextureDim3D"
+><A NAME="v%3AmaxTextureDim3D"
+></A
+></A
+><B
+>maxTextureDim3D</B
+> :: (<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>)</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:clockRate"
+><A NAME="v%3AclockRate"
+></A
+></A
+><B
+>clockRate</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="rdoc"
+>Clock frequency in kilohertz
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:multiProcessorCount"
+><A NAME="v%3AmultiProcessorCount"
+></A
+></A
+><B
+>multiProcessorCount</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="rdoc"
+>Number of multiprocessors on the device
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:memPitch"
+><A NAME="v%3AmemPitch"
+></A
+></A
+><B
+>memPitch</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+></TD
+><TD CLASS="rdoc"
+>Max pitch in bytes allowed by memory copies
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:textureAlignment"
+><A NAME="v%3AtextureAlignment"
+></A
+></A
+><B
+>textureAlignment</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt64"
+>Int64</A
+></TD
+><TD CLASS="rdoc"
+>Alignment requirement for textures
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:computeMode"
+><A NAME="v%3AcomputeMode"
+></A
+></A
+><B
+>computeMode</B
+> :: <A HREF="Foreign-CUDA-Runtime-Device.html#t%3AComputeMode"
+>ComputeMode</A
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:deviceOverlap"
+><A NAME="v%3AdeviceOverlap"
+></A
+></A
+><B
+>deviceOverlap</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+><TD CLASS="rdoc"
+>Device can concurrently copy memory and execute a kernel
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:concurrentKernels"
+><A NAME="v%3AconcurrentKernels"
+></A
+></A
+><B
+>concurrentKernels</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+><TD CLASS="rdoc"
+>Device can possibly execute multiple kernels concurrently
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:eccEnabled"
+><A NAME="v%3AeccEnabled"
+></A
+></A
+><B
+>eccEnabled</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+><TD CLASS="rdoc"
+>Device supports and has enabled error correction
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:kernelExecTimeoutEnabled"
+><A NAME="v%3AkernelExecTimeoutEnabled"
+></A
+></A
+><B
+>kernelExecTimeoutEnabled</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+><TD CLASS="rdoc"
+>Whether there is a runtime limit on kernels
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:integrated"
+><A NAME="v%3Aintegrated"
+></A
+></A
+><B
+>integrated</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+><TD CLASS="rdoc"
+>As opposed to discrete
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v:canMapHostMemory"
+><A NAME="v%3AcanMapHostMemory"
+></A
+></A
+><B
+>canMapHostMemory</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+><TD CLASS="rdoc"
+>Device can use pinned memory
+</TD
+></TR
+></TABLE
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="section4"
+><IMG SRC="minus.gif" CLASS="coll" ONCLICK="toggle(this,'i:DeviceProperties')" ALT="show/hide"
+> Instances</TD
+></TR
+><TR
+><TD CLASS="body"
+><DIV ID="i:DeviceProperties" STYLE="display:block;"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Text-Show.html#t%3AShow"
+>Show</A
+> <A HREF="Foreign-CUDA-Runtime-Device.html#t%3ADeviceProperties"
+>DeviceProperties</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Foreign-Storable.html#t%3AStorable"
+>Storable</A
+> <A HREF="Foreign-CUDA-Runtime-Device.html#t%3ADeviceProperties"
+>DeviceProperties</A
+></TD
+></TR
+></TABLE
+></DIV
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section2"
+><A NAME="1"
+><A NAME="1"
+>Device management
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:choose"
+><A NAME="v%3Achoose"
+></A
+></A
+><B
+>choose</B
+> :: <A HREF="Foreign-CUDA-Runtime-Device.html#t%3ADeviceProperties"
+>DeviceProperties</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Select the compute device which best matches the given criteria
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:get"
+><A NAME="v%3Aget"
+></A
+></A
+><B
+>get</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Returns which device is currently being used
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:count"
+><A NAME="v%3Acount"
+></A
+></A
+><B
+>count</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Returns the number of devices available for execution, with compute
+ capability &gt;= 1.0
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:props"
+><A NAME="v%3Aprops"
+></A
+></A
+><B
+>props</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="Foreign-CUDA-Runtime-Device.html#t%3ADeviceProperties"
+>DeviceProperties</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Return information about the selected compute device
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:set"
+><A NAME="v%3Aset"
+></A
+></A
+><B
+>set</B
+> :: <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Set device to be used for GPU execution
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:setFlags"
+><A NAME="v%3AsetFlags"
+></A
+></A
+><B
+>setFlags</B
+> :: [<A HREF="Foreign-CUDA-Runtime-Device.html#t%3ADeviceFlag"
+>DeviceFlag</A
+>] -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Set flags to be used for device executions
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v:setOrder"
+><A NAME="v%3AsetOrder"
+></A
+></A
+><B
+>setOrder</B
+> :: [<A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>] -&gt; <A HREF="/usr/share/doc/ghc/html/libraries/base-4.2.0.2/System-IO.html#t%3AIO"
+>IO</A
+> <A HREF="/usr/share/doc/ghc/html/libraries/ghc-prim-0.2.0.0/GHC-Unit.html#t%3A%28%29"
+>()</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Set list of devices for CUDA execution in priority order
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="botbar"
+>Produced by <A HREF="http://www.haskell.org/haddock/"
+>Haddock</A
+> version 2.6.1</TD
+></TR
+></TABLE
+></BODY
+></HTML
+>
