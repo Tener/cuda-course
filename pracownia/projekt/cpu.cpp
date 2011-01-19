@@ -19,7 +19,7 @@ namespace cpu {
     double x = r * cos(theta);
     double y = r * sin(theta);
 
-    return { x, y };
+    return Point( x, y );
   }
 
   void draw_point( const Point & p, GLfloat size = 1.0 )
@@ -52,6 +52,11 @@ namespace cpu {
     return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
   }
 
+  inline double cross( const  thrust::tuple< float, float >  &o, const  thrust::tuple< float, float >  &a, const  thrust::tuple< float, float >  &b )
+  {
+    return (thrust::get<0>(a) - thrust::get<0>(o)) * (thrust::get<1>(b) - thrust::get<1>(o)) - (thrust::get<1>(a) - thrust::get<1>(o)) * (thrust::get<0>(b) - thrust::get<0>(o));
+  }
+
 
   vector<Point> convex_hull(vector<Point> P)
   {
@@ -76,7 +81,55 @@ namespace cpu {
     H.resize(k);
     return H;
   }
-  
+
+  thrust::host_vector<Point> convex_hull(thrust::host_vector<Point> & P)
+  {
+    int n = P.size(), k = 0;
+    vector<Point> H(2*n);
+    
+    // Sort points lexicographically
+    sort(P.begin(), P.end());
+    
+    // Build lower hull
+    for (int i = 0; i < n; i++) {
+      while (k >= 2 && cross(H[k-2], H[k-1], P[i]) <= 0) k--;
+      H[k++] = P[i];
+    }
+    
+    // Build upper hull
+    for (int i = n-2, t = k+1; i >= 0; i--) {
+      while (k >= t && cross(H[k-2], H[k-1], P[i]) <= 0) k--;
+      H[k++] = P[i];
+    }
+    
+    H.resize(k);
+    return H;
+  }
+
+  std::vector< thrust::tuple< float, float > > convex_hull(thrust::host_vector< thrust::tuple< float, float > > & P)
+  {
+    int n = P.size(), k = 0;
+    vector< thrust::tuple< float, float > > H(2*n);
+    
+    // Sort points lexicographically
+    sort(P.begin(), P.end());
+    
+    // Build lower hull
+    for (int i = 0; i < n; i++) {
+      while (k >= 2 && cross(H[k-2], H[k-1], P[i]) <= 0) k--;
+      H[k++] = P[i];
+    }
+    
+    // Build upper hull
+    for (int i = n-2, t = k+1; i >= 0; i--) {
+      while (k >= t && cross(H[k-2], H[k-1], P[i]) <= 0) k--;
+      H[k++] = P[i];
+    }
+    
+    H.resize(k);
+    return H;
+  }
+
   void calculateConvexHull( vector< int > n_points )
   {
     for(vector<int>::iterator it = n_points.begin(); it < n_points.end(); it++)
