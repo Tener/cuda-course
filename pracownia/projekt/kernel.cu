@@ -242,10 +242,9 @@ struct RemoveQuadrilateral
     bool above_3_0 = (x3-x0)*(y-y0) - (y3-y0)*(x-x0) < 0;
 
     return !(above_0_1 || above_1_2 || above_2_3 || above_3_0);
-}
-
+  }
+  
 };
-
 
 struct Visualize
 {
@@ -258,21 +257,6 @@ struct Visualize
     vbo[thrust::get<0>(t)] = make_float4( thrust::get<1>(t), thrust::get<2>(t), 0.0f, 1.0f );
   }
 };
-
-struct Visualize2
-{
-  thrust::device_ptr< float4 > vbo;
-  Visualize2(float4 * vbo) : vbo(vbo) { }
-  template <typename Tuple>
-  __host__ __device__
-  void operator()(Tuple t)
-  {
-    vbo[thrust::get<0>(t)] = make_float4( thrust::get<0>(thrust::get<1>(t)), 
-					  thrust::get<1>(thrust::get<1>(t)),
-					  0.0f, 1.0f);
-  }
-};
-
 
 struct PolarIntoPlanar
 {
@@ -303,20 +287,6 @@ struct EarlyPartition
   }
 };
 
-struct mkPoint : public thrust::unary_function< thrust::tuple< float, float > , Point >
-{
-  template <typename Tuple>
-  __host__ __device__
-  Point operator()(Tuple t)
-  {
-    //int ix = thrust::get<0>(t);
-    float x = thrust::get<0>(t);
-    float y = thrust::get<1>(t);
-    //vec[ix] = Point(x,y);
-    return Point(x,y);
-  }
-};
-
 
 inline
 __device__ __host__ 
@@ -324,50 +294,6 @@ float crossProduct_3p( float x0, float y0, float x1, float y1, float x2, float y
 {
   return (x1 - x0) * (y2 - y0) - (y1 - y0) * (x2 - x0);
 };
-
-__global__
-void kernel_convex_hull(float * begin_x, float * end_x,
-			float * begin_y, float * end_y,
-			float2 * m_hull, int * points,
-			float4 * vbo)
-{
-  __shared__ float2 * hull; hull = m_hull;
-  __shared__ int hull_size; hull_size = 0;
-  
-  while(begin_x != end_x)
-    {
-      float x = *begin_x;
-      float y = *begin_y;
-      
-      while( (hull_size >= 2) && (crossProduct_3p( hull[hull_size-2].x,
-						   hull[hull_size-2].y,
-						   hull[hull_size-1].x,
-						   hull[hull_size-1].y,
-						   x,
-						   y ) <= 0 ) )
-	{
-	  hull_size--;
-	}
-      
-      hull[hull_size] = make_float2( x, y ); hull_size++;
-      
-      begin_x++;
-      begin_y++;
-    }
-  
-  for(int i = 0; i < hull_size; i++)
-    {
-      vbo[i] = make_float4( hull[i].x, hull[i].y, 0.0f, 1.0f );
-    }
-  
-  *points = hull_size;
-};
-
-__global__
-void kernel_test(int * ptr, int ix)
-{
-  ptr[ix] = 1;
-}
 
 void convex_hull(thrust::host_vector<float> & Px, thrust::host_vector<float> & Py)
 {
@@ -390,10 +316,6 @@ void convex_hull(thrust::host_vector<float> & Px, thrust::host_vector<float> & P
   
   // Build upper hull
   for (int i = n-2, t = k+1; i >= 0; i--) {
- //   while (k >= t && cross(H[k-2], H[k-1], P[i]) <= 0) k--;
- //   Hx[k] = Px[i];
- //   Hy[k] = Py[i];
- //   k++;
     while (k >= t && crossProduct_3p(Hx[k-2], Hy[k-2],
 				     Hx[k-1], Hy[k-1],
 				     Px[i], Py[i]) <= 0) k--;
@@ -416,8 +338,6 @@ extern "C" void launch_kernel_random_points(float4* vbo1, int* vbo1_vert_cnt,
 					    float4* vbo2, int* vbo2_vert_cnt,
 					    unsigned int points)
 {
-  //  sleep(1);
-
   cudaEvent_t start;
   cudaEvent_t end;
   float elapsed_time;
@@ -426,10 +346,6 @@ extern "C" void launch_kernel_random_points(float4* vbo1, int* vbo1_vert_cnt,
   cudaEventCreate(&end);
 
   cudaEventRecord(start,0);
-
-
-  //  std::cout << "cores: " << getCoreCount() << std::endl;
-  //unsigned int points_orig = points;
 
   points *= 1024;
   *vbo1_vert_cnt = points;
@@ -506,13 +422,8 @@ extern "C" void launch_kernel_random_points(float4* vbo1, int* vbo1_vert_cnt,
 										     x1, y1, 
 										     x3, y3 ));
 
-	//std::cerr << "DIFF:" << oP_end - new_oP_end << std::endl;
 	oP_end = new_oP_end;
-
-	// update number of points
-	//std::cerr << "P:" << points << std::endl;
 	points = oP_end - oP_begin;
-	//std::cerr << "P:" << points << std::endl;
 
 	oP_r.resize(points);
 	oP_theta.resize(points);	
@@ -531,7 +442,6 @@ extern "C" void launch_kernel_random_points(float4* vbo1, int* vbo1_vert_cnt,
 		       thrust::make_zip_iterator(make_tuple( oP_x.begin(), oP_y.begin())),
 		       MakePoints(vbo2) );  
     
-    //
     {
       h_x.reserve(h_rt.size());
       h_y.reserve(h_rt.size());
@@ -559,28 +469,6 @@ extern "C" void launch_kernel_random_points(float4* vbo1, int* vbo1_vert_cnt,
 	x1 = h_x[(i+1) % 16];
 	y1 = h_y[(i+1) % 16];
 
-	//float r0, t0, r1, t1;
-// 	r0 = thrust::get<0>(h_rt[i]);
-// 	t0 = thrust::get<1>(h_rt[i]);
-// 	r1 = thrust::get<0>(h_rt[(i+1) % 16]);
-// 	t1 = thrust::get<1>(h_rt[(i+1) % 16]);
-
- //	//	if ( i <= (points_orig % 16) )
- //	  {
- //	    std::cout << "i: " << i << std::endl;
- //
- //	    std::cout << "x0: " << x0 << " y0: " << y0 << " r0: " << r0 << " t0: " << t0 << std::endl;
- //	    std::cout << "x1: " << x1 << " y1: " << y1 << " r1: " << r1 << " t1: " << t1 << std::endl;
- //	    
- //	    glColor3f( 0.1, 0.3, 0.3 );
- //	    glPointSize(10);
- //	    glLineWidth(3);
- //	    glBegin(GL_LINES);
- //	    glVertex2f( x0, y0 );
- //	    glVertex2f( x1, y1 );
- //	    glEnd();
- //	    
- //	  }
 	begin = thrust::partition( begin, end, EarlyPartition(x0, y0, x1, y1) );
 	ends.push_back(begin);
       }
@@ -622,69 +510,6 @@ extern "C" void launch_kernel_random_points(float4* vbo1, int* vbo1_vert_cnt,
 		      Visualize(vbo2) );
 
     points = oP_x_h.size();
-    
-#if 0
-    {
-      thrust::device_vector< int > ch_points(2);
-      int * ch_points_ptr = thrust::raw_pointer_cast(&*ch_points.begin());
-
-      thrust::device_vector< float2 > m_hull(points);
-      float2 * m_hull_ptr = thrust::raw_pointer_cast(&*m_hull.begin());
-
-      int foo = 0;
-
-      for(int jj = 0; jj < 2; jj++)
-      {
-	kernel_convex_hull<<< 1, 1 >>>( (!jj) ? thrust::raw_pointer_cast(&*oP_x.begin()) : thrust::raw_pointer_cast(&*oP_x.rbegin()),
-					(!jj) ? thrust::raw_pointer_cast(&*oP_x.end())   : thrust::raw_pointer_cast(&*oP_x.rend()),  
-					(!jj) ? thrust::raw_pointer_cast(&*oP_y.begin()) : thrust::raw_pointer_cast(&*oP_y.rbegin()),
-					(!jj) ? thrust::raw_pointer_cast(&*oP_y.end())	 : thrust::raw_pointer_cast(&*oP_y.rend()),  
-					m_hull_ptr, ch_points_ptr, 
-					vbo2
-					);	
-	foo += ch_points[0];
-      }
-
-      points = foo;
-      std::cout << "Convex hull size: " << points << std::endl;
-    }
-#endif
-
-    // if ( 0 )
-    //   {
-    // 	thrust::for_each( thrust::make_zip_iterator(make_tuple( thrust::counting_iterator< int >(0),
-    // 								oP_x.begin(),
-    // 								oP_y.begin())),
-    // 			  thrust::make_zip_iterator(make_tuple( thrust::counting_iterator< int >(points),
-    // 								oP_x.end(),
-    // 								oP_y.end())),
-    // 			  Visualize(vbo2) );
-
-    // 	thrust::host_vector< thrust::tuple< float, float > > vpoints;
-    // 	std::vector< Point > std_vpoints;
-    // 	std_vpoints.resize(points);
-    // 	vpoints.resize(points);
-    
-    // 	thrust::copy( thrust::make_zip_iterator(thrust::make_tuple(oP_x.begin(),
-    // 								   oP_y.begin())),
-    // 		      thrust::make_zip_iterator(thrust::make_tuple(oP_x.end(),
-    // 								   oP_y.end())),
-    // 		      vpoints.begin()
-    // 		      );
-
-    // 	std::cout << "Number of points after cut: " << points << " " << oP_x.size() << " " << oP_y.size() << " " << vpoints.size() << std::endl;
-    
-    // 	thrust::host_vector< thrust::tuple< float, float > > chull = hull::alg::cpu::convex_hull(vpoints);
-    
-    // 	thrust::for_each( thrust::make_zip_iterator(make_tuple( thrust::counting_iterator< int >(0),
-    // 								chull.begin())),
-    // 			  thrust::make_zip_iterator(make_tuple( thrust::counting_iterator< int >(chull.size()),
-    // 								chull.end())),
-    // 			  Visualize2(vbo2) );
-    
-    // 	*vbo2_vert_cnt = chull.size();
-    // 	std::cout << "Convex hull size: " << chull.size() << std::endl;
-    //   }
 
   }
 
