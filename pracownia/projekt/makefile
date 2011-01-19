@@ -46,7 +46,9 @@ $(OBJ)%.o: %.cpp
 
 
 kno:
-	7z -tzip a kno_krzysztof_skrzetnicki_projekt_`date +%s`.zip ${FILES}
+	rm -f obj/*
+#	7z -tzip a projekt-cz1-krzysztof.skrzetnicki_`date +%s`.zip *.hpp *.cpp *.cu makefile thrust obj
+	7z -mx=9 a dist/projekt-cz1-krzysztof.skrzetnicki_`date +%s`.7z *.hpp *.cpp *.cu makefile thrust obj
 
 clean:
 	rm -vf *.o obj/* *.hi a.out *~ hull
