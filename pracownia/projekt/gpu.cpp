@@ -86,6 +86,9 @@ namespace hull {
       
       void calculateConvexHull( int n_points, VBO & vbo_1, VBO & vbo_2 )
       {
+	// clear screen
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	
 	// map OpenGL buffer object for writing from CUDA
 	int vbo1_cnt, vbo2_cnt;
 
@@ -95,15 +98,10 @@ namespace hull {
 
 	vbo_1.unmapResources();
 	vbo_2.unmapResources();
-	
-	// clear screen
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	// render from the vbo
 	vbo_1.render( vbo1_cnt, make_float3( 1.0, 0.0, 0.0 ) );
 	vbo_2.render( vbo2_cnt, make_float3( 0.0, 0.0, 1.0 ) );
-
-	std::cerr << "VBO1: " << vbo1_cnt << " VBO2: " << vbo2_cnt << std::endl;
 
 	glfwSwapBuffers();
       }
