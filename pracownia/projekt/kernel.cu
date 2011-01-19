@@ -363,6 +363,52 @@ void kernel_convex_hull(float * begin_x, float * end_x,
   *points = hull_size;
 };
 
+__global__
+void kernel_test(int * ptr, int ix)
+{
+  ptr[ix] = 1;
+}
+
+void convex_hull(thrust::host_vector<float> & Px, thrust::host_vector<float> & Py)
+{
+  int n = Px.size(), k = 0;
+  thrust::host_vector<float> Hx(2*n);
+  thrust::host_vector<float> Hy(2*n);
+  
+  // Sort points lexicographically
+  // sort(P.begin(), P.end()); - already sorted...
+  
+  // Build lower hull
+  for (int i = 0; i < n; i++) {
+    while (k >= 2 && crossProduct_3p(Hx[k-2], Hy[k-2],
+				     Hx[k-1], Hy[k-1],
+				     Px[i], Py[i]) <= 0) k--;
+    Hx[k] = Px[i];
+    Hy[k] = Py[i];
+    k++;
+  }
+  
+  // Build upper hull
+  for (int i = n-2, t = k+1; i >= 0; i--) {
+ //   while (k >= t && cross(H[k-2], H[k-1], P[i]) <= 0) k--;
+ //   Hx[k] = Px[i];
+ //   Hy[k] = Py[i];
+ //   k++;
+    while (k >= t && crossProduct_3p(Hx[k-2], Hy[k-2],
+				     Hx[k-1], Hy[k-1],
+				     Px[i], Py[i]) <= 0) k--;
+    Hx[k] = Px[i];
+    Hy[k] = Py[i];
+    k++;
+  }
+  
+  Hx.resize(k);
+  Hy.resize(k);
+
+  thrust::copy( Hx.begin(), Hx.end(), Px.begin() ); Px.resize(k);
+  thrust::copy( Hy.begin(), Hy.end(), Py.begin() ); Py.resize(k);
+
+}
 
 
 // Wrapper for the __global__ call that sets up the kernel call
@@ -557,7 +603,26 @@ extern "C" void launch_kernel_random_points(float4* vbo1, int* vbo1_vert_cnt,
 
     // (oP_x,oP_y) is sorted now. we can use 'Monotone Chain' algorithm now
     // http://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain
+    // It's O(n) on sorted inputs, so we call it on CPU.
 
+    thrust::host_vector<float> oP_x_h(oP_x);
+    thrust::host_vector<float> oP_y_h(oP_y);
+
+    convex_hull(oP_x_h, oP_y_h);
+    
+    thrust::copy( oP_x_h.begin(), oP_x_h.end(), oP_x.begin() ); oP_x.resize(oP_x_h.size());
+    thrust::copy( oP_y_h.begin(), oP_y_h.end(), oP_y.begin() ); oP_y.resize(oP_y_h.size());
+
+    thrust::for_each( thrust::make_zip_iterator(make_tuple( thrust::counting_iterator< int >(0),
+							    oP_x.begin(),
+							    oP_y.begin())),
+		      thrust::make_zip_iterator(make_tuple( thrust::counting_iterator< int >(points),
+							    oP_x.end(),
+							    oP_y.end())),
+		      Visualize(vbo2) );
+
+    points = oP_x_h.size();
+    
 #if 0
     {
       thrust::device_vector< int > ch_points(2);
@@ -566,28 +631,23 @@ extern "C" void launch_kernel_random_points(float4* vbo1, int* vbo1_vert_cnt,
       thrust::device_vector< float2 > m_hull(points);
       float2 * m_hull_ptr = thrust::raw_pointer_cast(&*m_hull.begin());
 
-      kernel_convex_hull<<< 1, 1 >>>( thrust::raw_pointer_cast(&*oP_x.begin()), 
-				      thrust::raw_pointer_cast(&*oP_x.end()),
-				      thrust::raw_pointer_cast(&*oP_y.begin()), 
-				      thrust::raw_pointer_cast(&*oP_y.end()),
-                                      m_hull_ptr, ch_points_ptr, 
-				      vbo2
-				      );
+      int foo = 0;
 
-      int foo = ch_points[0];
-
-      kernel_convex_hull<<< 1, 1 >>>( thrust::raw_pointer_cast(&*oP_x.rbegin()), 
-				      thrust::raw_pointer_cast(&*oP_x.rend()),
-				      thrust::raw_pointer_cast(&*oP_y.rbegin()), 
-				      thrust::raw_pointer_cast(&*oP_y.rend()),
-				      m_hull_ptr, ch_points_ptr+1, 
-				      vbo2+foo
-				      );
-      foo += ch_points[1];
+      for(int jj = 0; jj < 2; jj++)
+      {
+	kernel_convex_hull<<< 1, 1 >>>( (!jj) ? thrust::raw_pointer_cast(&*oP_x.begin()) : thrust::raw_pointer_cast(&*oP_x.rbegin()),
+					(!jj) ? thrust::raw_pointer_cast(&*oP_x.end())   : thrust::raw_pointer_cast(&*oP_x.rend()),  
+					(!jj) ? thrust::raw_pointer_cast(&*oP_y.begin()) : thrust::raw_pointer_cast(&*oP_y.rbegin()),
+					(!jj) ? thrust::raw_pointer_cast(&*oP_y.end())	 : thrust::raw_pointer_cast(&*oP_y.rend()),  
+					m_hull_ptr, ch_points_ptr, 
+					vbo2
+					);	
+	foo += ch_points[0];
+      }
 
       points = foo;
+      std::cout << "Convex hull size: " << points << std::endl;
     }
-
 #endif
 
     // if ( 0 )
