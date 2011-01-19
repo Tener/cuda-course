@@ -316,6 +316,55 @@ struct mkPoint : public thrust::unary_function< thrust::tuple< float, float > , 
   }
 };
 
+struct KernelConvexHull
+{
+
+  thrust::device_ptr< float4 > vbo;
+  unsigned int points;
+  KernelConvexHull(float4 * vbo, int points) : vbo(vbo), points(points) { }
+  
+  inline
+  __device__ __host__ 
+  float crossProduct( float x0, float y0, float x1, float y1, float x2, float y2 )
+  {
+    return (x1 - x0) * (y2 - y0) - (y1 - y0) * (x2 - x0);
+  }
+
+ 
+  template <typename Iterator>
+  __global__
+  void kernel_convex_hull(Iterator begin_x, Iterator end_x,
+			  Iterator begin_y, Iterator end_y)
+  {
+    thrust::device_vector< float2 > hull; 
+    hull.reserve(points);
+    while( begin_x != end_x )
+      {
+	float x = begin_x;
+	float y = begin_y;
+
+	while( (hull.size() >= 2) && (crossProduct( hull[hull.size()-2]->x, hull[hull.size()-2]->y, 
+						    hull[hull.size()-1]->x, hull[hull.size()-1]->y,
+						    x, y ) <= 0 ) )
+	  {
+	    hull.pop_back();
+	  }
+
+	hull.push_back( make_float2( x, y ) );
+
+	begin_x++;
+	begin_y++;
+      }
+
+    for(thrust::device_vector< float2 >::iterator it = hull.begin(); it != hull.end(); it++)
+      {
+	*vbo = make_float4( it->x, it->y, 0.0f, 1.0f );
+	vbo++;
+      }
+  }
+};
+
+
 
 // Wrapper for the __global__ call that sets up the kernel call
 extern "C" void launch_kernel_random_points(float4* vbo1, int* vbo1_vert_cnt,
@@ -494,40 +543,67 @@ extern "C" void launch_kernel_random_points(float4* vbo1, int* vbo1_vert_cnt,
     points = begin - begin_0;
     oP_x.resize(points);
     oP_y.resize(points);
-    *vbo2_vert_cnt = points;
+    
+    // sort points lexographically
+    thrust::device_vector<float> permutation(points);
+    thrust::sequence(permutation.begin(), permutation.end());
+  
+    // sort from least significant key to most significant keys
+    update_permutation(oP_y, permutation);
+    update_permutation(oP_x, permutation);
 
-    thrust::for_each( thrust::make_zip_iterator(make_tuple( thrust::counting_iterator< int >(0),
-							    oP_x.begin(),
-							    oP_y.begin())),
-		      thrust::make_zip_iterator(make_tuple( thrust::counting_iterator< int >(points),
-							    oP_x.end(),
-							    oP_y.end())),
-		      Visualize(vbo2) );
+    // permute the key arrays by the final permuation
+    apply_permutation(oP_y, permutation);
+    apply_permutation(oP_x, permutation);
 
-    thrust::host_vector< thrust::tuple< float, float > > vpoints;
-    std::vector< Point > std_vpoints;
-    std_vpoints.resize(points);
-    vpoints.resize(points);
-    
-    thrust::copy( thrust::make_zip_iterator(thrust::make_tuple(oP_x.begin(),
-							       oP_y.begin())),
-		  thrust::make_zip_iterator(thrust::make_tuple(oP_x.end(),
-							       oP_y.end())),
-		  vpoints.begin()
-		  );
+    // (oP_x,oP_y) is sorted now. we can use 'Monotone Chain' algorithm now
+    // http://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain
 
-    std::cout << "Number of points after cut: " << points << " " << oP_x.size() << " " << oP_y.size() << " " << vpoints.size() << std::endl;
+    struct KernelConvexHull KCH( vbo2, points );
+
+    KCH.kernel_convex_hull( oP_x.begin(), oP_x.end(),
+			    oP_y.begin(), oP_y.end());
+    KCH.kernel_convex_hull( oP_x.rbegin(), oP_x.rend(),
+			    oP_y.rbegin(), oP_y.rend());
+
+    points = KCH.vbo - thrust::device_ptr< float4 >(vbo2);
+
+    // if ( 0 )
+    //   {
+    // 	thrust::for_each( thrust::make_zip_iterator(make_tuple( thrust::counting_iterator< int >(0),
+    // 								oP_x.begin(),
+    // 								oP_y.begin())),
+    // 			  thrust::make_zip_iterator(make_tuple( thrust::counting_iterator< int >(points),
+    // 								oP_x.end(),
+    // 								oP_y.end())),
+    // 			  Visualize(vbo2) );
+
+    // 	thrust::host_vector< thrust::tuple< float, float > > vpoints;
+    // 	std::vector< Point > std_vpoints;
+    // 	std_vpoints.resize(points);
+    // 	vpoints.resize(points);
     
-    thrust::host_vector< thrust::tuple< float, float > > chull = hull::alg::cpu::convex_hull(vpoints);
+    // 	thrust::copy( thrust::make_zip_iterator(thrust::make_tuple(oP_x.begin(),
+    // 								   oP_y.begin())),
+    // 		      thrust::make_zip_iterator(thrust::make_tuple(oP_x.end(),
+    // 								   oP_y.end())),
+    // 		      vpoints.begin()
+    // 		      );
+
+    // 	std::cout << "Number of points after cut: " << points << " " << oP_x.size() << " " << oP_y.size() << " " << vpoints.size() << std::endl;
     
-    thrust::for_each( thrust::make_zip_iterator(make_tuple( thrust::counting_iterator< int >(0),
-							    chull.begin())),
-		      thrust::make_zip_iterator(make_tuple( thrust::counting_iterator< int >(chull.size()),
-							    chull.end())),
-		      Visualize2(vbo2) );
+    // 	thrust::host_vector< thrust::tuple< float, float > > chull = hull::alg::cpu::convex_hull(vpoints);
     
-    *vbo2_vert_cnt = chull.size();
-    std::cout << "Convex hull size: " << chull.size() << std::endl;
+    // 	thrust::for_each( thrust::make_zip_iterator(make_tuple( thrust::counting_iterator< int >(0),
+    // 								chull.begin())),
+    // 			  thrust::make_zip_iterator(make_tuple( thrust::counting_iterator< int >(chull.size()),
+    // 								chull.end())),
+    // 			  Visualize2(vbo2) );
+    
+    // 	*vbo2_vert_cnt = chull.size();
+    // 	std::cout << "Convex hull size: " << chull.size() << std::endl;
+    //   }
+
   }
 
   cudaThreadSynchronize();
@@ -535,23 +611,9 @@ extern "C" void launch_kernel_random_points(float4* vbo1, int* vbo1_vert_cnt,
   cudaEventSynchronize(end);
   cudaEventElapsedTime(&elapsed_time, start, end);
   std::cout << "Total time: " << elapsed_time << " milliseconds" << std::endl;
-
-
-#if 0
-  // sort points
-
-  thrust::device_vector<float> permutation(points);
-  thrust::sequence(permutation.begin(), permutation.end());
-  
-  // sort from least significant key to most significant keys
-  update_permutation(oP_y, permutation);
-  update_permutation(oP_x, permutation);
-
-  // permute the key arrays by the final permuation
-  apply_permutation(oP_y, permutation);
-  apply_permutation(oP_x, permutation);
     
+  *vbo2_vert_cnt = points;
+
   //CURAND_CALL(curandDestroyGenerator(gen));
   //CUDA_CALL(cudaFree(randomPoints));
-#endif
 }
