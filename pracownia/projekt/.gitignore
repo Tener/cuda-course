@@ -1,5 +1,6 @@
 projekt/
 nbproject/
 keep/
+dist/
 *.*_
 *.log
