@@ -15,6 +15,7 @@
 // thrust
 #include <thrust/copy.h>
 #include <thrust/device_ptr.h>
+#include <thrust/device_reference.h>
 #include <thrust/device_vector.h>
 #include <thrust/for_each.h>
 #include <thrust/gather.h>
@@ -316,52 +317,50 @@ struct mkPoint : public thrust::unary_function< thrust::tuple< float, float > , 
   }
 };
 
-struct KernelConvexHull
+
+inline
+__device__ __host__ 
+float crossProduct_3p( float x0, float y0, float x1, float y1, float x2, float y2 )
 {
+  return (x1 - x0) * (y2 - y0) - (y1 - y0) * (x2 - x0);
+};
 
-  thrust::device_ptr< float4 > vbo;
-  unsigned int points;
-  KernelConvexHull(float4 * vbo, int points) : vbo(vbo), points(points) { }
+__global__
+void kernel_convex_hull(float * begin_x, float * end_x,
+			float * begin_y, float * end_y,
+			float2 * m_hull, int * points,
+			float4 * vbo)
+{
+  __shared__ float2 * hull; hull = m_hull;
+  __shared__ int hull_size; hull_size = 0;
   
-  inline
-  __device__ __host__ 
-  float crossProduct( float x0, float y0, float x1, float y1, float x2, float y2 )
-  {
-    return (x1 - x0) * (y2 - y0) - (y1 - y0) * (x2 - x0);
-  }
-
- 
-  template <typename Iterator>
-  __global__
-  void kernel_convex_hull(Iterator begin_x, Iterator end_x,
-			  Iterator begin_y, Iterator end_y)
-  {
-    thrust::device_vector< float2 > hull; 
-    hull.reserve(points);
-    while( begin_x != end_x )
-      {
-	float x = begin_x;
-	float y = begin_y;
-
-	while( (hull.size() >= 2) && (crossProduct( hull[hull.size()-2]->x, hull[hull.size()-2]->y, 
-						    hull[hull.size()-1]->x, hull[hull.size()-1]->y,
-						    x, y ) <= 0 ) )
-	  {
-	    hull.pop_back();
-	  }
-
-	hull.push_back( make_float2( x, y ) );
-
-	begin_x++;
-	begin_y++;
-      }
-
-    for(thrust::device_vector< float2 >::iterator it = hull.begin(); it != hull.end(); it++)
-      {
-	*vbo = make_float4( it->x, it->y, 0.0f, 1.0f );
-	vbo++;
-      }
-  }
+  while(begin_x != end_x)
+    {
+      float x = *begin_x;
+      float y = *begin_y;
+      
+      while( (hull_size >= 2) && (crossProduct_3p( hull[hull_size-2].x,
+						   hull[hull_size-2].y,
+						   hull[hull_size-1].x,
+						   hull[hull_size-1].y,
+						   x,
+						   y ) <= 0 ) )
+	{
+	  hull_size--;
+	}
+      
+      hull[hull_size] = make_float2( x, y ); hull_size++;
+      
+      begin_x++;
+      begin_y++;
+    }
+  
+  for(int i = 0; i < hull_size; i++)
+    {
+      vbo[i] = make_float4( hull[i].x, hull[i].y, 0.0f, 1.0f );
+    }
+  
+  *points = hull_size;
 };
 
 
@@ -559,14 +558,37 @@ extern "C" void launch_kernel_random_points(float4* vbo1, int* vbo1_vert_cnt,
     // (oP_x,oP_y) is sorted now. we can use 'Monotone Chain' algorithm now
     // http://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain
 
-    struct KernelConvexHull KCH( vbo2, points );
+#if 0
+    {
+      thrust::device_vector< int > ch_points(2);
+      int * ch_points_ptr = thrust::raw_pointer_cast(&*ch_points.begin());
 
-    KCH.kernel_convex_hull( oP_x.begin(), oP_x.end(),
-			    oP_y.begin(), oP_y.end());
-    KCH.kernel_convex_hull( oP_x.rbegin(), oP_x.rend(),
-			    oP_y.rbegin(), oP_y.rend());
+      thrust::device_vector< float2 > m_hull(points);
+      float2 * m_hull_ptr = thrust::raw_pointer_cast(&*m_hull.begin());
 
-    points = KCH.vbo - thrust::device_ptr< float4 >(vbo2);
+      kernel_convex_hull<<< 1, 1 >>>( thrust::raw_pointer_cast(&*oP_x.begin()), 
+				      thrust::raw_pointer_cast(&*oP_x.end()),
+				      thrust::raw_pointer_cast(&*oP_y.begin()), 
+				      thrust::raw_pointer_cast(&*oP_y.end()),
+                                      m_hull_ptr, ch_points_ptr, 
+				      vbo2
+				      );
+
+      int foo = ch_points[0];
+
+      kernel_convex_hull<<< 1, 1 >>>( thrust::raw_pointer_cast(&*oP_x.rbegin()), 
+				      thrust::raw_pointer_cast(&*oP_x.rend()),
+				      thrust::raw_pointer_cast(&*oP_y.rbegin()), 
+				      thrust::raw_pointer_cast(&*oP_y.rend()),
+				      m_hull_ptr, ch_points_ptr+1, 
+				      vbo2+foo
+				      );
+      foo += ch_points[1];
+
+      points = foo;
+    }
+
+#endif
 
     // if ( 0 )
     //   {
