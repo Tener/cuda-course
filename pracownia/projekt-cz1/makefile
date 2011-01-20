@@ -25,8 +25,8 @@ BOOST_RANDOM_FLAGS := -lboost_random -DBOOST_RANDOM
 BOOST_RANDOM_FLAGS := 
 
 # run visualization?
-OPENGL := 
 OPENGL := -DUSE_OPENGL 
+OPENGL := 
 
 PTX := --ptxas-options '--verbose -O4'
 PTX := 
