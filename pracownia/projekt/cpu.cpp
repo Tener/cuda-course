@@ -9,6 +9,7 @@ namespace hull {
 namespace alg {
 namespace cpu {
 
+#ifdef BOOST_RANDOM
   Point random_point(){ 
     // http://www.anderswallin.net/2009/05/uniform-random-points-in-a-circle-using-polar-coordinates/
     // http://www.comnets.uni-bremen.de/itg/itgfg521/per_eval/circle_uniform_distribution.pdf
@@ -21,6 +22,19 @@ namespace cpu {
 
     return Point( x, y );
   }
+#else
+  Point random_point(){ 
+    static bool was_init = false; if (!was_init) { srand48( time( 0 ) ); was_init = true; }
+
+    double r = sqrt( drand48() );
+    double theta = drand48() * 2 * M_PI;
+
+    double x = r * cos(theta);
+    double y = r * sin(theta);
+
+    return Point( x, y );
+  }
+#endif
 
   void draw_point( const Point & p, GLfloat size = 1.0 )
   {

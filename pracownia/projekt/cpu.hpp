@@ -3,8 +3,10 @@
 #include <GL/glut.h>
 #include <GL/gl.h>
 
+#ifdef BOOST_RANDOM
 #include <boost/random.hpp>
 #include <boost/random/uniform_real.hpp>
+#endif
 
 #include <thrust/host_vector.h>
 
@@ -35,6 +37,7 @@ namespace hull {
 namespace alg {
 namespace cpu {
 
+#ifdef BOOST_RANDOM
   typedef boost::mt19937 RNGType;
 
   static RNGType rng( time( 0 ) ); // produces randomness out of thin air
@@ -44,6 +47,7 @@ namespace cpu {
   static boost::variate_generator< RNGType, boost::uniform_real<> > random_angle( rng, uniform_0_2pi );
   static boost::variate_generator< RNGType, boost::uniform_real<> > random_radius( rng, uniform_0_1 );
   static boost::variate_generator< RNGType, boost::uniform_real<> > random_coord( rng, uniform_m1_1 );
+#endif
 
   Point random_point();
   
