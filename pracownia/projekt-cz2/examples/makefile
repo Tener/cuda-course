@@ -7,3 +7,8 @@ $(OBJ)%.bin: %.cu
 	nvcc -I.. -O3 -use_fast_math ${NVCC_FLAGS} $< -o $@
 
 
+clean:
+	rm -f *~ *.bin
+
+exec:
+	find -type f -executable -exec ./{} \;
