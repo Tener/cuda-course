@@ -1,0 +1,7 @@
+projekt/
+nbproject/
+keep/
+dist/
+*.dblite
+*.*_
+*.log

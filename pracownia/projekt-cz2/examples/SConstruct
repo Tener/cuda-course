@@ -1,0 +1,38 @@
+import os
+import inspect
+import glob
+
+# try to import an environment first
+try:
+  Import('env')
+except:
+  exec open("../build/build-env.py")
+  env = Environment()
+
+# on mac we have to tell the linker to link against the C++ library
+if env['PLATFORM'] == "darwin":
+  env.Append(LINKFLAGS = "-lstdc++")
+
+# find all .cus & .cpps in the current directory
+sources = []
+directories = ['.', 'cuda']
+extensions = ['*.cu', '*.cpp']
+for dir in directories:
+  for ext in extensions:
+    regexp = os.path.join(dir, ext)
+    sources.extend(glob.glob(regexp))
+
+# compile examples
+commands = []
+for src in sources:
+  if src.endswith('opengl_interop.cu'):
+    # disable this example while its build is broken
+    #env.Program(src, LINKFLAGS = ['-lGLEW', '-lglut'])
+    sources.remove(src)
+  else:
+    program = env.Program(src)
+    # add the program to the 'run_examples' alias
+    program_alias = env.Alias('run_examples', [program], program[0].abspath)
+    # always build the 'run_examples' target whether or not it needs it
+    env.AlwaysBuild(program_alias)
+
