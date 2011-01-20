@@ -9,7 +9,7 @@ namespace hull {
     int width = 600;
     
     void initGlWindow(int argc, char ** argv){ 
-
+#ifdef USE_OPENGL
       cudaGLSetGLDevice( cutGetMaxGflopsDeviceId() );
 
       if( !glfwInit() )
@@ -38,14 +38,14 @@ namespace hull {
       glViewport(0, 0, height, width);
       glLoadIdentity();
       glOrtho(-1.0, 1.0, -1.0, 1.0, 0.0, 1.0);
-
+#endif
     };
   
     void closeGlWindow(){
-    
+#ifdef USE_OPENGL   
       glfwCloseWindow();
       glfwTerminate();
-
+#endif
     };
 
   } // namespace graphics

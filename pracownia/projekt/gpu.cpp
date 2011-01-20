@@ -11,10 +11,17 @@
 
 #include <algorithm>
 
+// CUDA
+#include <cuda_runtime_api.h>
+#include <cuda.h>
+#include <cutil.h>
+#include <curand_kernel.h>
+
 namespace hull {
   namespace alg {
     namespace gpu {
 
+#ifdef USE_OPENGL
       struct VBO {
 	// vbo variables
 	GLuint vbo;
@@ -100,7 +107,9 @@ namespace hull {
 	vbo_2.unmapResources();
 
 	// render from the vbo
+	glPointSize(1);
 	vbo_1.render( vbo1_cnt, make_float3( 1.0, 0.0, 0.0 ) );
+	glPointSize(5);
 	vbo_2.render( vbo2_cnt, make_float3( 0.0, 0.0, 1.0 ) );
 
 	glfwSwapBuffers();
@@ -118,6 +127,35 @@ namespace hull {
 	    calculateConvexHull(*it, vbo_1, vbo_2);
 	  }
       }
+#else
+      void calculateConvexHull( int n_points, float4 * vbo_1, float4 * vbo_2 )
+      {
+	int vbo1_cnt, vbo2_cnt;
+
+	launch_kernel_random_points(vbo_1, &vbo1_cnt,
+				    vbo_2, &vbo2_cnt,
+				    n_points);
+      }
+
+      void calculateConvexHull( vector< int > n_points )
+      {
+	int max_n_points = *max_element( n_points.begin(), n_points.end() );
+
+	float4 * vbo_1;
+	float4 * vbo_2;
+
+	CUDA_CALL(cudaMalloc(&vbo_1, sizeof(float4) * max_n_points * 1024)); 
+	CUDA_CALL(cudaMalloc(&vbo_2, sizeof(float4) * max_n_points * 1024)); 
+
+	for(vector<int>::iterator it = n_points.begin(); it < n_points.end(); it++)
+	  {
+	    calculateConvexHull(*it, vbo_1, vbo_2);
+	  }
+
+	CUDA_CALL(cudaFree(vbo_1));
+	CUDA_CALL(cudaFree(vbo_2));
+      }      
+#endif
     }
   }
 }

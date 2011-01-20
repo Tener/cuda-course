@@ -22,6 +22,9 @@ GENCODE_F :=
 
 KEEP := --keep --keep-dir keep
 
+OPENGL := -DUSE_OPENGL 
+OPENGL := 
+
 PTX := --ptxas-options '--verbose -O4'
 
 OBJ = obj/
@@ -29,8 +32,8 @@ OBJ = obj/
 O_FILES := $(addprefix $(OBJ),$(patsubst %.cpp,%.o,$(wildcard *.cpp)))
 
 INCLUDES := -I${CUDA_SDK}/C/common/inc -I${CUDA_SDK}/shared/inc/ -I.
-GCC_FLAGS := --compiler-options -mtune=native,-march=native,-ffast-math
-NVCC_FLAGS = -O3 -use_fast_math ${LIBS} ${GENCODE_FULL} ${INCLUDES} ${GCC_FLAGS}
+GCC_FLAGS := --compiler-options -mtune=native,-march=native,-ffast-math,-ggdb3
+NVCC_FLAGS = -g -O3 -use_fast_math ${LIBS} ${GENCODE_F} ${INCLUDES} ${GCC_FLAGS} ${OPENGL}
 
 all: $(O_FILES)
 	nvcc ${NVCC_FLAGS} *.cu $(O_FILES) -o hull

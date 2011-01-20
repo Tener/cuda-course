@@ -30,10 +30,6 @@
 
 #include "cpu.hpp"
 
-#define CUDA_CALL(x) do { if((x) != cudaSuccess) { \
-      printf("Error (%d) at %s:%d\n", __FILE__,__LINE__);	\
-      return ;}} while(0)
-
 #define CURAND_CALL(x) CURAND_CALL_( (x), __FILE__, __LINE__) 
 
 inline void CURAND_CALL_(curandStatus st, char * file, int line )

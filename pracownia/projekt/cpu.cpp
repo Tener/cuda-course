@@ -24,16 +24,19 @@ namespace cpu {
 
   void draw_point( const Point & p, GLfloat size = 1.0 )
   {
+#ifdef USE_OPENGL
     glPointSize(size);
     glBegin(GL_POINTS);
     {
       glVertex2d( p.x, p.y );
     }
     glEnd();
+#endif
   }
 
   void draw_point( const std::vector< Point > & vp, GLfloat size = 1.0 )
   {
+#ifdef USE_OPENGL
     glPointSize(size);
     glBegin(GL_POINTS);
     {
@@ -45,6 +48,7 @@ namespace cpu {
 	}
     }
     glEnd();
+#endif
   }  
 
   inline double cross( const Point &o, const Point &a, const Point &b )
