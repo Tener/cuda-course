@@ -21,12 +21,13 @@
 #include <thrust/gather.h>
 #include <thrust/generate.h>
 #include <thrust/host_vector.h>
-#include <thrust/partition.h>
 #include <thrust/iterator/zip_iterator.h>
+#include <thrust/partition.h>
 #include <thrust/random.h>
 #include <thrust/remove.h>
 #include <thrust/sequence.h>
 #include <thrust/sort.h>
+#include <thrust/unique.h>
 
 #include "cpu.hpp"
 
@@ -450,42 +451,61 @@ extern "C" void launch_kernel_random_points(float4* vbo1, int* vbo1_vert_cnt,
 			 );
     }
 
-    DevVecFloatZipIterTuple begin = thrust::make_zip_iterator(make_tuple( oP_x.begin(), oP_y.begin()));
-    DevVecFloatZipIterTuple begin_0 = thrust::make_zip_iterator(make_tuple( oP_x.begin(), oP_y.begin()));
-    DevVecFloatZipIterTuple end = thrust::make_zip_iterator(make_tuple( oP_x.end(), oP_y.end()));
-    thrust::host_vector< DevVecFloatZipIterTuple > ends;
+    {
+      DevVecFloatZipIterTuple begin = thrust::make_zip_iterator(make_tuple( oP_x.begin(), oP_y.begin()));
+      DevVecFloatZipIterTuple begin_0 = thrust::make_zip_iterator(make_tuple( oP_x.begin(), oP_y.begin()));
+      DevVecFloatZipIterTuple end = thrust::make_zip_iterator(make_tuple( oP_x.end(), oP_y.end()));
+      thrust::host_vector< DevVecFloatZipIterTuple > ends;
 
-    for(int i = 0; i < 16; i++)
-      {
-	float x0, y0, x1, y1;
+      for(int i = 0; i < 16; i++)
+	{
+	  float x0, y0, x1, y1;
+	  
+	  x0 = h_x[i];
+	  y0 = h_y[i];
+	  
+	  x1 = h_x[(i+1) % 16];
+	  y1 = h_y[(i+1) % 16];
+	  
+	  begin = thrust::partition( begin, end, EarlyPartition(x0, y0, x1, y1) );
+	  ends.push_back(begin);
+	}
+      
+      points = begin - begin_0;
+      oP_x.resize(points);
+      oP_y.resize(points);
+    }
 
-	x0 = h_x[i];
-	y0 = h_y[i];
-
-	x1 = h_x[(i+1) % 16];
-	y1 = h_y[(i+1) % 16];
-
-	begin = thrust::partition( begin, end, EarlyPartition(x0, y0, x1, y1) );
-	ends.push_back(begin);
-      }
-    
-    points = begin - begin_0;
-    oP_x.resize(points);
-    oP_y.resize(points);
-    
-    // sort points lexographically
-    thrust::device_vector<float> permutation(points);
-    thrust::sequence(permutation.begin(), permutation.end());
+    {
+      // sort points lexographically
+      thrust::device_vector<float> permutation(points);
+      thrust::sequence(permutation.begin(), permutation.end());
   
-    // sort from least significant key to most significant keys
-    update_permutation(oP_y, permutation);
-    update_permutation(oP_x, permutation);
+      // sort from least significant key to most significant keys
+      update_permutation(oP_y, permutation);
+      update_permutation(oP_x, permutation);
 
-    // permute the key arrays by the final permuation
-    apply_permutation(oP_y, permutation);
-    apply_permutation(oP_x, permutation);
+      // permute the key arrays by the final permuation
+      apply_permutation(oP_y, permutation);
+      apply_permutation(oP_x, permutation);
+    }
 
-    // (oP_x,oP_y) is sorted now. we can use 'Monotone Chain' algorithm now
+#ifdef COMPACT
+    {
+      // run stream compaction: it works only on sorted input
+      DevVecFloatZipIterTuple begin = thrust::make_zip_iterator(make_tuple( oP_x.begin(), oP_y.begin()));
+      DevVecFloatZipIterTuple end = thrust::make_zip_iterator(make_tuple( oP_x.end(), oP_y.end()));
+      DevVecFloatZipIterTuple end_0 = thrust::make_zip_iterator(make_tuple( oP_x.end(), oP_y.end()));
+
+      end = thrust::unique( begin, end );
+      
+      points = end - begin;
+      oP_x.resize(points);
+      oP_y.resize(points);
+    }
+#endif
+
+    // (oP_x,oP_y) is sorted and compacted now. we can use 'Monotone Chain' algorithm now
     // http://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain
     // It's O(n) on sorted inputs, so we call it on CPU.
 
