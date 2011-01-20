@@ -4,6 +4,8 @@ keep/
 dist/
 bench/
 benchres.txt
+hull
+*.bin
 *.dblite
 *.*_
 *.log
