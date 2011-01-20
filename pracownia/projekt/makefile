@@ -17,33 +17,39 @@ GENCODE_FULL :=	-gencode arch=compute_10,code=sm_10 \
 		-gencode arch=compute_20,code=sm_21 
 
 GENCODE_F := -gencode arch=compute_11,code=sm_13
-GENCODE_F := 
 GENCODE_F := -gencode arch=compute_20,code=sm_21
+GENCODE_F :=
 
 # boost random
 BOOST_RANDOM_FLAGS := -lboost_random -DBOOST_RANDOM
 BOOST_RANDOM_FLAGS := 
 
 # run visualization?
-OPENGL := -DUSE_OPENGL 
 OPENGL := 
+OPENGL := -DUSE_OPENGL 
 
 PTX := --ptxas-options '--verbose -O4'
+PTX := 
 KEEP := --keep --keep-dir keep
 
 OBJ = obj/
 O_FILES := $(addprefix $(OBJ),$(patsubst %.cpp,%.o,$(wildcard *.cpp)))
 
 INCLUDES := -I${CUDA_SDK}/C/common/inc -I${CUDA_SDK}/shared/inc/ -I.
-GCC_FLAGS := --compiler-options -mtune=native,-march=native,-ffast-math,-ggdb3
-NVCC_FLAGS := -g -O3 -use_fast_math ${LIBS} ${GENCODE_F} ${INCLUDES} ${GCC_FLAGS} ${OPENGL} ${BOOST_RANDOM_FLAGS}
+GCC_FLAGS := --compiler-options -mtune=native,-march=native,-ffast-math
+NVCC_FLAGS := -O3 -use_fast_math ${LIBS} ${GENCODE_F} ${INCLUDES} ${GCC_FLAGS} ${OPENGL} ${BOOST_RANDOM_FLAGS} ${PTX}
 
-all: $(O_FILES)
+hull: $(O_FILES)
 	nvcc ${NVCC_FLAGS} *.cu $(O_FILES) -o hull
 
 $(OBJ)%.o: %.cpp
 	nvcc -c ${NVCC_FLAGS} $< -o $@
 
+bench: hull
+	@echo "SHA1: " bench/`sha1sum makefile | cut -d " " -f 1` 
+	mkdir -p bench/`sha1sum makefile | cut -d " " -f 1`
+	./hull gpu `cat benchset.txt` > benchres.txt
+	cp benchset.txt benchres.txt makefile hull bench/`sha1sum makefile | cut -d " " -f 1`/
 
 kno:
 	rm -f obj/*
@@ -56,4 +62,4 @@ clean:
 purge: clean
 	rm -vf kno_*.zip
 
-.PHONY: clean purge kno rs
+.PHONY: clean purge kno rs bench hull

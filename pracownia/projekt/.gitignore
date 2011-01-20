@@ -2,6 +2,7 @@ projekt/
 nbproject/
 keep/
 dist/
+bench/
 *.dblite
 *.*_
 *.log
