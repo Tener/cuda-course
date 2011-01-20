@@ -3,6 +3,7 @@ nbproject/
 keep/
 dist/
 bench/
+benchres.txt
 *.dblite
 *.*_
 *.log
