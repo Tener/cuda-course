@@ -29,7 +29,11 @@
 #include <thrust/sort.h>
 #include <thrust/unique.h>
 
+//#include <thrust/experimental/cuda/pinned_allocator.h>
+#include "kernel.hpp"
+
 #include "cpu.hpp"
+
 
 #define CURAND_CALL(x) CURAND_CALL_( (x), __FILE__, __LINE__) 
 
@@ -173,8 +177,8 @@ struct MakePoints : public thrust::unary_function< ArgTuple_2 , ResultTuple_2>
 
 
 typedef thrust::tuple< float, float > Float2;
-typedef thrust::tuple< thrust::device_vector<float>::iterator,
-		       thrust::device_vector<float>::iterator > DevVecFloatIterTuple2;
+typedef thrust::tuple< DevVec::iterator,
+		       DevVec::iterator > DevVecFloatIterTuple2;
 typedef thrust::zip_iterator< DevVecFloatIterTuple2 > DevVecFloatZipIterTuple;
 
 
@@ -292,11 +296,13 @@ float crossProduct_3p( float x0, float y0, float x1, float y1, float x2, float y
   return (x1 - x0) * (y2 - y0) - (y1 - y0) * (x2 - x0);
 };
 
-void convex_hull(thrust::host_vector<float> & Px, thrust::host_vector<float> & Py)
+template <typename T>
+inline
+void convex_hull(T & Px, T & Py)
 {
   int n = Px.size(), k = 0;
-  thrust::host_vector<float> Hx(2*n);
-  thrust::host_vector<float> Hy(2*n);
+  HostVec Hx(2*n);
+  HostVec Hy(2*n);
   
   // Sort points lexicographically
   // sort(P.begin(), P.end()); - already sorted...
@@ -329,12 +335,32 @@ void convex_hull(thrust::host_vector<float> & Px, thrust::host_vector<float> & P
 
 }
 
+void compactStream( DevVec & oP_x, 
+		    DevVec & oP_y, 
+		    unsigned int & points)
+{
+  // run stream compaction: it works only on sorted input
+  DevVecFloatZipIterTuple begin = thrust::make_zip_iterator(make_tuple( oP_x.begin(), oP_y.begin()));
+  DevVecFloatZipIterTuple end = thrust::make_zip_iterator(make_tuple( oP_x.end(), oP_y.end()));
+  DevVecFloatZipIterTuple end_0 = thrust::make_zip_iterator(make_tuple( oP_x.end(), oP_y.end()));
+
+  end = thrust::unique( begin, end );
+      
+  std::cout << "Compaction: " << points << " -> " << end-begin << " (diff=" << (points - (end-begin)) << ")" << std::endl;
+      
+  points = end - begin;
+  oP_x.resize(points);
+  oP_y.resize(points);
+}
+
 
 // Wrapper for the __global__ call that sets up the kernel call
 extern "C" void launch_kernel_random_points(float4* vbo1, int* vbo1_vert_cnt,
 					    float4* vbo2, int* vbo2_vert_cnt,
-					    unsigned int points)
+					    unsigned int points_orig)
 {
+  unsigned int points = points_orig;
+
   cudaEvent_t start;
   cudaEvent_t end;
   float elapsed_time;
@@ -348,8 +374,8 @@ extern "C" void launch_kernel_random_points(float4* vbo1, int* vbo1_vert_cnt,
   *vbo1_vert_cnt = points;
 
   // calculate points, display them on the screen
-  thrust::device_vector<float> oP_r(points);
-  thrust::device_vector<float> oP_theta(points);
+  DevVec oP_r(points);
+  DevVec oP_theta(points);
   thrust::transform( thrust::counting_iterator< int >(0),
 		     thrust::counting_iterator< int >(points),
 		     thrust::make_zip_iterator(make_tuple( oP_r.begin(), oP_theta.begin())),
@@ -357,10 +383,10 @@ extern "C" void launch_kernel_random_points(float4* vbo1, int* vbo1_vert_cnt,
 
   {
     // first points on convex hull - taken from quadrilaterals
-    thrust::host_vector<float> h_x;
-    thrust::host_vector<float> h_y;
-    thrust::host_vector<float> h_t;
-    thrust::host_vector<float> h_r;
+    HostVec h_x;
+    HostVec h_y;
+    HostVec h_t;
+    HostVec h_r;
     thrust::host_vector< thrust::tuple< float, float > > h_rt;
 
     // find extreme points and remove the vast amount of points that lie within the bounding quadrilateral
@@ -427,8 +453,8 @@ extern "C" void launch_kernel_random_points(float4* vbo1, int* vbo1_vert_cnt,
       }
 
     // materialize points (x,y) now
-    thrust::device_vector<float> oP_x(points);
-    thrust::device_vector<float> oP_y(points);
+    DevVec oP_x(points);
+    DevVec oP_y(points);
 
     thrust::transform( thrust::make_zip_iterator(make_tuple( thrust::counting_iterator< int >(0),
 							     oP_r.begin(), 
@@ -478,7 +504,7 @@ extern "C" void launch_kernel_random_points(float4* vbo1, int* vbo1_vert_cnt,
 
     {
       // sort points lexographically
-      thrust::device_vector<float> permutation(points);
+      DevVec permutation(points);
       thrust::sequence(permutation.begin(), permutation.end());
   
       // sort from least significant key to most significant keys
@@ -490,27 +516,15 @@ extern "C" void launch_kernel_random_points(float4* vbo1, int* vbo1_vert_cnt,
       apply_permutation(oP_x, permutation);
     }
 
-#ifdef COMPACT
-    {
-      // run stream compaction: it works only on sorted input
-      DevVecFloatZipIterTuple begin = thrust::make_zip_iterator(make_tuple( oP_x.begin(), oP_y.begin()));
-      DevVecFloatZipIterTuple end = thrust::make_zip_iterator(make_tuple( oP_x.end(), oP_y.end()));
-      DevVecFloatZipIterTuple end_0 = thrust::make_zip_iterator(make_tuple( oP_x.end(), oP_y.end()));
-
-      end = thrust::unique( begin, end );
-      
-      points = end - begin;
-      oP_x.resize(points);
-      oP_y.resize(points);
-    }
-#endif
+    // It doesn't really do anything, since it's only ~0.1% that are duplicated.
+    // compactStream( oP_x, oP_y, points );
 
     // (oP_x,oP_y) is sorted and compacted now. we can use 'Monotone Chain' algorithm now
     // http://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain
     // It's O(n) on sorted inputs, so we call it on CPU.
 
-    thrust::host_vector<float> oP_x_h(oP_x);
-    thrust::host_vector<float> oP_y_h(oP_y);
+    HostVec oP_x_h(oP_x);
+    HostVec oP_y_h(oP_y);
 
     convex_hull(oP_x_h, oP_y_h);
     
