@@ -21,12 +21,12 @@ GENCODE_F := -gencode arch=compute_20,code=sm_21
 GENCODE_F :=
 
 # boost random
-BOOST_RANDOM_FLAGS := -lboost_random -DBOOST_RANDOM
 BOOST_RANDOM_FLAGS := 
+BOOST_RANDOM_FLAGS := -lboost_random -DBOOST_RANDOM
 
 # run visualization?
-OPENGL := -DUSE_OPENGL 
 OPENGL := 
+OPENGL := -DUSE_OPENGL 
 
 PTX := --ptxas-options '--verbose -O4'
 PTX := 
