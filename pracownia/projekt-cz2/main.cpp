@@ -1,63 +1,39 @@
 
 #include "common.hpp"
-#include "hull.hpp"
 #include "graphics.hpp"
-
-#include <boost/lexical_cast.hpp>
+#include "utils.hpp"
 
 int main(int argc, char ** argv)
 {
+  rt::utils::CudaStartEndTimer timer;
+
   srand(time(0));
 
-  if ( argc < 3 )
+  rt::graphics::global_glm.initGlWindow();
+  
+  rt::graphics::PBO pbo(rt::graphics::global_glm.width, 
+                        rt::graphics::global_glm.height);
+
+  bool run = true;
+  while( run )
     {
-      std::cerr << "Za mało argumentów. Oczekiwano minimum 2, było: " << argc-1 << endl;
-      return 1;
+      rt::utils::CudaIntervalAutoTimer t(timer);
+      rt::graphics::PBO_map_unmap autoMapper(pbo);
+
+      launch_raytrace_kernel(pbo.dev_pbo, 
+                             rt::graphics::global_glm.width, 
+                             rt::graphics::global_glm.height);
+
+      pbo.render();
+      glfwSwapBuffers();
+    
+      run = !glfwGetKey( GLFW_KEY_ESC ) && glfwGetWindowParam( GLFW_OPENED );
     }
 
-  Processor proc;
-
-  if ( string("cpu") == string(argv[1]) )
-    {
-      proc = CPU;
-    }
-  else if ( string("gpu") == string(argv[1]) )
-    {
-      proc = GPU;
-    }
-  else
-    {
-      std::cerr << "Nie podano poprawnego procesora: " << string(argv[1]) << endl;
-      return 1;
-    }
-
-  vector< int > num_points;
-  for(int i = 2; i < argc; i++)
-    { 
-      using boost::lexical_cast;
-      using boost::bad_lexical_cast;
-
-      try
-	{
-	  num_points.push_back(lexical_cast< int >(argv[i]));
-	}
-      catch(bad_lexical_cast &)
-        {
-	  cerr << __FILE__ << " " << __LINE__ << " " << "Zły argument: " << string(argv[i]) << endl;
-	  exit(1);
-        }
-    }
-
-  hull::graphics::initGlWindow(argc, argv);
-
-  // are we finished?	
-  //run = loopMode && !glfwGetKey( GLFW_KEY_ESC ) && glfwGetWindowParam( GLFW_OPENED );
-
-  hull::alg::calculateConvexHull( proc, num_points );
-
-  hull::graphics::closeGlWindow();
+  rt::graphics::global_glm.closeGlWindow();
 
   return 0;
 
 }
 
+//step by step: pl dom6, pok 313
