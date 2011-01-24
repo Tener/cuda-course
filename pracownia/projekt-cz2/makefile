@@ -17,8 +17,8 @@ GENCODE_FULL :=	-gencode arch=compute_10,code=sm_10 \
 		-gencode arch=compute_20,code=sm_21 
 
 GENCODE_F := -gencode arch=compute_11,code=sm_13
-GENCODE_F := -gencode arch=compute_20,code=sm_21
 GENCODE_F :=
+GENCODE_F := -gencode arch=compute_20,code=sm_21
 
 # boost random
 BOOST_RANDOM_FLAGS := -lboost_random -DBOOST_RANDOM
@@ -31,13 +31,14 @@ OPENGL :=
 PTX := --ptxas-options '--verbose -O4'
 PTX := 
 KEEP := --keep --keep-dir keep
+KEEP :=
 
 OBJ = obj/
 O_FILES := $(addprefix $(OBJ),$(patsubst %.cpp,%.o,$(wildcard *.cpp)))
 
 INCLUDES := -I${CUDA_SDK}/C/common/inc -I${CUDA_SDK}/shared/inc/ -I.
 GCC_FLAGS := --compiler-options -mtune=native,-march=native,-ffast-math,-ggdb3
-NVCC_FLAGS := -O3 -use_fast_math ${LIBS} ${GENCODE_F} ${INCLUDES} ${GCC_FLAGS} ${OPENGL} ${BOOST_RANDOM_FLAGS} ${PTX} -g
+NVCC_FLAGS := -O3 -use_fast_math ${KEEP} ${LIBS} ${GENCODE_F} ${INCLUDES} ${GCC_FLAGS} ${OPENGL} ${BOOST_RANDOM_FLAGS} ${PTX} -g
 
 rt: $(O_FILES)
 	nvcc ${NVCC_FLAGS} *.cu $(O_FILES) -o rt
