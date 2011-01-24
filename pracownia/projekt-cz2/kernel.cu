@@ -43,7 +43,9 @@ inline uint RGBA( unsigned char r, unsigned char g, unsigned char b, unsigned ch
     (g << (1 * 8)) +
     (r << (0 * 8));
 }
-    
+
+
+enum Surf { SURF_CHMUTOV, SURF_PLANE, SURF_TORUS, SURF_DING_DONG, SURF_CAYLEY, SURF_DIAMOND };    
     
     
 // Nice intro to ray tracing:
@@ -53,9 +55,15 @@ struct TracePoint
 {
   int w; int h; int ix_h;
 
+  enum Surf surf;
+
   float3 R0; // origin point
 
-  TracePoint(int w, int h, int ix_h, float3 R0 = make_float3( -1, -1, -1 ) ) : w(w), h(h), ix_h(ix_h), R0(R0) { };
+  TracePoint(int w, int h, 
+             int ix_h, 
+             float3 R0 = make_float3( -1, -1, -1 ),
+             enum Surf surf = SURF_CHMUTOV)
+    : w(w), h(h), ix_h(ix_h), R0(R0), surf(surf) { };
 
   __host__ __device__
   inline
@@ -68,10 +76,30 @@ struct TracePoint
 
   __host__ __device__
   inline
-  float Surface( float3 V )
+  float Surface(float3 V,enum Surf surf_id)
   {
-    // for now - let's choose chebyshev's polynomials
-    return Chebyshev( CHMUTOV_DEGREE, V.x ) + Chebyshev( CHMUTOV_DEGREE, V.y ) + Chebyshev( CHMUTOV_DEGREE, V.z );
+    float x, y, z;
+    x = V.x; y = V.y; z = V.z;
+
+    switch ( surf_id )
+      {
+      case SURF_CHMUTOV:
+        // for now - let's choose chebyshev's polynomials
+        return Chebyshev( CHMUTOV_DEGREE, V.x ) + Chebyshev( CHMUTOV_DEGREE, V.y ) + Chebyshev( CHMUTOV_DEGREE, V.z );
+      case SURF_TORUS:
+        {
+          float c = 3;
+          float a = .5;
+          return pow(c - x*x + y*y, 2 ) + z*z - a*a;
+        }
+      case SURF_DIAMOND:
+        {
+          return sin(x) * sin(y) * sin(z) + sin(x) * cos(y) * cos(z) + cos(x) * sin(y) * cos(z) + cos(x) * cos(y) * sin(z);
+        }
+      }
+
+    return 0;
+        
   };
 
   __host__ __device__
@@ -150,10 +178,8 @@ struct TracePoint
   __host__ __device__ 
   uint operator()( int ix_w )
   {
-   const float max_range = 1;
-   const float min_range = 0;
-   const float max_cnt = 50;
-   const float step = ((float)(max_range - min_range)) / max_cnt;
+   const int max_cnt = 500;
+   const float step = 1;
    
    // directon vector
    float3 Rd = make_float3( -(float)(w/2) + ix_w, 
@@ -161,18 +187,18 @@ struct TracePoint
                             1); 
    // must be normalized!
    Normalize( Rd );
-   PrintVector( Rd );
+   //PrintVector( Rd );
 
    float3 Rc; // current point
    
-   float val = Surface( R0 ); // current surface value
+   float val = Surface( R0, surf ); // current surface value
    bool sign_has_changed = false;
    for(int i = 0; (i < max_cnt) && !sign_has_changed; i++)
       {
  	// calculate our current position
  	Ray( Rc, R0, Rd, i * step );
  	// determine the sign
- 	float tmp = Surface( Rc );
+ 	float tmp = Surface(Rc,surf);
 	
 	sign_has_changed = SignChangeSlow( val, tmp ); //SignChange( val, tmp );
  	val = tmp;
@@ -190,6 +216,8 @@ struct TracePoint
                     TRANS(Rc.y) + 10,
                     TRANS(Rc.z) + 10,
                     0); 
+
+#undef TRANS
 
      }
    else
@@ -222,7 +250,7 @@ extern "C" void launch_raytrace_kernel(uint * pbo, int w, int h)
       thrust::transform( thrust::make_counting_iterator< short >(0),
                          thrust::make_counting_iterator< short >(w),
                          thrust::device_ptr< uint >(pbo + h * ix_h),
-                         TracePoint(w,h,ix_h,R) );
+                         TracePoint(w,h,ix_h,R,SURF_DIAMOND) );
     }
 
 }
