@@ -10,7 +10,9 @@ int main(int argc, char ** argv)
   srand(time(0));
 
   rt::graphics::global_glm.initGlWindow();
-  
+ 
+  glfwSetWindowTitle("RayTrace 2011");
+ 
   rt::graphics::PBO pbo(rt::graphics::global_glm.width, 
                         rt::graphics::global_glm.height);
 
@@ -18,11 +20,14 @@ int main(int argc, char ** argv)
   while( run )
     {
       rt::utils::CudaIntervalAutoTimer t(timer);
-      rt::graphics::PBO_map_unmap autoMapper(pbo);
+      
+      {
+        rt::graphics::PBO_map_unmap autoMapper(pbo);
 
-      launch_raytrace_kernel(pbo.dev_pbo, 
-                             rt::graphics::global_glm.width, 
-                             rt::graphics::global_glm.height);
+        launch_raytrace_kernel(pbo.dev_pbo, 
+                               rt::graphics::global_glm.width, 
+                               rt::graphics::global_glm.height);
+      }
 
       pbo.render();
       glfwSwapBuffers();
