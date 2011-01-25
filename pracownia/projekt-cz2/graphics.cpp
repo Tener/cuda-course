@@ -109,7 +109,6 @@ namespace rt {
 	  exit( 1 );
 	}
 
-      glfwOpenWindowHint( GLFW_FSAA_SAMPLES, 4 );
       glfwOpenWindowHint( GLFW_WINDOW_NO_RESIZE, GL_TRUE );
 
       if ( !glfwOpenWindow( width, height, 
