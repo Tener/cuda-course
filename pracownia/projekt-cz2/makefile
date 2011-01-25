@@ -2,7 +2,8 @@ CUDA_SDK ?= /home/tener/localopt/NVIDIA_GPU_Computing_SDK
 CUDA_PLATFORM ?= $(shell uname -m)
 
 FILES := makefile main.cpp
-LIBS := -L${CUDA_SDK}/C/lib -lcurand -lcutil_${CUDA_PLATFORM} -lGL -lglfw -lGLEW
+FTGL :=  $(shell freetype-config --cflags) -lftgl
+LIBS := -L${CUDA_SDK}/C/lib -lcurand -lcutil_${CUDA_PLATFORM} -lGL -lglfw -lGLEW -lfltk2 -lpthread_nonshared ${FTGL}
 GENCODE_FULL :=	-gencode arch=compute_10,code=sm_10 \
 		-gencode arch=compute_10,code=sm_11 \
 		-gencode arch=compute_10,code=sm_12 \
@@ -17,8 +18,8 @@ GENCODE_FULL :=	-gencode arch=compute_10,code=sm_10 \
 		-gencode arch=compute_20,code=sm_21 
 
 GENCODE_F := -gencode arch=compute_11,code=sm_13
-GENCODE_F :=
 GENCODE_F := -gencode arch=compute_20,code=sm_21
+GENCODE_F :=
 
 # boost random
 BOOST_RANDOM_FLAGS := -lboost_random -DBOOST_RANDOM
