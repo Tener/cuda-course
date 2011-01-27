@@ -1,4 +1,9 @@
 
+void PrintVector( const float3 & Vec, char * name, std::ostream & out = std::cout );
+const std::string SurfString( Surf s );
+void PrintView( View v, std::ostream & out = std::cout );
+
+
 namespace rt {
   namespace utils {
     

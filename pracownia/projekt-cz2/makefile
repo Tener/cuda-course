@@ -3,7 +3,8 @@ CUDA_PLATFORM ?= $(shell uname -m)
 
 FILES := makefile main.cpp
 FTGL :=  $(shell freetype-config --cflags) -lftgl
-LIBS := -L${CUDA_SDK}/C/lib -lcurand -lcutil_${CUDA_PLATFORM} -lGL -lglfw -lGLEW -lfltk2 -lpthread_nonshared ${FTGL}
+LIBS := -L${CUDA_SDK}/C/lib -lcurand -lcutil_${CUDA_PLATFORM} -lparamgl_${CUDA_PLATFORM} -lglut -lGL -lglfw -lGLEW -lpthread -lboost_system -lboost_thread-mt
+#LIBS := -L${CUDA_SDK}/C/lib -lcurand -lcutil_${CUDA_PLATFORM} -lparamgl_${CUDA_PLATFORM} -lglut -lGL -lglfw -lGLEW -lpthread -Llib -lboost_system -lboost_thread
 GENCODE_FULL :=	-gencode arch=compute_10,code=sm_10 \
 		-gencode arch=compute_10,code=sm_11 \
 		-gencode arch=compute_10,code=sm_12 \

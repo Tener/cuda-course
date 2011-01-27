@@ -17,7 +17,14 @@
 #include <vector>
 #include <iostream>
 
-extern "C" void launch_raytrace_kernel(uint * pbo, int w, int h);
+#include "view.h"
+#include "surf.h"
+
+
+extern "C" void launch_raytrace_kernel(uint * pbo, View view, int w, int h);
+extern "C" void * server_thread(void * arg);
+
+#define SERV_PORT 4000
 
 #endif
 

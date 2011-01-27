@@ -31,6 +31,7 @@
 #include "common.hpp"
 #include "graphics.hpp"
 
+#include "utils.hpp"
 
 #define CHMUTOV_DEGREE 16
 
@@ -45,8 +46,6 @@ inline uint RGBA( unsigned char r, unsigned char g, unsigned char b, unsigned ch
 }
 
 
-enum Surf { SURF_CHMUTOV, SURF_PLANE, SURF_TORUS, SURF_DING_DONG, SURF_CAYLEY, SURF_DIAMOND };    
-    
     
 // Nice intro to ray tracing:
 // http://www.siggraph.org/education/materials/HyperGraph/raytrace/rtinter0.htm
@@ -54,16 +53,50 @@ enum Surf { SURF_CHMUTOV, SURF_PLANE, SURF_TORUS, SURF_DING_DONG, SURF_CAYLEY, S
 struct TracePoint
 {
   int w; int h; int ix_h;
+  Surf surf;
+  int steps;
+  float3 R0;
+  float3 Rd;
+  
+  float3 Rtrans;
 
-  enum Surf surf;
+  // bounding box
+  float range_w;
+  float range_h;
 
-  float3 R0; // origin point
-
+  float step_size;
+  
   TracePoint(int w, int h, 
              int ix_h, 
-             float3 R0 = make_float3( -1, -1, -1 ),
-             enum Surf surf = SURF_CHMUTOV)
-    : w(w), h(h), ix_h(ix_h), R0(R0), surf(surf) { };
+             View v
+             )
+    : w(w), h(h), ix_h(ix_h), 
+      surf(v.surf),
+      steps(v.steps),
+      R0(v.StartingPoint),
+      Rd(v.DirectionVector),
+      range_w(v.range_w),
+      range_h(v.range_h),
+      step_size(sqrt(pow(R0.x - Rd.x,2) + pow(R0.y - Rd.y,2) + pow(R0.z - Rd.z,2)) / steps),
+      Rtrans(make_float3( R0.x - Rd.x, R0.y - Rd.y, R0.z - Rd.z ))
+  { 
+
+ //   printf("step_size=%f\n", step_size);
+ //   printf("steps=%d\n", steps);
+
+  };
+
+  float3 foo()
+  {
+    Rtrans = make_float3( R0.x - Rd.x, R0.y - Rd.y, R0.z - Rd.z );
+    printf("%s=(%f,%f,%f) %s=(%f,%f,%f) %s=(%f,%f,%f)\n", 
+           "R0", R0.x, R0.y, R0.z, 
+           "Rd", Rd.x, Rd.y, Rd.z,
+           "Rtrans", Rtrans.x, Rtrans.y, Rtrans.z
+           );
+    return Rtrans;
+  }
+
 
   __host__ __device__
   inline
@@ -83,6 +116,10 @@ struct TracePoint
 
     switch ( surf_id )
       {
+      case SURF_DING_DONG:
+        {
+          return x*x+y*y-z*(1-z*z);
+        }
       case SURF_CHMUTOV:
         // for now - let's choose chebyshev's polynomials
         return Chebyshev( CHMUTOV_DEGREE, V.x ) + Chebyshev( CHMUTOV_DEGREE, V.y ) + Chebyshev( CHMUTOV_DEGREE, V.z );
@@ -96,6 +133,10 @@ struct TracePoint
         {
           return sin(x) * sin(y) * sin(z) + sin(x) * cos(y) * cos(z) + cos(x) * sin(y) * cos(z) + cos(x) * cos(y) * sin(z);
         }
+      case SURF_BALL:
+        {
+          return sqrt(x * x + y * y + z * z) - 1;
+        }
       }
 
     return 0;
@@ -104,11 +145,11 @@ struct TracePoint
 
   __host__ __device__
   inline
-  void Ray( float3 & Rc, const float3 & R0, const float3 & Rd, const float & t )
+  void Ray( float3 & Rc, const float3 & Rd, const float & t )
   {
-    Rc.x = R0.x + Rd.x * t;
-    Rc.y = R0.y + Rd.y * t;
-    Rc.z = R0.z + Rd.z * t;
+    Rc.x += Rd.x * t;
+    Rc.y += Rd.y * t;
+    Rc.z += Rd.z * t;
   };
 
   __host__ __device__
@@ -131,6 +172,11 @@ struct TracePoint
 	}
   };
 
+  __host__ __device__
+  bool SignChangeBit( const float & a, const float & b )
+  {
+    return signbit(a) != signbit(b);
+  }
 
   __host__ __device__
   bool SignChange( const float & a, const float & b )
@@ -153,8 +199,8 @@ struct TracePoint
     bool d0 = a < 0;
     bool d1 = a > 0;
     bool d2 = d0 ^ d1;
-    bool d3 = b > 0;
-    bool d4 = b < 0;
+    bool d3 = b < 0;
+    bool d4 = b > 0;
     bool d5 = d3 ^ d4;
     
     return (d0 ^ d3) || (d1 ^ d4) || (d2 ^ d5);
@@ -169,88 +215,66 @@ struct TracePoint
     Vec.z /= len;
   }
 
-  __host__ __device__
-  void PrintVector( const float3 & Vec )
-  {
-    printf("Vec=(%f,%f,%f)\n", Vec.x, Vec.y, Vec.z );
-  }
-
   __host__ __device__ 
   uint operator()( int ix_w )
   {
-   const int max_cnt = 500;
-   const float step = 1;
-   
-   // directon vector
-   float3 Rd = make_float3( -(float)(w/2) + ix_w, 
-                            -(float)(h/2) + ix_h, 
-                            1); 
-   // must be normalized!
-   Normalize( Rd );
-   //PrintVector( Rd );
+    float x = 2.0f * (float)range_w * (((float)ix_w - (w/2.0f)) / (float)w);
+    float y = 2.0f * (float)range_h * (((float)ix_h - (h/2.0f)) / (float)w);
+    float z = 0 ;
 
-   float3 Rc; // current point
-   
-   float val = Surface( R0, surf ); // current surface value
-   bool sign_has_changed = false;
-   for(int i = 0; (i < max_cnt) && !sign_has_changed; i++)
+    //printf("FOO (%f,%f,%f)\n", x, y, z );
+
+    float3 Rc = make_float3( R0.x + x, R0.y + y, R0.z + z ); // current point
+    
+    float val = Surface( Rc, surf );
+    bool sign_has_changed = false;
+    
+    for(int i = 0; (i < steps) && !sign_has_changed; i++)
       {
- 	// calculate our current position
- 	Ray( Rc, R0, Rd, i * step );
+ 	// calculate next position
+        Ray( Rc, Rtrans, step_size );
  	// determine the sign
  	float tmp = Surface(Rc,surf);
-	
 	sign_has_changed = SignChangeSlow( val, tmp ); //SignChange( val, tmp );
  	val = tmp;
       }
- 
-   if ( sign_has_changed )
+
+      if ( sign_has_changed )
      {
-       //       printf("(%f,%f,%f)\n", Rc.x, Rc.y, Rc.z);
-
-#define TRANS( x ) (240 * (x + 1) / 2)
-
-       //       printf("%f\n%f\n%f\n", Rc.x, Rc.y, Rc.z);
-
+       //       printf("%s=(%f,%f,%f) %s=(%f,%f,%f)\n", "Rc", Rc.x, Rc.y, Rc.z, "R0", R0.x, R0.y, R0.z );
+       
+#define TRANS( x ) fabs(240 * (x + 1) / 2)
        return RGBA( TRANS(Rc.x) + 10, 
-                    TRANS(Rc.y) + 10,
-                    TRANS(Rc.z) + 10,
+		    TRANS(Rc.y) + 10,
+		    TRANS(Rc.z) + 10,
                     0); 
-
 #undef TRANS
-
+       
      }
-   else
-     {
-       return RGBA( 0, 
-                    0,
-                    0,  
-                    0);
-     }
- 
+      else
+        {
+          return RGBA( 0, 
+                       0,
+                       0,  
+                       0);
+        }
   }
 };
 
-
-extern "C" void launch_raytrace_kernel(uint * pbo, int w, int h)
+extern "C" void launch_raytrace_kernel(uint * pbo, View view, int w, int h)
 {
   std::cerr << "w=" << w << std::endl
             << "h=" << h << std::endl; 
 
-  static float3 R = make_float3(0,0,-1);
-  static float cnt = 0;
-
-  R.x = 3 * sin(cnt);
-  R.y = 3 * cos(cnt);
-  
-  cnt += .01;
+  PrintView( view );
 
   for(int ix_h = 0; ix_h < h; ix_h++)
     {
       thrust::transform( thrust::make_counting_iterator< short >(0),
                          thrust::make_counting_iterator< short >(w),
                          thrust::device_ptr< uint >(pbo + h * ix_h),
-                         TracePoint(w,h,ix_h,R,SURF_DIAMOND) );
+                         TracePoint(w,h,ix_h,
+                                    view));
     }
 
 }
