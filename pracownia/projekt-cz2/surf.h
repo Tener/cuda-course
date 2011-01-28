@@ -1,7 +1,8 @@
 #ifndef __SURF_H
 #define __SURF_H
 
-enum Surf { SURF_CHMUTOV = 1, 
+enum Surf { SURF_CHMUTOV_0 = 1, 
+            SURF_CHMUTOV_1,
             SURF_CHMUTOV_2,
             SURF_CHMUTOV_3,
             SURF_PLANE,

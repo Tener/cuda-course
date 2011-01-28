@@ -194,8 +194,16 @@ struct TracePoint
         {
           return x*x+y*y-z*(1-z*z);
         }
-      case SURF_CHMUTOV:
-	return Chebyshev( CHMUTOV_DEGREE, V.x ) + Chebyshev( CHMUTOV_DEGREE, V.y ) + Chebyshev( CHMUTOV_DEGREE, V.z );
+
+      case SURF_CHMUTOV_0:
+	return Chebyshev( CHMUTOV_DEGREE, V.x ) + 
+	       Chebyshev( CHMUTOV_DEGREE, V.y ) + 
+	       Chebyshev( CHMUTOV_DEGREE, V.z );
+
+      case SURF_CHMUTOV_1:
+	return Chebyshev_T< CHMUTOV_DEGREE >::calculate( V.x ) + 
+	       Chebyshev_T< CHMUTOV_DEGREE >::calculate( V.y ) + 
+	       Chebyshev_T< CHMUTOV_DEGREE >::calculate( V.z );
 
       case SURF_CHMUTOV_2:
 	return Chebyshev_Pol< CHMUTOV_DEGREE >::calculate(V.x)
@@ -203,9 +211,13 @@ struct TracePoint
              + Chebyshev_Pol< CHMUTOV_DEGREE >::calculate(V.z);
 
       case SURF_CHMUTOV_3:
-	return Chebyshev_Pol_N( CHMUTOV_DEGREE, V.x)
-	     + Chebyshev_Pol_N( CHMUTOV_DEGREE, V.y)
-	     + Chebyshev_Pol_N( CHMUTOV_DEGREE, V.z);
+	return Chebyshev_Pol< CHMUTOV_DEGREE >::calculate(V.x)
+	     + Chebyshev_Pol< CHMUTOV_DEGREE >::calculate(V.y)
+	     + Chebyshev_Pol< CHMUTOV_DEGREE >::calculate(V.z);
+
+//        return Chebyshev_Pol_N( CHMUTOV_DEGREE, V.x)
+//             + Chebyshev_Pol_N( CHMUTOV_DEGREE, V.y)
+//             + Chebyshev_Pol_N( CHMUTOV_DEGREE, V.z);
 
       case SURF_TORUS:
         {
