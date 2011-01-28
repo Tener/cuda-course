@@ -31,10 +31,10 @@ class MultiRuler:
                              ("dirvec.y", (-100, 100, 0, 100)),
                              ("dirvec.z", (-100, 100, 0, 100)),
                              ("steps", (100, 5000, 500, 5000)),
-                             ("surf", (1, 12, 12, 12)),
                              ("rr", (0, 100, 0, 100)),
                              ("range_w", (0, 100, 0, 100)),
-                             ("range_h", (0, 100, 0, 100))
+                             ("range_h", (0, 100, 0, 100)),
+                             ("surf", (1, 12, 12, 12))
                              ]
 
         # Create a table for placing the ruler and the drawing area
