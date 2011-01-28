@@ -55,7 +55,7 @@ float Chebyshev_Pol_N( int N, float x )
 #pragma unroll 16
   for(unsigned int i = 2; i < N; i++)
     {
-      arr[i] = 2 * x * arr[N-1] - arr[N-2];
+      arr[i] = 2 * x * arr[i-1] - arr[i-2];
     }
   return arr[N-1];
 }
@@ -72,7 +72,7 @@ struct Chebyshev_Pol
 #pragma unroll 16
     for(unsigned int i = 2; i < N; i++)
       {
-	arr[i] = 2 * x * arr[N-1] - arr[N-2];
+	arr[i] = 2 * x * arr[i-1] - arr[i-2];
       }
     return arr[N-1];
   }
