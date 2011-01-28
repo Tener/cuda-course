@@ -167,18 +167,6 @@ struct TracePoint
     Vmax.x = Rd.x + range_w;
     Vmax.y = Rd.y + range_h;
     Vmax.z = Rd.z;
-  };
-
-//  float3 foo()
-//  {
-//    Rtrans = make_float3( R0.x - Rd.x, R0.y - Rd.y, R0.z - Rd.z );
-//    printf("%s=(%f,%f,%f) %s=(%f,%f,%f) %s=(%f,%f,%f)\n", 
-//           "R0", R0.x, R0.y, R0.z, 
-//           "Rd", Rd.x, Rd.y, Rd.z,
-//           "Rtrans", Rtrans.x, Rtrans.y, Rtrans.z
-//           );
-//    return Rtrans;
-//  }
 
     Vdiff.x = Vmax.x - Vmin.x;
     Vdiff.y = Vmax.y - Vmin.y;
