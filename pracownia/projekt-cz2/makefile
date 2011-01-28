@@ -42,7 +42,7 @@ INCLUDES := -I${CUDA_SDK}/C/common/inc -I${CUDA_SDK}/shared/inc/ -I.
 GCC_FLAGS := --compiler-options -mtune=native,-march=native
 FLOAT_PREC_OPTS := --ftz=true --prec-div=false --prec-sqrt=true
 FLOAT_PREC_OPTS := -use_fast_math
-NVCC_FLAGS := -O3 -v -v -v ${FLOAT_PREC_OPTS} ${KEEP} ${LIBS} ${GENCODE_F} ${INCLUDES} ${GCC_FLAGS} ${OPENGL} ${BOOST_RANDOM_FLAGS} ${PTX}
+NVCC_FLAGS := -O3 ${FLOAT_PREC_OPTS} ${KEEP} ${LIBS} ${GENCODE_F} ${INCLUDES} ${GCC_FLAGS} ${OPENGL} ${BOOST_RANDOM_FLAGS} ${PTX}
 
 rt: $(O_FILES)
 	nvcc ${NVCC_FLAGS} *.cu $(O_FILES) -o rt
