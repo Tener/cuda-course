@@ -77,25 +77,24 @@ struct TracePoint
       Rd(v.DirectionVector),
       range_w(v.range_w),
       range_h(v.range_h),
-      step_size(sqrt(pow(R0.x - Rd.x,2) + pow(R0.y - Rd.y,2) + pow(R0.z - Rd.z,2)) / steps),
+      step_size(sqrt(pow(R0.x - Rd.x,2) + 
+		     pow(R0.y - Rd.y,2) + 
+		     pow(R0.z - Rd.z,2)) / steps),
       Rtrans(make_float3( R0.x - Rd.x, R0.y - Rd.y, R0.z - Rd.z ))
   { 
 
- //   printf("step_size=%f\n", step_size);
- //   printf("steps=%d\n", steps);
-
   };
 
-  float3 foo()
-  {
-    Rtrans = make_float3( R0.x - Rd.x, R0.y - Rd.y, R0.z - Rd.z );
-    printf("%s=(%f,%f,%f) %s=(%f,%f,%f) %s=(%f,%f,%f)\n", 
-           "R0", R0.x, R0.y, R0.z, 
-           "Rd", Rd.x, Rd.y, Rd.z,
-           "Rtrans", Rtrans.x, Rtrans.y, Rtrans.z
-           );
-    return Rtrans;
-  }
+//  float3 foo()
+//  {
+//    Rtrans = make_float3( R0.x - Rd.x, R0.y - Rd.y, R0.z - Rd.z );
+//    printf("%s=(%f,%f,%f) %s=(%f,%f,%f) %s=(%f,%f,%f)\n", 
+//           "R0", R0.x, R0.y, R0.z, 
+//           "Rd", Rd.x, Rd.y, Rd.z,
+//           "Rtrans", Rtrans.x, Rtrans.y, Rtrans.z
+//           );
+//    return Rtrans;
+//  }
 
 
   __host__ __device__
@@ -221,8 +220,6 @@ struct TracePoint
     float x = 2.0f * (float)range_w * (((float)ix_w - (w/2.0f)) / (float)w);
     float y = 2.0f * (float)range_h * (((float)ix_h - (h/2.0f)) / (float)w);
     float z = 0 ;
-
-    //printf("FOO (%f,%f,%f)\n", x, y, z );
 
     float3 Rc = make_float3( R0.x + x, R0.y + y, R0.z + z ); // current point
     
