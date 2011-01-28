@@ -118,8 +118,9 @@ struct Chebyshev_T< 1 >
 //    return 1;
 //  if ( N == 1 )
 //    return x;
-//  return 2 * x * Chebyshev_Pol( N-1, x) - Chebyshev_Pol(N-2, x);
+//  return 2 * x * Chebyshev_Pol(N-1, x) - Chebyshev_Pol(N-2, x);
 //}
+
 
     
 // Nice intro to ray tracing:
@@ -146,8 +147,7 @@ struct TracePoint
   
   TracePoint(int w, int h, 
              int ix_h, 
-             View v
-             )
+             View v)
     : w(w), h(h), ix_h(ix_h), 
       surf(v.surf),
       steps(v.steps),
