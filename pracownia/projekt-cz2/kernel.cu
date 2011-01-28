@@ -139,6 +139,9 @@ struct TracePoint
   float range_w;
   float range_h;
 
+  // Vmin, Vmax, Vdiff;
+  float3 Vmin, Vmax, Vdiff;
+
   float step_size;
   
   TracePoint(int w, int h, 
@@ -157,7 +160,13 @@ struct TracePoint
 		     pow(R0.z - Rd.z,2)) / steps),
       Rtrans(make_float3( R0.x - Rd.x, R0.y - Rd.y, R0.z - Rd.z ))
   { 
+    Vmin.x = R0.x - range_w;
+    Vmin.y = R0.y - range_h;
+    Vmin.z = R0.z;
 
+    Vmax.x = Rd.x + range_w;
+    Vmax.y = Rd.y + range_h;
+    Vmax.z = Rd.z;
   };
 
 //  float3 foo()
@@ -171,6 +180,10 @@ struct TracePoint
 //    return Rtrans;
 //  }
 
+    Vdiff.x = Vmax.x - Vmin.x;
+    Vdiff.y = Vmax.y - Vmin.y;
+    Vdiff.z = Vmax.z - Vmin.z;
+  };
 
   __host__ __device__
   inline
@@ -335,14 +348,23 @@ struct TracePoint
 
       if ( sign_has_changed )
      {
-       //       printf("%s=(%f,%f,%f) %s=(%f,%f,%f)\n", "Rc", Rc.x, Rc.y, Rc.z, "R0", R0.x, R0.y, R0.z );
-       
-#define TRANS( x ) fabs(240 * (x + 1) / 2)
-       return RGBA( TRANS(Rc.x) + 10, 
-		    TRANS(Rc.y) + 10,
-		    TRANS(Rc.z) + 10,
-                    0); 
-#undef TRANS
+#define COLOR( p, pmin, pmax ) (10.0f + 240.0f * (p-pmin)/(pmax-pmin) )
+
+       return RGBA( COLOR( Rc.x, Vmin.x, Vmax.x ),
+		    COLOR( Rc.y, Vmin.y, Vmax.y ),
+		    COLOR( Rc.z, Vmin.z, Vmax.z ),
+		    0);
+
+#undef COLOR
+ 
+
+//#define TRANS( x ) fabs(240 * (x + 1) / 2)
+// 
+//       return RGBA( TRANS(Rc.x) + 10, 
+// 		    TRANS(Rc.y) + 10,
+// 		    TRANS(Rc.z) + 10,
+//                    0); 
+//#undef TRANS
        
      }
       else
