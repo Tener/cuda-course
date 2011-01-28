@@ -78,6 +78,37 @@ struct Chebyshev_Pol
   }
 };
 
+template <int N>
+struct Chebyshev_T
+{
+  __host__ __device__
+  static float calculate(float x)
+  { 
+    return 2 * x * Chebyshev_T< N-1 >::calculate(x) - Chebyshev_T< N-2 >::calculate(x);
+  };
+};
+
+template <>
+struct Chebyshev_T< 0 >
+{
+  __host__ __device__
+  static float calculate(float x)
+  { 
+    return 1;
+  };
+};
+
+template <>
+struct Chebyshev_T< 1 >
+{
+  __host__ __device__
+  static float calculate(float x)
+  { 
+    return x;
+  };
+};
+
+
 //inline 
 //__host__ __device__ 
 //float Chebyshev_Pol( int N, float x )
