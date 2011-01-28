@@ -11,7 +11,7 @@ struct View
   float range_w;
   float range_h;
 
-View( Surf s = SURF_DING_DONG, 
+View( Surf s = SURF_CHMUTOV_2, 
       float3 start = make_float3( 0, 0, -100 ), 
       float3 dirvec = make_float3(0,0,1), 
       int steps = 100,
