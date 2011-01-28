@@ -10,6 +10,8 @@ const std::string SurfString( Surf s )
   switch ( s )
     {
     case SURF_CHMUTOV:	 return std::string("SURF_CHMUTOV");
+    case SURF_CHMUTOV_2: return std::string("SURF_CHMUTOV_2");
+    case SURF_CHMUTOV_3: return std::string("SURF_CHMUTOV_3");
     case SURF_PLANE:	 return std::string("SURF_PLANE");
     case SURF_TORUS:	 return std::string("SURF_TORUS");
     case SURF_DING_DONG: return std::string("SURF_DING_DONG");

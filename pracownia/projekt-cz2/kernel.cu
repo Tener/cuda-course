@@ -45,6 +45,50 @@ inline uint RGBA( unsigned char r, unsigned char g, unsigned char b, unsigned ch
     (r << (0 * 8));
 }
 
+__device__ __host__
+float Chebyshev_Pol_N( int N, float x )
+{
+  float arr[CHMUTOV_DEGREE];
+  //  thrust::device_vector< float > arr( N );
+  arr[0] = 1;
+  arr[1] = x;
+#pragma unroll 16
+  for(unsigned int i = 2; i < N; i++)
+    {
+      arr[i] = 2 * x * arr[N-1] - arr[N-2];
+    }
+  return arr[N-1];
+}
+
+template <int N>
+struct Chebyshev_Pol
+{
+  __host__ __device__
+  static float calculate(float x)
+  {
+    float arr[N];
+    arr[0] = 1;
+    arr[1] = x;
+#pragma unroll 16
+    for(unsigned int i = 2; i < N; i++)
+      {
+	arr[i] = 2 * x * arr[N-1] - arr[N-2];
+      }
+    return arr[N-1];
+  }
+};
+
+//inline 
+//__host__ __device__ 
+//float Chebyshev_Pol( int N, float x )
+//{
+//  
+//  if ( N == 0 )
+//    return 1;
+//  if ( N == 1 )
+//    return x;
+//  return 2 * x * Chebyshev_Pol( N-1, x) - Chebyshev_Pol(N-2, x);
+//}
 
     
 // Nice intro to ray tracing:
@@ -120,8 +164,18 @@ struct TracePoint
           return x*x+y*y-z*(1-z*z);
         }
       case SURF_CHMUTOV:
-        // for now - let's choose chebyshev's polynomials
-        return Chebyshev( CHMUTOV_DEGREE, V.x ) + Chebyshev( CHMUTOV_DEGREE, V.y ) + Chebyshev( CHMUTOV_DEGREE, V.z );
+	return Chebyshev( CHMUTOV_DEGREE, V.x ) + Chebyshev( CHMUTOV_DEGREE, V.y ) + Chebyshev( CHMUTOV_DEGREE, V.z );
+
+      case SURF_CHMUTOV_2:
+	return Chebyshev_Pol< CHMUTOV_DEGREE >::calculate(V.x)
+             + Chebyshev_Pol< CHMUTOV_DEGREE >::calculate(V.y)
+             + Chebyshev_Pol< CHMUTOV_DEGREE >::calculate(V.z);
+
+      case SURF_CHMUTOV_3:
+	return Chebyshev_Pol_N( CHMUTOV_DEGREE, V.x)
+	     + Chebyshev_Pol_N( CHMUTOV_DEGREE, V.y)
+	     + Chebyshev_Pol_N( CHMUTOV_DEGREE, V.z);
+
       case SURF_TORUS:
         {
           float c = 3;
