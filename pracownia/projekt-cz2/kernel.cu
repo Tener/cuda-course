@@ -222,8 +222,8 @@ struct TracePoint
 
       case SURF_TORUS:
         {
-          float c = 3;
-          float a = .5;
+          float c = .3;
+          float a = 3;
           return pow(c - x*x + y*y, 2 ) + z*z - a*a;
         }
       case SURF_DIAMOND:
