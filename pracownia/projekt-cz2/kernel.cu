@@ -48,16 +48,16 @@ inline uint RGBA( unsigned char r, unsigned char g, unsigned char b, unsigned ch
 __device__ __host__
 float Chebyshev_Pol_N( int N, float x )
 {
-  float arr[CHMUTOV_DEGREE];
+  float arr[CHMUTOV_DEGREE+1];
   //  thrust::device_vector< float > arr( N );
   arr[0] = 1;
   arr[1] = x;
 #pragma unroll 16
-  for(unsigned int i = 2; i < N; i++)
+  for(unsigned int i = 2; i < N+1; i++)
     {
       arr[i] = 2 * x * arr[i-1] - arr[i-2];
     }
-  return arr[N-1];
+  return arr[N];
 }
 
 template <int N>
@@ -66,15 +66,15 @@ struct Chebyshev_Pol
   __host__ __device__
   static float calculate(float x)
   {
-    float arr[N];
+    float arr[N+1];
     arr[0] = 1;
     arr[1] = x;
 #pragma unroll 16
-    for(unsigned int i = 2; i < N; i++)
+    for(unsigned int i = 2; i < N+1; i++)
       {
 	arr[i] = 2 * x * arr[i-1] - arr[i-2];
       }
-    return arr[N-1];
+    return arr[N];
   }
 };
 
