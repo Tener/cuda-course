@@ -336,6 +336,22 @@ struct TracePoint
 
       if ( sign_has_changed )
      {
+       float step_size_l = step_size;
+#pragma unroll 10
+       for(int i = 0; i < 5; i++)
+	 {
+	   step_size_l /= sign_has_changed ? -2 : 2;
+// 	   if ( sign_has_changed )
+// 	     {
+// 	       step_size *= -1; // if there was a sign change, we swap directions
+// 	     }
+	   //
+	   Ray( Rc, Rtrans, step_size_l );
+	   float tmp = Surface(Rc,surf);
+	   sign_has_changed = SignChangeSlow( val, tmp ); //SignChange( val, tmp );
+	   val = tmp;
+	 }
+
 #define COLOR( p, pmin, pmax ) (10.0f + 240.0f * (p-pmin)/(pmax-pmin) )
 
        return RGBA( COLOR( Rc.x, Vmin.x, Vmax.x ),
