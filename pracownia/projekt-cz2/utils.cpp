@@ -14,6 +14,7 @@ const std::string SurfString( Surf s )
     case SURF_CHMUTOV_2: return std::string("SURF_CHMUTOV_2");
     case SURF_CHMUTOV_3: return std::string("SURF_CHMUTOV_3");
     case SURF_PLANE:	 return std::string("SURF_PLANE");
+    case SURF_HEART:	 return std::string("SURF_HEART");
     case SURF_TORUS:	 return std::string("SURF_TORUS");
     case SURF_DING_DONG: return std::string("SURF_DING_DONG");
     case SURF_CAYLEY:	 return std::string("SURF_CAYLEY");

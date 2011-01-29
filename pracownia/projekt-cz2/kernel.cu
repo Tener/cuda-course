@@ -328,6 +328,9 @@ struct TracePoint
 	     + Chebyshev_DiVar< CHMUTOV_DEGREE >::calculate(V.y)
 	     + Chebyshev_DiVar< CHMUTOV_DEGREE >::calculate(V.z);
 
+      case SURF_HEART:
+        return pow(2*x*x+y*y+z*z-1,3) - (0.1*x*x+y*y)*z*z*z;
+
 //        return Chebyshev_Pol_N( CHMUTOV_DEGREE, V.x)
 //             + Chebyshev_Pol_N( CHMUTOV_DEGREE, V.y)
 //             + Chebyshev_Pol_N( CHMUTOV_DEGREE, V.z);
