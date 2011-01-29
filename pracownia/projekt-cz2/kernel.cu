@@ -253,6 +253,10 @@ struct TracePoint
         {
           return sqrt(x * x + y * y + z * z) - 1;
         }
+      case SURF_CAYLEY:
+        {
+          return -5 * (x * x * (y + z) + y * y * (x + z) + z * z * (x + y)) + 2 * (x * y + y * x + x * z);
+        }
       }
 
     return 0;
