@@ -127,6 +127,52 @@ struct Chebyshev_T< 1 >
   };
 };
 
+template <int N>
+struct Chebyshev_U
+{
+  __host__ __device__
+  static float calculate(float x)
+  { 
+    return 2 * x * Chebyshev_U< N-1 >::calculate(x) - Chebyshev_U< N-2 >::calculate(x);
+  };
+};
+
+template <>
+struct Chebyshev_U< 0 >
+{
+  __host__ __device__
+  static float calculate(float x)
+  { 
+    return 1;
+  };
+};
+
+template <>
+struct Chebyshev_U< 1 >
+{
+  __host__ __device__
+  static float calculate(float x)
+  { 
+    return 2*x;
+  };
+};
+
+__host__ __device__
+float VecMagnitude(float x, float y, float z)
+{
+  return sqrt(x*x+y*y+z*z);
+}
+
+__host__ __device__
+float DotProduct(float a_x, float a_y, float a_z,
+                 float b_x, float b_y, float b_z)
+{
+  return 
+    (a_x * b_x +
+     a_y * b_y +
+     a_z * b_z)
+    / (VecMagnitude( a_x, a_y, a_z ) * VecMagnitude( b_x, b_y, b_z ));
+}
 
 //inline 
 //__host__ __device__ 
@@ -211,7 +257,46 @@ struct TracePoint
 
   __host__ __device__
   inline
-  float Surface(float3 V,enum Surf surf_id)
+  uint Gradient(float3 V, Surf surf_id)
+  {
+    switch ( surf_id )
+      {
+      case SURF_CHMUTOV_1:
+        
+//        printf("color(%f,%f,%f)\n", 
+//               Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.x ),
+//               Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.y ),
+//               Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.z ));
+
+        //float3 Light = make_float( 1, 0, 0 );
+	return RGBA( 30 + 100 + 100 * DotProduct( 1, 0, 0 ,
+                                                  Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.x ),
+                                                  Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.y ),
+                                                  Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.z )),
+                     0, 0,
+//                     30 + 100 + 100 * DotProduct( 0, 1, 0 ,
+//                                                  Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.x ),
+//                                                  Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.y ),
+//                                                  Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.z )),
+//                     30 + 100 + 100 * DotProduct( 0, 0, 1 ,
+//                                                  Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.x ),
+//                                                  Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.y ),
+//                                                  Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.z )),
+                     0 );
+      }
+
+#define EXPDAMP( p ) (10.0f + 240.0f * (expf(-fabsf(p))))
+    return RGBA( EXPDAMP( V.x ),
+                 EXPDAMP( V.y ),
+                 EXPDAMP( V.z ),
+                 0);
+#undef EXPDAMP
+
+  }
+
+  __host__ __device__
+  inline
+  float Surface(float3 V, Surf surf_id)
   {
     float x, y, z;
     x = V.x; y = V.y; z = V.z;
@@ -383,12 +468,7 @@ struct TracePoint
 	   val = tmp;
 	 }
 
-#define EXPDAMP( p ) (10.0f + 240.0f * (expf(-fabsf(p))))
-       return RGBA( EXPDAMP( Rc.x ),
-                    EXPDAMP( Rc.y ),
-                    EXPDAMP( Rc.z ),
-                    0);
-
+       return Gradient(Rc,surf);
 
 //#define COLOR( p, pmin, pmax ) (10.0f + 240.0f * fabs((p-pmin)/(pmax-pmin)) )
 // 
