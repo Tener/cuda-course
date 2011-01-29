@@ -378,14 +378,21 @@ struct TracePoint
 	   val = tmp;
 	 }
 
-#define COLOR( p, pmin, pmax ) (10.0f + 240.0f * (p-pmin)/(pmax-pmin) )
+#define EXPDAMP( p ) (10.0f + 240.0f * (expf(-fabsf(p))))
+       return RGBA( EXPDAMP( Rc.x ),
+                    EXPDAMP( Rc.y ),
+                    EXPDAMP( Rc.z ),
+                    0);
 
-       return RGBA( COLOR( Rc.x, Vmin.x, Vmax.x ),
-		    COLOR( Rc.y, Vmin.y, Vmax.y ),
-		    COLOR( Rc.z, Vmin.z, Vmax.z ),
-		    0);
 
-#undef COLOR
+//#define COLOR( p, pmin, pmax ) (10.0f + 240.0f * fabs((p-pmin)/(pmax-pmin)) )
+// 
+//       return RGBA( COLOR( Rc.x, Vmin.x, Vmax.x ),
+//        	    COLOR( Rc.y, Vmin.y, Vmax.y ),
+//        	    COLOR( Rc.z, Vmin.z, Vmax.z ),
+//        	    0);
+// 
+//#undef COLOR
  
 
 //#define TRANS( x ) fabs(240 * (x + 1) / 2)
