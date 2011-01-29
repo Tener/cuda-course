@@ -175,13 +175,18 @@ struct TracePoint
       bisect_count(v.bisect_count),
       R0(v.StartingPoint),
       Rd(v.DirectionVector),
-      range_w(v.range_w),
-      range_h(v.range_h),
+//      range_w(v.range_w),
+//      range_h(v.range_h),
       step_size(sqrt(pow(R0.x - Rd.x,2) + 
 		     pow(R0.y - Rd.y,2) + 
 		     pow(R0.z - Rd.z,2)) / steps),
       Rtrans(make_float3( R0.x - Rd.x, R0.y - Rd.y, R0.z - Rd.z ))
   { 
+    range_w = sqrt(pow(R0.x - Rd.x,2) + 
+                   pow(R0.y - Rd.y,2) + 
+                   pow(R0.z - Rd.z,2)) / 2;
+    range_h = range_w;
+
     Vmin.x = R0.x - range_w;
     Vmin.y = R0.y - range_h;
     Vmin.z = R0.z;
