@@ -157,13 +157,13 @@ struct TracePoint
   
   float3 Rtrans;
 
+
   // bounding box
   float range_w;
   float range_h;
 
   // Vmin, Vmax, Vdiff;
   float3 Vmin, Vmax, Vdiff;
-
   float step_size;
   
   TracePoint(int w, int h, 
@@ -371,7 +371,7 @@ struct TracePoint
 #pragma unroll 10
        for(int i = 0; i < bisect_count; i++)
 	 {
-	   step_size_l /= sign_has_changed ? -2 : 2;
+	   step_size_l /= 2 * (1 + (sign_has_changed * -2 ));
 // 	   if ( sign_has_changed )
 // 	     {
 // 	       step_size *= -1; // if there was a sign change, we swap directions
@@ -379,7 +379,7 @@ struct TracePoint
 	   //
 	   Ray( Rc, Rtrans, step_size_l );
 	   float tmp = Surface(Rc,surf);
-	   sign_has_changed = SignChangeSlow( val, tmp ); //SignChange( val, tmp );
+	   sign_has_changed = SignChangeBit( val, tmp ); //SignChange( val, tmp );
 	   val = tmp;
 	 }
 
