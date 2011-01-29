@@ -150,6 +150,8 @@ struct TracePoint
   int w; int h; int ix_h;
   Surf surf;
   int steps;
+  int bisect_count;
+  
   float3 R0;
   float3 Rd;
   
@@ -170,6 +172,7 @@ struct TracePoint
     : w(w), h(h), ix_h(ix_h), 
       surf(v.surf),
       steps(v.steps),
+      bisect_count(v.bisect_count),
       R0(v.StartingPoint),
       Rd(v.DirectionVector),
       range_w(v.range_w),
@@ -361,7 +364,7 @@ struct TracePoint
      {
        float step_size_l = step_size;
 #pragma unroll 10
-       for(int i = 0; i < 5; i++)
+       for(int i = 0; i < bisect_count; i++)
 	 {
 	   step_size_l /= sign_has_changed ? -2 : 2;
 // 	   if ( sign_has_changed )

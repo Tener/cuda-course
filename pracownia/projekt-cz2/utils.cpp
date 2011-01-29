@@ -33,6 +33,7 @@ void PrintVector( const float3 & Vec, char * name, std::ostream & out )
 void PrintView( View v, std::ostream & out)
 {
   out << "steps=" << v.steps << std::endl;
+  out << "bisect_count=" << v.bisect_count << std::endl;
   out << "surf=" << v.surf << "=" << SurfString(v.surf) << std::endl;
   PrintVector( v.StartingPoint, "start", out ); // what point is the center of our view?
   PrintVector( v.DirectionVector, "dirVec", out ); // in which direction and how far does it reach?

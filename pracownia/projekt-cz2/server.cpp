@@ -56,6 +56,7 @@ std::string parseLine(std::string data)
              << ("dirvec") << sep
              << ("start") << sep 
              << ("steps") << sep 
+             << ("bisect") << sep 
              << ("surf") << sep 
              << ("range_w") << sep
              << ("rw") << sep
@@ -135,6 +136,15 @@ std::string parseLine(std::string data)
           int x;
           x = (int)boost::lexical_cast< float >( strs[1] );
           currentView->steps = x;
+        }
+
+      if( boost::starts_with( std::string("bisect"), strs[0] ) )
+        {
+          if (strs.size() < 1+1) return "ARG???\n";
+
+          int x;
+          x = (int)boost::lexical_cast< float >( strs[1] );
+          currentView->bisect_count = x;
         }
 
       if( boost::starts_with( std::string("surf"), strs[0] ) )
