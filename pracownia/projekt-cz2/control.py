@@ -1,7 +1,8 @@
 #!/usr/bin/env python2
 
 # example rulers.py
-
+import sys
+        
 import pygtk
 pygtk.require('2.0')
 import gtk
@@ -24,16 +25,17 @@ class MultiRuler:
         window.set_size_request(self.XSIZE, self.YSIZE)
 
     
-        labels_and_ranges = [("start.x", (-100, 100, 0, 100)),
-                             ("start.y", (-100, 100, 0, 100)),
-                             ("start.z", (-100, 100, 0, 100)),
-                             ("dirvec.x", (-100, 100, 0, 100)),
-                             ("dirvec.y", (-100, 100, 0, 100)),
-                             ("dirvec.z", (-100, 100, 0, 100)),
+        labels_and_ranges = [("start.x", (-10, 10, 0, 10)),
+                             ("start.y", (-10, 10, 0, 10)),
+                             ("start.z", (-10, 10, 0, 10)),
+                             ("dirvec.x", (-10, 10, 0, 10)),
+                             ("dirvec.y", (-10, 10, 0, 10)),
+                             ("dirvec.z", (-10, 10, 0, 10)),
                              ("steps", (100, 5000, 500, 5000)),
-                             ("rr", (0, 100, 0, 100)),
-                             ("range_w", (0, 100, 0, 100)),
-                             ("range_h", (0, 100, 0, 100)),
+                             ("bisect", (0, 10, 0, 10)),
+                             ("rr", (0, 10, 0, 10)),
+                             ("range_w", (0, 10, 0, 10)),
+                             ("range_h", (0, 10, 0, 10)),
                              ("surf", (1, 12, 12, 12))
                              ]
 
@@ -60,7 +62,11 @@ class MultiRuler:
                 #print (range_,ii,ll)
                 msg = (ll + " " + val_fmt)
                 print msg
-                connection.write(msg)
+                try:
+                    connection.write(msg)
+                except:
+                    window.emit("destroy")
+                    gtk.main_quit()
                 rows[ii][0].set_text(ll + " = " + val_fmt)
                 
                 return False
@@ -101,13 +107,13 @@ def listener(connection):
             
 
 if __name__ == "__main__":
-    import sys
-    connection = sys.stdout
-    try:
-        connection = telnetlib.Telnet("localhost",4000)
-        thread.start_new_thread( listener, (connection,) )
-    except:
-        pass
-    
-    MultiRuler(connection)
-    main()
+    while True:
+        try:
+            connection = telnetlib.Telnet("localhost",4000)
+            thread.start_new_thread( listener, (connection,) )
+            MultiRuler(connection)
+            main()
+        except:
+            print "Couldn't connect, retrying in 1 sec..."
+            time.sleep(1)
+            
