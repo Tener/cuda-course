@@ -61,6 +61,25 @@ float Chebyshev_Pol_N( int N, float x )
 }
 
 template <int N>
+struct Chebyshev_DiVar
+{
+  __host__ __device__
+  static float calculate(float x)
+  {
+    float arr_0 = 1;
+    float arr_1 = x;
+#pragma unroll 16
+    for(unsigned int i = 1; i < N/2; i++)
+      {
+        arr_0 = 2 * x * arr_0 - arr_1;
+        arr_1 = 2 * x * arr_1 - arr_0;
+      }
+    return arr_0;
+  }
+};
+
+
+template <int N>
 struct Chebyshev_Pol
 {
   __host__ __device__
@@ -212,9 +231,9 @@ struct TracePoint
              + Chebyshev_Pol< CHMUTOV_DEGREE >::calculate(V.z);
 
       case SURF_CHMUTOV_3:
-	return Chebyshev_Pol< CHMUTOV_DEGREE >::calculate(V.x)
-	     + Chebyshev_Pol< CHMUTOV_DEGREE >::calculate(V.y)
-	     + Chebyshev_Pol< CHMUTOV_DEGREE >::calculate(V.z);
+	return Chebyshev_DiVar< CHMUTOV_DEGREE >::calculate(V.x)
+	     + Chebyshev_DiVar< CHMUTOV_DEGREE >::calculate(V.y)
+	     + Chebyshev_DiVar< CHMUTOV_DEGREE >::calculate(V.z);
 
 //        return Chebyshev_Pol_N( CHMUTOV_DEGREE, V.x)
 //             + Chebyshev_Pol_N( CHMUTOV_DEGREE, V.y)
