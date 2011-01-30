@@ -80,6 +80,11 @@ class MultiRuler:
         table.show()
         window.show()
 
+def getSurfaces():
+    surf_def = filter( lambda s: s.startswith('SURF_'), open('surf.h').read().replace(',',' ').split() )
+    return surf_def
+    
+
 def main():
     gtk.main()
     return 0
