@@ -12,11 +12,9 @@ struct View
   float range_w;
   float range_h;
 
-View( Surf s = SURF_CHMUTOV_1, 
-//      float3 start = make_float3( 0, 0, -100 ), 
-//      float3 dirvec = make_float3(0,0,1), 
-      float3 start = make_float3( 3.6, 0.65, -0.21 ), 
-      float3 dirvec = make_float3(4.9,5.7,4.9), 
+View( Surf s = SURF_CHMUTOV_1,
+      float3 start = make_float3( 2.2, 1.9, 1.7 ), 
+      float3 dirvec = make_float3(7.1,5.7,4.9), 
       int steps = 500,
       float range_w = 8,
       float range_h = 8,
