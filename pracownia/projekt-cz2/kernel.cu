@@ -304,16 +304,7 @@ struct TracePoint
                                                   Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.x ),
                                                   Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.y ),
                                                   Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.z )),
-                     0, 0,
-//                     30 + 100 + 100 * DotProduct( 0, 1, 0 ,
-//                                                  Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.x ),
-//                                                  Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.y ),
-//                                                  Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.z )),
-//                     30 + 100 + 100 * DotProduct( 0, 0, 1 ,
-//                                                  Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.x ),
-//                                                  Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.y ),
-//                                                  Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.z )),
-                     0 );
+                     0, 0, 0 );
       }
 
 #define EXPDAMP( p ) (10.0f + 240.0f * (expf(-fabsf(p))))
