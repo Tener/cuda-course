@@ -107,13 +107,14 @@ def listener(connection):
             
 
 if __name__ == "__main__":
+    import socket
     while True:
         try:
             connection = telnetlib.Telnet("localhost",4000)
             thread.start_new_thread( listener, (connection,) )
             MultiRuler(connection)
             main()
-        except:
+        except socket.error:
             print "Couldn't connect, retrying in 1 sec..."
             time.sleep(1)
             
