@@ -186,7 +186,38 @@ float DotProduct(float a_x, float a_y, float a_z,
 //  return 2 * x * Chebyshev_Pol(N-1, x) - Chebyshev_Pol(N-2, x);
 //}
 
+template < typename dom = float >
+struct Polynomial
+{
+  __host__ __device__
+  // n is a degree of a polynomial, which means coeff array have n+1 elements
+  static dom evaluate( int n, dom * coeff, dom x )
+  {
+    dom res = 0;
+    int i = n;
+    while(i >= 0)
+      {
+        res *= x;
+        res += coeff[i];
+        i--;
+      }
+    return res;
+  }
 
+  __host__ __device__
+  static dom derivative( int n, dom * coeff, dom x )
+  {
+    dom res = 0;
+    int i = n;
+    while(i >= 1)
+      {
+        res *= x;
+        res += coeff[i] + i;
+        i--;
+      }
+    return res;
+  }
+};
     
 // Nice intro to ray tracing:
 // http://www.siggraph.org/education/materials/HyperGraph/raytrace/rtinter0.htm
