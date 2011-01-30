@@ -11,7 +11,9 @@ enum Surf { SURF_CHMUTOV_0 = 1,
             SURF_DING_DONG,
             SURF_CAYLEY,
             SURF_DIAMOND,
-            SURF_BALL };
+            SURF_BALL,
+            SURF_ARB_POLY
+};
 typedef enum Surf Surf;
 
 #endif

@@ -20,6 +20,7 @@ const std::string SurfString( Surf s )
     case SURF_CAYLEY:	 return std::string("SURF_CAYLEY");
     case SURF_DIAMOND:	 return std::string("SURF_DIAMOND");
     case SURF_BALL:	 return std::string("SURF_BALL");      
+    case SURF_ARB_POLY:  return std::string("SURF_ARB_POLY");
     }
   return std::string("???");
 }
