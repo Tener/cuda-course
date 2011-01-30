@@ -77,6 +77,28 @@ class MultiRuler:
             hrule.show()
 
             rows.append( (label,hrule) )
+
+        # Combo for surfaces
+        pos = len(labels_and_ranges)+2
+        
+        combobox = gtk.combo_box_new_text()
+        slist = getSurfaces()
+        for el in slist:
+            combobox.append_text(el)
+
+        def combobox_changed(combobox):
+            model = combobox.get_model()
+            index = combobox.get_active()
+            print 'I like', model[index][0], 'pie'
+            return
+            
+        combobox.connect('changed', combobox_changed)
+        combobox.set_active(0)
+        combobox.show()
+        #window.add(combobox)
+        table.attach( combobox, 1, 2, pos-2, pos-1, gtk.EXPAND|gtk.SHRINK|gtk.FILL, gtk.FILL, 0, 0 )
+        
+        # show
         table.show()
         window.show()
 
