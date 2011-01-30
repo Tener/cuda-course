@@ -186,34 +186,51 @@ float DotProduct(float a_x, float a_y, float a_z,
 //  return 2 * x * Chebyshev_Pol(N-1, x) - Chebyshev_Pol(N-2, x);
 //}
 
-template < typename dom = float >
+template < typename dom = float, int N = 18 >
 struct Polynomial
 {
-  __host__ __device__
   // n is a degree of a polynomial, which means coeff array have n+1 elements
-  static dom evaluate( int n, dom * coeff, dom x )
+  dom coeff[N+1];
+  dom coeff_der[N];
+  Polynomial( dom coeff_p[N+1] )
+  {
+    for(int i = 0; i < N+1; i++)
+      {
+        coeff[i] = coeff_p[i];
+        if ( i )
+          {
+            coeff_der[i-1] = coeff_p[i] * i;
+          }
+      }
+  }
+
+  // default constructor
+  Polynomial()
+  {
+  }
+
+  __host__ __device__
+  dom evaluate( dom x )
   {
     dom res = 0;
-    int i = n;
-    while(i >= 0)
+#pragma unroll 18
+    for(int i = 0; i < N+1; i++)
       {
         res *= x;
-        res += coeff[i];
-        i--;
+        res += coeff[N+1-i];
       }
     return res;
   }
 
   __host__ __device__
-  static dom derivative( int n, dom * coeff, dom x )
+  dom derivative(dom x)
   {
     dom res = 0;
-    int i = n;
-    while(i >= 1)
+#pragma unroll 18
+    for(int i = 0; i < N; i++)
       {
         res *= x;
-        res += coeff[i] + i;
-        i--;
+        res += coeff_der[N-i];
       }
     return res;
   }
