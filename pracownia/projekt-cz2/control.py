@@ -8,7 +8,8 @@ pygtk.require('2.0')
 import gtk
 
 import thread, telnetlib, time
-
+import socket
+    
 class MultiRuler:
     XSIZE = 450
     YSIZE = 450
@@ -23,60 +24,57 @@ class MultiRuler:
         window.connect("delete_event", self.close_application)
         window.set_border_width(10)
         window.set_size_request(self.XSIZE, self.YSIZE)
+        window.set_property("resizable",False)
+        window.set_property("allow_grow",True)
 
     
-        labels_and_ranges = [("start.x", (-10, 10, 0, 10)),
-                             ("start.y", (-10, 10, 0, 10)),
-                             ("start.z", (-10, 10, 0, 10)),
-                             ("dirvec.x", (-10, 10, 0, 10)),
-                             ("dirvec.y", (-10, 10, 0, 10)),
-                             ("dirvec.z", (-10, 10, 0, 10)),
-                             ("steps", (100, 5000, 500, 5000)),
-                             ("bisect", (0, 10, 0, 10)),
+        labels_and_ranges = [("start.x", (-10, 10, 0, 0.01)),
+                             ("start.y", (-10, 10, 0, 0.01)),
+                             ("start.z", (-10, 10, 0, 0.01)),
+                             ("dirvec.x", (-10, 10, 0, 0.01)),
+                             ("dirvec.y", (-10, 10, 0, 0.01)),
+                             ("dirvec.z", (-10, 10, 0, 0.01)),
+                             ("steps", (100, 5000, 500, 1)),
+                             ("bisect", (0, 10, 0, 1)),
  #                            ("rr", (0, 10, 0, 10)),
  #                            ("range_w", (0, 10, 0, 10)),
  #                            ("range_h", (0, 10, 0, 10)),
 #                             ("surf", (1, 12, 12, 12))
                              ]
 
-        # Create a table for placing the ruler and the drawing area
+        # Create a table
         table = gtk.Table(len(labels_and_ranges)+1+3, 2, True)
         window.add(table)
 
-        rows = []
-        for (i,(l,rang)) in enumerate(labels_and_ranges):
-            hrule = gtk.HRuler()
-            hrule.set_metric(gtk.PIXELS)
-#           hrule.set_range(-100, 100, 0, 100)
-            hrule.set_range(rang[0],rang[1],rang[2],rang[3])
+        for (i,(label_txt,(r_low, r_high, r_def, step_inc))) in enumerate(labels_and_ranges):
+            page_size = 1
+            adj = gtk.Adjustment(r_def, r_low, r_high, step_inc, page_size)
+            scale = gtk.HScale(adj)
 
-
-            label = gtk.Label()
-            label.set_text(l + "= ???")
-            table.attach(label, 0, 1, i, i+1, gtk.SHRINK|gtk.FILL, gtk.FILL, 0, 0 )
-            label.show()
-
-            def motion_notify(ruler, event, (ii,ll)):
-                range_ = ruler.get_range()
-                val_fmt = ("%0.2f" % range_[2])
-                #print (range_,ii,ll)
-                msg = (ll + " " + val_fmt)
-                print msg
+            def update_value(adj, (window,param)):
                 try:
+                    msg = param + " " + str(adj.value) + "\n"
+                    sys.stdout.write(msg)
+                    sys.stdout.flush()
                     connection.write(msg)
-                except:
+                    #help(connection)
+                    #connection.flush()
+                except socket.error:
+                    print "Connection lost..."
+                    window.hide_all()
                     window.emit("destroy")
                     gtk.main_quit()
-                rows[ii][0].set_text(ll + " = " + val_fmt)
-                
-                return False
 
-            table.attach(hrule, 1, 2, i, i+1, gtk.EXPAND|gtk.SHRINK|gtk.FILL, gtk.FILL, 0, 0 )
+            adj.connect("value_changed", update_value, (window,label_txt))
 
-            hrule.connect("motion_notify_event", motion_notify, (i,l))
-            hrule.show()
+            label = gtk.Label()
+            label.set_text(label_txt)
 
-            rows.append( (label,hrule) )
+            table.attach(label, 0, 1, i, i+1, gtk.SHRINK|gtk.FILL, gtk.FILL, 0, 0 )
+            table.attach(scale, 1, 2, i, i+1, gtk.EXPAND|gtk.SHRINK|gtk.FILL, gtk.FILL, 0, 0 )
+
+            label.show()
+            scale.show()
 
         # Combo for surfaces
         pos = len(labels_and_ranges)+2
@@ -109,7 +107,7 @@ def getSurfaces():
 
 def main():
     gtk.main()
-    return 0
+
 
 ## 
 ##COMMANDS: 
@@ -124,22 +122,36 @@ def main():
 ##        rh
 ##        rr
 
-def listener(connection):
+
+def listener(connection_lock, connection):
     while True:
-        data = connection.read_eager()
-        if data:
-            print data
-            sys.stdout.flush()
-        else:
-            time.sleep(0.01)
+
+        if not connection_lock.acquire(0):
+            print "connection lock acquired by main thread, exit now"
+            return
+        connection_lock.release()
+
+        try:
+                data = connection.read_eager()
+                if data:
+                    print data
+                    sys.stdout.flush()
+                else:
+                    time.sleep(0.01)
+        except EOFError:
+            print "EOFError occured, connection closed"
+            return
             
 
 if __name__ == "__main__":
-    import socket
+    connection_lock = thread.allocate_lock()
+    
     while True:
         try:
-            connection = telnetlib.Telnet("localhost",4000)
-            thread.start_new_thread( listener, (connection,) )
+            connection = None
+            with connection_lock:
+                connection = telnetlib.Telnet("localhost",4000)
+            thread.start_new_thread( listener, (connection_lock, connection) )
             MultiRuler(connection)
             main()
         except socket.error:
