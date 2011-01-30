@@ -102,6 +102,7 @@ def listener(connection):
         data = connection.read_eager()
         if data:
             print data
+            sys.stdout.flush()
         else:
             time.sleep(0.01)
             
