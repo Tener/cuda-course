@@ -33,10 +33,10 @@ class MultiRuler:
                              ("dirvec.z", (-10, 10, 0, 10)),
                              ("steps", (100, 5000, 500, 5000)),
                              ("bisect", (0, 10, 0, 10)),
-                             ("rr", (0, 10, 0, 10)),
-                             ("range_w", (0, 10, 0, 10)),
-                             ("range_h", (0, 10, 0, 10)),
-                             ("surf", (1, 12, 12, 12))
+ #                            ("rr", (0, 10, 0, 10)),
+ #                            ("range_w", (0, 10, 0, 10)),
+ #                            ("range_h", (0, 10, 0, 10)),
+#                             ("surf", (1, 12, 12, 12))
                              ]
 
         # Create a table for placing the ruler and the drawing area
