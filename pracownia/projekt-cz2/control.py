@@ -40,7 +40,7 @@ class MultiRuler:
                              ]
 
         # Create a table for placing the ruler and the drawing area
-        table = gtk.Table(2*len(labels_and_ranges)+1, 2, True)
+        table = gtk.Table(len(labels_and_ranges)+1+3, 2, True)
         window.add(table)
 
         rows = []
@@ -53,7 +53,7 @@ class MultiRuler:
 
             label = gtk.Label()
             label.set_text(l + "= ???")
-            table.attach(label, 0, 1, 2*i, 2*i+1, gtk.SHRINK|gtk.FILL, gtk.FILL, 0, 0 )
+            table.attach(label, 0, 1, i, i+1, gtk.SHRINK|gtk.FILL, gtk.FILL, 0, 0 )
             label.show()
 
             def motion_notify(ruler, event, (ii,ll)):
@@ -71,7 +71,7 @@ class MultiRuler:
                 
                 return False
 
-            table.attach(hrule, 1, 2, 2*i, 2*i+1, gtk.EXPAND|gtk.SHRINK|gtk.FILL, gtk.FILL, 0, 0 )
+            table.attach(hrule, 1, 2, i, i+1, gtk.EXPAND|gtk.SHRINK|gtk.FILL, gtk.FILL, 0, 0 )
 
             hrule.connect("motion_notify_event", motion_notify, (i,l))
             hrule.show()
