@@ -5,6 +5,7 @@ import sys
         
 import pygtk
 pygtk.require('2.0')
+
 import gtk
 
 import thread, telnetlib, time
@@ -18,6 +19,27 @@ class MultiRuler:
     def close_application(self, widget, event, data=None):
         gtk.main_quit()
         return False
+
+    def send_msg(self, msg):
+        try:
+            sys.stdout.write(msg)
+            sys.stdout.flush()
+            connection.write(msg)
+        except socket.error:
+            print "Connection lost..."
+            self.window.hide_all()
+            self.window.emit("destroy")
+            gtk.main_quit()
+
+    def update_value(self, adj, param):
+        msg = param + " " + str(adj.value) + "\n"
+        self.send_msg(msg)
+
+    def surface_combobox_changed(self, combobox):
+        model = combobox.get_model()
+        index = combobox.get_active()
+        msg = "surf " + str(index)
+        self.send_msg(msg)
 
     def __init__(self, connection):
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
@@ -53,21 +75,7 @@ class MultiRuler:
             adj = gtk.Adjustment(r_def, r_low, r_high, step_inc, page_size)
             scale = gtk.HScale(adj)
 
-            def update_value(adj, (window,param)):
-                try:
-                    msg = param + " " + str(adj.value) + "\n"
-                    sys.stdout.write(msg)
-                    sys.stdout.flush()
-                    connection.write(msg)
-                    #help(connection)
-                    #connection.flush()
-                except socket.error:
-                    print "Connection lost..."
-                    window.hide_all()
-                    window.emit("destroy")
-                    gtk.main_quit()
-
-            adj.connect("value_changed", update_value, (window,label_txt))
+            adj.connect("value_changed", self.update_value, label_txt)
 
             label = gtk.Label()
             label.set_text(label_txt)
@@ -85,17 +93,10 @@ class MultiRuler:
         slist = getSurfaces()
         for el in slist:
             combobox.append_text(el)
-
-        def combobox_changed(combobox):
-            model = combobox.get_model()
-            index = combobox.get_active()
-            print 'I like', model[index][0], 'pie'
-            return
             
-        combobox.connect('changed', combobox_changed)
+        combobox.connect('changed', self.surface_combobox_changed)
         combobox.set_active(0)
         combobox.show()
-        #window.add(combobox)
         table.attach( combobox, 1, 2, pos-2, pos-1, gtk.EXPAND|gtk.SHRINK|gtk.FILL, gtk.FILL, 0, 0 )
         
         # show
