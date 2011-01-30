@@ -325,18 +325,27 @@ struct TracePoint
     switch ( surf_id )
       {
       case SURF_CHMUTOV_1:
-        
-//        printf("color(%f,%f,%f)\n", 
-//               Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.x ),
-//               Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.y ),
-//               Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.z ));
-
-        //float3 Light = make_float( 1, 0, 0 );
-	return RGBA( 30 + 100 + 100 * DotProduct( 1, 0, 0 ,
-                                                  Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.x ),
-                                                  Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.y ),
-                                                  Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.z )),
-                     0, 0, 0 );
+        {
+          //float3 Light = make_float( 1, 0, 0 );
+          float dot_pr = DotProduct( 1, 0, 0 ,
+                                     Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.x ),
+                                     Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.y ),
+                                     Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.z ));
+          
+          return RGBA( 30 + 100 + 100 * dot_pr,
+                       0, 0, 0 );
+        }
+      case SURF_ARB_POLY:
+        {
+          //float3 Light = make_float( 1, 0, 0 );
+          float dot_pr = DotProduct( 1, 0, 0 ,
+                                     poly_surf[0].derivative(V.x),
+                                     poly_surf[1].derivative(V.y),
+                                     poly_surf[2].derivative(V.z));
+          
+          return RGBA( 30 + 100 + 100 * dot_pr,
+                       0, 0, 0 );        
+        }
       }
 
 #define EXPDAMP( p ) (10.0f + 240.0f * (expf(-fabsf(p))))
@@ -357,6 +366,14 @@ struct TracePoint
 
     switch ( surf_id )
       {
+      case SURF_ARB_POLY:
+        {
+          return 
+            poly_surf[0].evaluate(V.x) + 
+            poly_surf[1].evaluate(V.y) + 
+            poly_surf[2].evaluate(V.z);
+        }
+
       case SURF_DING_DONG:
         {
           return x*x+y*y-z*(1-z*z);
