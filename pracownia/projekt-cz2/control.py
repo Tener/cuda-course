@@ -152,6 +152,7 @@ if __name__ == "__main__":
         try:
             connection = None
             with connection_lock:
+                time.sleep(0.5)
                 connection = telnetlib.Telnet("localhost",4000)
             thread.start_new_thread( listener, (connection_lock, connection) )
             MultiRuler(connection)
