@@ -23,10 +23,12 @@ class MultiRuler:
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         window.connect("delete_event", self.close_application)
         window.set_border_width(10)
-        window.set_size_request(self.XSIZE, self.YSIZE)
         window.set_property("resizable",False)
         window.set_property("allow_grow",True)
+        window.set_geometry_hints( min_width = self.XSIZE, min_height = self.YSIZE,
+                                   max_width = self.XSIZE, max_height = self.YSIZE)
 
+        self.window = window
     
         labels_and_ranges = [("start.x", (-10, 10, 0, 0.01)),
                              ("start.y", (-10, 10, 0, 0.01)),
