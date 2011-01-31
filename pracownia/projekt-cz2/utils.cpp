@@ -39,7 +39,5 @@ void PrintView( View v, std::ostream & out)
   out << "surf=" << v.surf << "=" << SurfString(v.surf) << std::endl;
   PrintVector( v.StartingPoint, "start", out ); // what point is the center of our view?
   PrintVector( v.DirectionVector, "dirVec", out ); // in which direction and how far does it reach?
-  out << "range_w=" << v.range_w << std::endl;
-  out << "range_h=" << v.range_h << std::endl;
 
 }

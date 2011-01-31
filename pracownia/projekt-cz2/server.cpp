@@ -152,36 +152,6 @@ std::string parseLine(std::string data)
           if (strs.size() < 1+1) return "ARG???\n";
           currentView->surf = (Surf)(int)boost::lexical_cast< float >( strs[1] );
         }
-
-      if( ( boost::starts_with( std::string("range_w"), strs[0] ) )
-          || ( boost::starts_with( std::string("rw"), strs[0] ) )) 
-        {
-          if (strs.size() < 1+1) return "ARG???\n";
-
-          float x;
-          x = boost::lexical_cast< float >( strs[1] );
-          currentView->range_w = x;
-        }
-
-      if( ( boost::starts_with( std::string("range_h"), strs[0] ) )
-          || ( boost::starts_with( std::string("rh"), strs[0] ) )) 
-        {
-          if (strs.size() < 1+1) return "ARG???\n";
-
-          float x;
-          x = boost::lexical_cast< float >( strs[1] );
-          currentView->range_h = x;
-        }
-
-      if( ( boost::starts_with( std::string("rr"), strs[0] ) ) )
-        {
-          if (strs.size() < 1+1) return "ARG???\n";
-
-          float x;
-          x = boost::lexical_cast< float >( strs[1] );
-          currentView->range_h = x;
-          currentView->range_w = x;
-        }
     }
   catch ( std::exception & e )
     {

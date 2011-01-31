@@ -31,137 +31,15 @@
 #include "common.hpp"
 #include "graphics.hpp"
 
+#include "polynomial.hpp"
 #include "utils.hpp"
-
 #define CHMUTOV_DEGREE 16
+#include "chebyshev.hpp"
 
-__host__ __device__
-inline uint RGBA( unsigned char r, unsigned char g, unsigned char b, unsigned char a )
-{ 
-  return 
-    (a << (3 * 8)) + 
-    (b << (2 * 8)) +
-    (g << (1 * 8)) +
-    (r << (0 * 8));
-}
+#include "colors.hpp"
+#include "sign_change.hpp"
+#include "surface.hpp"
 
-__device__ __host__
-float Chebyshev_Pol_N( int N, float x )
-{
-  float arr[CHMUTOV_DEGREE+1];
-  //  thrust::device_vector< float > arr( N );
-  arr[0] = 1;
-  arr[1] = x;
-#pragma unroll 16
-  for(unsigned int i = 2; i < N+1; i++)
-    {
-      arr[i] = 2 * x * arr[i-1] - arr[i-2];
-    }
-  return arr[N];
-}
-
-template <int N>
-struct Chebyshev_DiVar
-{
-  __host__ __device__
-  static float calculate(float x)
-  {
-    float arr_0 = 1;
-    float arr_1 = x;
-#pragma unroll 16
-    for(unsigned int i = 1; i < N/2; i++)
-      {
-        arr_0 = 2 * x * arr_0 - arr_1;
-        arr_1 = 2 * x * arr_1 - arr_0;
-      }
-    return arr_0;
-  }
-};
-
-
-template <int N>
-struct Chebyshev_Pol
-{
-  __host__ __device__
-  static float calculate(float x)
-  {
-    float arr[N+1];
-    arr[0] = 1;
-    arr[1] = x;
-#pragma unroll 16
-    for(unsigned int i = 2; i < N+1; i++)
-      {
-	arr[i] = 2 * x * arr[i-1] - arr[i-2];
-      }
-    return arr[N];
-  }
-};
-
-template <int N>
-struct Chebyshev_T
-{
-  __host__ __device__
-  static float calculate(float x)
-  { 
-    return 2 * x * Chebyshev_T< N-1 >::calculate(x) - Chebyshev_T< N-2 >::calculate(x);
-  };
-};
-
-template <>
-struct Chebyshev_T< 0 >
-{
-  __host__ __device__
-  static float calculate(float x)
-  { 
-    return 1;
-  };
-};
-
-template <>
-struct Chebyshev_T< 1 >
-{
-  __host__ __device__
-  static float calculate(float x)
-  { 
-    return x;
-  };
-};
-
-template <int N>
-struct Chebyshev_U
-{
-  __host__ __device__
-  static float calculate(float x)
-  { 
-    return 2 * x * Chebyshev_U< N-1 >::calculate(x) - Chebyshev_U< N-2 >::calculate(x);
-  };
-};
-
-template <>
-struct Chebyshev_U< 0 >
-{
-  __host__ __device__
-  static float calculate(float x)
-  { 
-    return 1;
-  };
-};
-
-template <>
-struct Chebyshev_U< 1 >
-{
-  __host__ __device__
-  static float calculate(float x)
-  { 
-    return 2*x;
-  };
-};
-
-__host__ __device__
-float VecMagnitude(float x, float y, float z)
-{
-  return sqrt(x*x+y*y+z*z);
-}
 
 __host__ __device__
 float DotProduct(float a_x, float a_y, float a_z,
@@ -174,73 +52,24 @@ float DotProduct(float a_x, float a_y, float a_z,
     / (VecMagnitude( a_x, a_y, a_z ) * VecMagnitude( b_x, b_y, b_z ));
 }
 
-//inline 
-//__host__ __device__ 
-//float Chebyshev_Pol( int N, float x )
-//{
-//  
-//  if ( N == 0 )
-//    return 1;
-//  if ( N == 1 )
-//    return x;
-//  return 2 * x * Chebyshev_Pol(N-1, x) - Chebyshev_Pol(N-2, x);
-//}
-
-template < typename dom = float, int N = 18 >
-struct Polynomial
+__host__ __device__
+void Normalize( float3 & Vec )
 {
-  // n is a degree of a polynomial, which means coeff array have n+1 elements
-  dom coeff[N+1];
-  dom coeff_der[N];
-  Polynomial( dom coeff_p[N+1] )
-  {
-    for(int i = 0; i < N+1; i++)
-      {
-        coeff[i] = coeff_p[i];
-        if ( i )
-          {
-            coeff_der[i-1] = coeff_p[i] * i;
-          }
-      }
-  }
+  float len = sqrt(Vec.x * Vec.x + Vec.y * Vec.y + Vec.z * Vec.z);
+  Vec.x /= len;
+  Vec.y /= len;
+  Vec.z /= len;
+}
 
-  // default constructor
-  Polynomial()
-  {
-  }
-
-  __host__ __device__
-  dom evaluate( dom x )
-  {
-    dom res = 0;
-#pragma unroll 18
-    for(int i = 0; i < N+1; i++)
-      {
-        res *= x;
-        res += coeff[N+1-i];
-      }
-    return res;
-  }
-
-  __host__ __device__
-  dom derivative(dom x)
-  {
-    dom res = 0;
-#pragma unroll 18
-    for(int i = 0; i < N; i++)
-      {
-        res *= x;
-        res += coeff_der[N-i];
-      }
-    return res;
-  }
-};
     
 // Nice intro to ray tracing:
 // http://www.siggraph.org/education/materials/HyperGraph/raytrace/rtinter0.htm
 
+template < typename SurfTyp >
 struct TracePoint
 {
+  const uint background;
+
   int w; int h; int ix_h;
   Surf surf;
   int steps;
@@ -251,8 +80,10 @@ struct TracePoint
   
   float3 Rtrans;
 
-  typedef Polynomial< float, 16 > Poly;
-  Poly poly_surf[3];
+  SurfTyp surfaceInstance;
+
+  //  typedef Polynomial< float, 16 > Poly;
+  //Poly poly_surf[3];
 
   // bounding box
   float range_w;
@@ -264,7 +95,8 @@ struct TracePoint
   
   TracePoint(int w, int h, 
              int ix_h, 
-             View v)
+             View v,
+             SurfTyp surfInst = SurfTyp())
     : w(w), h(h), ix_h(ix_h), 
       surf(v.surf),
       steps(v.steps),
@@ -276,7 +108,8 @@ struct TracePoint
       step_size(sqrt(pow(R0.x - Rd.x,2) + 
 		     pow(R0.y - Rd.y,2) + 
 		     pow(R0.z - Rd.z,2)) / steps),
-      Rtrans(make_float3( R0.x - Rd.x, R0.y - Rd.y, R0.z - Rd.z ))
+      Rtrans(make_float3( R0.x - Rd.x, R0.y - Rd.y, R0.z - Rd.z )),
+      background(0)
   { 
     range_w = sqrt(pow(R0.x - Rd.x,2) + 
                    pow(R0.y - Rd.y,2) + 
@@ -301,133 +134,14 @@ struct TracePoint
      
     */
 
-    float chebyshev_coeff_18[18+1] = { -1, 0, +162, 0, -4320, 0, +44352, 0, -228096, 0, +658944, 0, -1118208, 0, +1105920, 0, -589824, 0, 131072 };
-    float chebyshev_coeff_16[16+1] = { +1, 0, -128, 0, +2688, 0, -21504, 0, +84480,  0, -180224, 0,  +212992, 0,  -131072, 0,  +32768};
+//    float chebyshev_coeff_18[18+1] = { -1, 0, +162, 0, -4320, 0, +44352, 0, -228096, 0, +658944, 0, -1118208, 0, +1105920, 0, -589824, 0, 131072 };
+//    float chebyshev_coeff_16[16+1] = { +1, 0, -128, 0, +2688, 0, -21504, 0, +84480,  0, -180224, 0,  +212992, 0,  -131072, 0,  +32768};
+// 
+//    poly_surf[0] = Poly( chebyshev_coeff_18 );
+//    poly_surf[1] = Poly( chebyshev_coeff_18 );
+//    poly_surf[2] = Poly( chebyshev_coeff_18 );
 
-    poly_surf[0] = Poly( chebyshev_coeff_18 );
-    poly_surf[1] = Poly( chebyshev_coeff_18 );
-    poly_surf[2] = Poly( chebyshev_coeff_18 );
-  };
-
-  __host__ __device__
-  inline
-  float Chebyshev( char n, float x )
-  { // http://en.wikipedia.org/wiki/Chebyshev_polynomials
-    return 
-      ( x <= -1 ) ? ((n & 1 ? -1 : 1) * cosh( n * acosh( -x ) )) :
-      (( x >= 1 ) ? cosh( n * acosh( x ) ) : cos(n * acos(x)));
-  };
-
-  __host__ __device__
-  inline
-  uint Gradient(float3 V, Surf surf_id)
-  {
-    switch ( surf_id )
-      {
-      case SURF_CHMUTOV_1:
-        {
-          //float3 Light = make_float( 1, 0, 0 );
-          float dot_pr = DotProduct( 1, 0, 0 ,
-                                     Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.x ),
-                                     Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.y ),
-                                     Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.z ));
-          
-          return RGBA( 30 + 100 + 100 * dot_pr,
-                       0, 0, 0 );
-        }
-      case SURF_ARB_POLY:
-        {
-          //float3 Light = make_float( 1, 0, 0 );
-          float dot_pr = DotProduct( 1, 0, 0 ,
-                                     poly_surf[0].derivative(V.x),
-                                     poly_surf[1].derivative(V.y),
-                                     poly_surf[2].derivative(V.z));
-          
-          return RGBA( 30 + 100 + 100 * dot_pr,
-                       0, 0, 0 );        
-        }
-      }
-
-#define EXPDAMP( p ) (10.0f + 240.0f * (expf(-fabsf(p))))
-    return RGBA( EXPDAMP( V.x ),
-                 EXPDAMP( V.y ),
-                 EXPDAMP( V.z ),
-                 0);
-#undef EXPDAMP
-
-  }
-
-  __host__ __device__
-  inline
-  float Surface(float3 V, Surf surf_id)
-  {
-    float x, y, z;
-    x = V.x; y = V.y; z = V.z;
-
-    switch ( surf_id )
-      {
-      case SURF_ARB_POLY:
-        {
-          return 
-            poly_surf[0].evaluate(V.x) + 
-            poly_surf[1].evaluate(V.y) + 
-            poly_surf[2].evaluate(V.z);
-        }
-
-      case SURF_DING_DONG:
-        {
-          return x*x+y*y-z*(1-z*z);
-        }
-
-      case SURF_CHMUTOV_0:
-	return Chebyshev( CHMUTOV_DEGREE, V.x ) + 
-	       Chebyshev( CHMUTOV_DEGREE, V.y ) + 
-	       Chebyshev( CHMUTOV_DEGREE, V.z );
-
-      case SURF_CHMUTOV_1:
-	return Chebyshev_T< CHMUTOV_DEGREE >::calculate( V.x ) + 
-	       Chebyshev_T< CHMUTOV_DEGREE >::calculate( V.y ) + 
-	       Chebyshev_T< CHMUTOV_DEGREE >::calculate( V.z );
-
-      case SURF_CHMUTOV_2:
-	return Chebyshev_Pol< CHMUTOV_DEGREE >::calculate(V.x)
-             + Chebyshev_Pol< CHMUTOV_DEGREE >::calculate(V.y)
-             + Chebyshev_Pol< CHMUTOV_DEGREE >::calculate(V.z);
-
-      case SURF_CHMUTOV_3:
-	return Chebyshev_DiVar< CHMUTOV_DEGREE >::calculate(V.x)
-	     + Chebyshev_DiVar< CHMUTOV_DEGREE >::calculate(V.y)
-	     + Chebyshev_DiVar< CHMUTOV_DEGREE >::calculate(V.z);
-
-      case SURF_HEART:
-        return pow(2*x*x+y*y+z*z-1,3) - (0.1*x*x+y*y)*z*z*z;
-
-//        return Chebyshev_Pol_N( CHMUTOV_DEGREE, V.x)
-//             + Chebyshev_Pol_N( CHMUTOV_DEGREE, V.y)
-//             + Chebyshev_Pol_N( CHMUTOV_DEGREE, V.z);
-
-      case SURF_TORUS:
-        {
-          float R = 1;
-          float r = .3;
-          return pow(R - sqrt(x*x + y*y), 2 ) + z*z - r*r;
-        }
-      case SURF_DIAMOND:
-        {
-          return sin(x) * sin(y) * sin(z) + sin(x) * cos(y) * cos(z) + cos(x) * sin(y) * cos(z) + cos(x) * cos(y) * sin(z);
-        }
-      case SURF_BALL:
-        {
-          return sqrt(x * x + y * y + z * z) - 1;
-        }
-      case SURF_CAYLEY:
-        {
-          return -5 * (x * x * (y + z) + y * y * (x + z) + z * z * (x + y)) + 2 * (x * y + y * x + x * z);
-        }
-      }
-
-    return 0;
-        
+    //    surfaceInstance = SurfaceT();
   };
 
   __host__ __device__
@@ -439,68 +153,6 @@ struct TracePoint
     Rc.z += Rd.z * t;
   };
 
-  __host__ __device__
-  inline
-  // this is likely to be slow
-  bool SignChangeSlow( const float & a, const float & b )
-  {
-    if ( a < 0 ) // a is below 0
-      {
-	return !(b < 0);
-      }
-    else 
-      if (a > 0) // a is above 0
-	{
-	  return !(b > 0);
-	}
-      else // a is equal to 0
-	{
-	  return (b != 0);
-	}
-  };
-
-  __host__ __device__
-  bool SignChangeBit( const float & a, const float & b )
-  {
-    return signbit(a) != signbit(b);
-  }
-
-  __host__ __device__
-  bool SignChange( const float & a, const float & b )
-  {
-    /*
-0      a < 0
-1      a > 0
-2      0 ^ 1
-
-3      b < 0
-4      b > 0
-5      3 ^ 4
-
-     (0 ^ 3)
-  || (1 ^ 4)
-  || (2 ^ 5)
-  
-    */
-    
-    bool d0 = a < 0;
-    bool d1 = a > 0;
-    bool d2 = d0 ^ d1;
-    bool d3 = b < 0;
-    bool d4 = b > 0;
-    bool d5 = d3 ^ d4;
-    
-    return (d0 ^ d3) || (d1 ^ d4) || (d2 ^ d5);
-  }
-
-  __host__ __device__
-  void Normalize( float3 & Vec )
-  {
-    float len = sqrt(Vec.x * Vec.x + Vec.y * Vec.y + Vec.z * Vec.z);
-    Vec.x /= len;
-    Vec.y /= len;
-    Vec.z /= len;
-  }
 
   __host__ __device__ 
   uint operator()( int ix_w )
@@ -511,7 +163,7 @@ struct TracePoint
 
     float3 Rc = make_float3( R0.x + x, R0.y + y, R0.z + z ); // current point
     
-    float val = Surface( Rc, surf );
+    float val = surfaceInstance.calculate( Rc );
     bool sign_has_changed = false;
     
     for(int i = 0; (i < steps) && !sign_has_changed; i++)
@@ -519,16 +171,16 @@ struct TracePoint
  	// calculate next position
         Ray( Rc, Rtrans, step_size );
  	// determine the sign
- 	float tmp = Surface(Rc,surf);
-	sign_has_changed = SignChangeSlow( val, tmp ); //SignChange( val, tmp );
+ 	float tmp = surfaceInstance.calculate(Rc);
+	sign_has_changed = SignChange<>::check( val, tmp );
  	val = tmp;
       }
 
       if ( sign_has_changed )
      {
        float step_size_l = step_size;
-#pragma unroll 10
-       for(int i = 0; i < bisect_count; i++)
+#pragma unroll
+       for(int i = 0; i < bisect_count && i < 11; i++)
 	 {
 	   step_size_l /= 2 * (1 + (sign_has_changed * -2 ));
 // 	   if ( sign_has_changed )
@@ -537,41 +189,36 @@ struct TracePoint
 // 	     }
 	   //
 	   Ray( Rc, Rtrans, step_size_l );
-	   float tmp = Surface(Rc,surf);
-	   sign_has_changed = SignChangeBit( val, tmp ); //SignChange( val, tmp );
+	   float tmp = surfaceInstance.calculate(Rc);
+	   sign_has_changed = SignChange<>::check( val, tmp ); //SignChange( val, tmp );
 	   val = tmp;
 	 }
+       return surfaceInstance.lightning(Rc, make_float3( 1, 0, 0 ));
 
-       return Gradient(Rc,surf);
-
-//#define COLOR( p, pmin, pmax ) (10.0f + 240.0f * fabs((p-pmin)/(pmax-pmin)) )
-// 
-//       return RGBA( COLOR( Rc.x, Vmin.x, Vmax.x ),
-//        	    COLOR( Rc.y, Vmin.y, Vmax.y ),
-//        	    COLOR( Rc.z, Vmin.z, Vmax.z ),
-//        	    0);
-// 
-//#undef COLOR
- 
-
-//#define TRANS( x ) fabs(240 * (x + 1) / 2)
-// 
-//       return RGBA( TRANS(Rc.x) + 10, 
-// 		    TRANS(Rc.y) + 10,
-// 		    TRANS(Rc.z) + 10,
-//                    0); 
-//#undef TRANS
-       
      }
       else
         {
-          return RGBA( 0, 
-                       0,
-                       0,  
-                       0);
+          return background;
         }
   }
 };
+
+template < typename SurfTyp >
+struct TraceScreen
+{
+  static
+  void run(int w, int h, View view, uint * pbo, SurfTyp s = SurfTyp())
+  {
+    for(int ix_h = 0; ix_h < h; ix_h++)
+    {
+      thrust::transform( thrust::make_counting_iterator< short >(0),
+                         thrust::make_counting_iterator< short >(w),
+                         thrust::device_ptr< uint >(pbo + h * ix_h),
+                         TracePoint< SurfTyp >(w,h,ix_h,view,s));
+    }
+  }
+};
+
 
 extern "C" void launch_raytrace_kernel(uint * pbo, View view, int w, int h)
 {
@@ -580,13 +227,48 @@ extern "C" void launch_raytrace_kernel(uint * pbo, View view, int w, int h)
 
   PrintView( view );
 
-  for(int ix_h = 0; ix_h < h; ix_h++)
+  switch ( view.surf )
     {
-      thrust::transform( thrust::make_counting_iterator< short >(0),
-                         thrust::make_counting_iterator< short >(w),
-                         thrust::device_ptr< uint >(pbo + h * ix_h),
-                         TracePoint(w,h,ix_h,
-                                    view));
+    case SURF_CHMUTOV_0:
+    case SURF_CHMUTOV_1:
+    case SURF_CHMUTOV_2:
+    case SURF_CHMUTOV_3:
+      TraceScreen< Surface< SURF_CHMUTOV_1 > >::run(w,h,view,pbo);
+      break;
+    case SURF_HEART:
+      TraceScreen< Surface< SURF_HEART > >::run(w,h,view,pbo);
+      break;
+    case SURF_PLANE:
+      TraceScreen< Surface< SURF_PLANE > >::run(w,h,view,pbo);
+      break;
+    case SURF_TORUS:
+      TraceScreen< Surface< SURF_TORUS > >::run(w,h,view,pbo);
+      break;
+    case SURF_DING_DONG:
+      TraceScreen< Surface< SURF_DING_DONG > >::run(w,h,view,pbo);
+      break;
+    case SURF_CAYLEY:
+      TraceScreen< Surface< SURF_CAYLEY > >::run(w,h,view,pbo);
+      break;
+    case SURF_DIAMOND:
+      TraceScreen< Surface< SURF_DIAMOND > >::run(w,h,view,pbo);
+      break;
+    case SURF_BALL:
+      TraceScreen< Surface< SURF_BALL > >::run(w,h,view,pbo);
+      break;
+    case SURF_ARB_POLY:
+      TraceScreen< Surface< SURF_ARB_POLY > >::run(w,h,view,pbo, Surface< SURF_ARB_POLY, float3, float >( view.arb_poly ));
+      break;
+    default:
+      break;
     }
+  
+  //for(int ix_h = 0; ix_h < h; ix_h++)
+  //  {
+  //    thrust::transform( thrust::make_counting_iterator< short >(0),
+  //                       thrust::make_counting_iterator< short >(w),
+  //                       thrust::device_ptr< uint >(pbo + h * ix_h),
+  //                       Surface< SURF_CHMUTOV_1, float3, float, void > >(w,h,ix_h,view));
+  //  }
 
 }
