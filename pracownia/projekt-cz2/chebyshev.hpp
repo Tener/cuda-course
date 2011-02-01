@@ -118,9 +118,3 @@ struct Chebyshev_U< 1 >
     return 2*x;
   };
 };
-
-__host__ __device__
-float VecMagnitude(float x, float y, float z)
-{
-  return sqrt(x*x+y*y+z*z);
-}
