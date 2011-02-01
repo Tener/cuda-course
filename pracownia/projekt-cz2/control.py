@@ -12,8 +12,8 @@ import thread, telnetlib, time
 import socket
     
 class MultiRuler:
-    XSIZE = 450
-    YSIZE = 450
+    XSIZE = 550
+    YSIZE = 550
 
     # This routine gets control when the close button is clicked
     def close_application(self, widget, event, data=None):
@@ -22,6 +22,7 @@ class MultiRuler:
 
     def send_msg(self, msg):
         try:
+            msg += "\n"
             sys.stdout.write(msg)
             sys.stdout.flush()
             connection.write(msg)
@@ -32,7 +33,11 @@ class MultiRuler:
             gtk.main_quit()
 
     def update_value(self, adj, param):
-        msg = param + " " + str(adj.value) + "\n"
+        msg = param + " " + str(adj.value)
+        self.send_msg(msg)
+
+    def arb_poly_entry_activate(self, widget, entry):
+        msg = widget.param + " " + entry.get_text()
         self.send_msg(msg)
 
     def surface_combobox_changed(self, combobox):
@@ -63,7 +68,7 @@ class MultiRuler:
                              ]
 
         # Create a table
-        table = gtk.Table(len(labels_and_ranges)+1+3, 2, True)
+        table = gtk.Table(len(labels_and_ranges)+1+3+3*20, 2, True)
         window.add(table)
 
         for (i,(label_txt,(r_low, r_high, r_def, step_inc))) in enumerate(labels_and_ranges):
@@ -93,12 +98,30 @@ class MultiRuler:
         combobox.connect('changed', self.surface_combobox_changed)
         combobox.set_active(0)
         combobox.show()
-        table.attach( combobox, 1, 2, pos-2, pos-1, gtk.EXPAND|gtk.SHRINK|gtk.FILL, gtk.FILL, 0, 0 )
+        table.attach( combobox, 0, 2, pos-2, pos-1, gtk.EXPAND|gtk.SHRINK|gtk.FILL, gtk.FILL, 0, 0 )
+
+        print pos
+
+        # text boxes for arbitrary surface
+        for i in range(3):
+            pos += 1
+            print pos
+            text = gtk.Entry(max=300)
+            text.set_text( ["3", "2", "1"][i] )
+            text.set_editable(True)
+            text.show()
+            text.param = "arb_poly." + ["x","y","z"][i]
+            table.attach( text, 0, 2, pos-2, pos-1, gtk.EXPAND|gtk.SHRINK|gtk.FILL, gtk.FILL, 0, 0 )
+
+            # setup callbacks
+            
+
+            text.connect("activate", self.arb_poly_entry_activate, text)
+        
         
         # show
         table.show()
         window.show()
-
 
         window.move(800, 0)
 

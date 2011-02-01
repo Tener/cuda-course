@@ -103,13 +103,12 @@ struct TracePoint
       bisect_count(v.bisect_count),
       R0(v.StartingPoint),
       Rd(v.DirectionVector),
-//      range_w(v.range_w),
-//      range_h(v.range_h),
       step_size(sqrt(pow(R0.x - Rd.x,2) + 
 		     pow(R0.y - Rd.y,2) + 
 		     pow(R0.z - Rd.z,2)) / steps),
       Rtrans(make_float3( R0.x - Rd.x, R0.y - Rd.y, R0.z - Rd.z )),
-      background(0)
+      background(0),
+      surfaceInstance(surfInst)
   { 
     range_w = sqrt(pow(R0.x - Rd.x,2) + 
                    pow(R0.y - Rd.y,2) + 
@@ -257,7 +256,8 @@ extern "C" void launch_raytrace_kernel(uint * pbo, View view, int w, int h)
       TraceScreen< Surface< SURF_BALL > >::run(w,h,view,pbo);
       break;
     case SURF_ARB_POLY:
-      TraceScreen< Surface< SURF_ARB_POLY > >::run(w,h,view,pbo, Surface< SURF_ARB_POLY, float3, float >( view.arb_poly ));
+      TraceScreen< Surface< SURF_ARB_POLY > >::run(w,h,view,pbo,
+                                                   Surface< SURF_ARB_POLY, float3, float >(view.arb_poly));
       break;
     default:
       break;

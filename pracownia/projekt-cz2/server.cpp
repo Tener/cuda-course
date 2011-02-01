@@ -48,27 +48,6 @@ std::string parseLine(std::string data)
           return "QUIT";
         }
 
-      if( boost::starts_with( std::string("help"), strs[0] ) )
-        {
-          std::string sep = "\n\t"; 
-          ss << "COMMANDS: " << sep
-             << "quit" << sep
-             << ("dirvec") << sep
-             << ("start") << sep 
-             << ("steps") << sep 
-             << ("bisect") << sep 
-             << ("surf") << sep 
-             << ("range_w") << sep
-             << ("rw") << sep
-             << ("range_h") << sep
-             << ("rh") << sep
-             << ("rr") << sep
-             << std::endl;
-
-          return ss.str();
-        }
-
-
       if( boost::starts_with( std::string("dirvec"), strs[0] ) )
         {
           if (strs.size() < 1+3) return "ARG???\n";
@@ -152,6 +131,66 @@ std::string parseLine(std::string data)
           if (strs.size() < 1+1) return "ARG???\n";
           currentView->surf = (Surf)(int)boost::lexical_cast< float >( strs[1] );
         }
+
+      if( boost::starts_with( std::string("arb_poly.x"), strs[0] ) )
+        {
+          for(int i = 0; i < 18+1; i++)
+            {
+              currentView->arb_poly[0][i] = 0;
+            }
+
+          for(int i = 1; i < strs.size(); i++)
+            {
+              currentView->arb_poly[0][i] = boost::lexical_cast< float >( strs[i] );
+            }
+        }
+
+      if( boost::starts_with( std::string("arb_poly.y"), strs[0] ) )
+        {
+          for(int i = 0; i < 18+1; i++)
+            {
+              currentView->arb_poly[0][i] = 0;
+            }
+
+          for(int i = 1; i < strs.size(); i++)
+            {
+              currentView->arb_poly[0][i] = boost::lexical_cast< float >( strs[i] );
+            }
+        }
+
+      if( boost::starts_with( std::string("arb_poly.z"), strs[0] ) )
+        {
+          for(int i = 0; i < 18+1; i++)
+            {
+              currentView->arb_poly[0][i] = 0;
+            }
+
+          for(int i = 1; i < strs.size(); i++)
+            {
+              currentView->arb_poly[0][i] = boost::lexical_cast< float >( strs[i] );
+            }
+        }
+      
+      if( boost::starts_with( std::string("help"), strs[0] ) )
+        {
+          std::string sep = "\n\t"; 
+          ss << "COMMANDS: " << sep
+             << "quit" << sep
+             << ("dirvec") << sep
+             << ("start") << sep 
+             << ("steps") << sep 
+             << ("bisect") << sep 
+             << ("surf") << sep 
+             << ("range_w") << sep
+             << ("rw") << sep
+             << ("range_h") << sep
+             << ("rh") << sep
+             << ("rr") << sep
+             << std::endl;
+
+          return ss.str();
+        }
+
     }
   catch ( std::exception & e )
     {

@@ -15,8 +15,8 @@ struct View
   int steps;
   int bisect_count;
 
-  typedef Polynomial< float, 18 > PolyT;
-  PolyT arb_poly[3];
+  float arb_poly[3][18+1];
+  int arb_poly_deg[3];
 
   View(Surf s = SURF_CHMUTOV_1,
        float3 start = make_float3( 2.2, 1.9, 1.7 ), 
@@ -28,14 +28,18 @@ struct View
     DirectionVector(dirvec), 
     steps(steps)
   { 
-    //  float chebyshev_coeff_16[16+1] = { +1, 0, -128, 0, +2688, 0, -21504, 0, +84480,  0, -180224, 0,  +212992, 0,  -131072, 0,  +32768};
+    float chebyshev_coeff_16[18+1] = { +1, 0, -128, 0, +2688, 0, -21504, 0, +84480,  0, -180224, 0,  +212992, 0,  -131072, 0,  +32768, 0, 0};
 
     float chebyshev_coeff_18[18+1] = { -1, 0, +162, 0, -4320, 0, +44352, 0, -228096, 0, +658944, 0, -1118208, 0, +1105920, 0, -589824, 0, 131072 };
 
-    PolyT chebyshev_Poly( chebyshev_coeff_18 );
-
     for(int i = 0; i < 3; i++)
-      arb_poly[i] = chebyshev_Poly;
+      {
+        for(int j = 0; j < 18+1; j++)
+          {
+            arb_poly[i][j] = chebyshev_coeff_16[j];
+          }
+      }
+
   };
 };
 

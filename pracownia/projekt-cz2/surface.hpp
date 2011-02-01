@@ -74,30 +74,28 @@ struct Surface< SURF_ARB_POLY, Vector, dom >
   PolyT params[3];
  
   __host__ __device__
-  Surface(PolyT p[3]){ params[0] = p[0]; params[1] = p[1]; params[2] = p[2];};
-
-  __host__ __device__
-  Surface() : params( )
-  { };
+  Surface(dom p[3][18+1]) : params() { 
+    params[0] = PolyT(p[0]); 
+    params[1] = PolyT(p[1]); 
+    params[2] = PolyT(p[2]); 
+  };
 
 
   __host__ __device__ 
   inline
   dom calculate(const Vector & V)
   {
-    // XXX: fixme
-    return params[0].evaluate(V.x) + params[1].evaluate(V.y) + params[2].evaluate(V.z);
-    
+    return params[0].evaluate(V.x) + params[1].evaluate(V.y) + params[2].evaluate(V.z);    
   }
 
   __host__ __device__
   Color lightning(Vector V, Vector Light)
   {          
     float dot_pr = 0;
-//    dot_pr = DotProduct( Light.x, Light.y, Light.z,
-//        		 this->params[0].derivative(V.x),
-//        		 this->params[1].derivative(V.y),
-//        		 this->params[2].derivative(V.z));
+    dot_pr = DotProduct( Light.x, Light.y, Light.z,
+			 params[0].derivative(V.x),
+			 params[1].derivative(V.y),
+			 params[2].derivative(V.z));
     
     return RGBA( 30 + 100 + 100 * dot_pr,
 		 0, 0, 0 );        
@@ -118,7 +116,6 @@ __host__ __device__
 float Surface< SURF_PLANE >::calculate(const float3 & V)
 {
     float x = V.x; float y = V.y; float z = V.z;
-
     float A = 1, B = 2, C = 3, D = 2.1;
 
     return A*x + B*y + C*z + D;
