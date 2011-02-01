@@ -70,32 +70,51 @@ struct Surface< SURF_CHMUTOV_1, Vector, dom >
 template < typename Vector, typename dom >
 struct Surface< SURF_ARB_POLY, Vector, dom >
 {
-  typedef Polynomial< dom, 18 > PolyT;
-  PolyT params[3];
- 
+//  typedef Polynomial< dom, 18 > PolyT;
+//  PolyT params[3];
+
+  PolynomialSimple<> params_s_x;
+  PolynomialSimple<> params_s_y;
+  PolynomialSimple<> params_s_z;
+
   __host__ __device__
-  Surface(dom p[3][18+1]) : params() { 
-    params[0] = PolyT(p[0]); 
-    params[1] = PolyT(p[1]); 
-    params[2] = PolyT(p[2]); 
-  };
+  Surface() :
+    params_s_x(0),
+    params_s_y(1),
+    params_s_z(2)
+  {
+  }
+ 
+//  __host__ __device__
+//  Surface(dom p[3][18+1]) : params(), params_s() { 
+//    params[0] = PolyT(p[0]); 
+//    params[1] = PolyT(p[1]); 
+//    params[2] = PolyT(p[2]); 
+// 
+//    params_s[0] = PolynomialSimple<>(); 
+//    params_s[1] = PolynomialSimple<>(); 
+//    params_s[2] = PolynomialSimple<>(); 
+// 
+//  };
 
 
-  __host__ __device__ 
+  __device__ 
   inline
   dom calculate(const Vector & V)
   {
-    return params[0].evaluate(V.x) + params[1].evaluate(V.y) + params[2].evaluate(V.z);    
+    return params_s_x.evaluate(V.x) + params_s_y.evaluate(V.y) + params_s_z.evaluate(V.z);    
+
+    //    return params[0].evaluate(V.x) + params[1].evaluate(V.y) + params[2].evaluate(V.z);    
   }
 
-  __host__ __device__
+  __device__
   Color lightning(Vector V, Vector Light)
   {          
     float dot_pr = 0;
     dot_pr = DotProduct( Light.x, Light.y, Light.z,
-			 params[0].derivative(V.x),
-			 params[1].derivative(V.y),
-			 params[2].derivative(V.z));
+			 params_s_x.derivative(V.x),
+			 params_s_y.derivative(V.y),
+			 params_s_z.derivative(V.z));
     
     return RGBA( 30 + 100 + 100 * dot_pr,
 		 0, 0, 0 );        

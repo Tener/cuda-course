@@ -28,17 +28,21 @@
 #include <thrust/sort.h>
 #include <thrust/unique.h>
 
+#define CHMUTOV_DEGREE 16
+
+#include "constant_vars.hpp"
+
 #include "common.hpp"
 #include "graphics.hpp"
 
 #include "polynomial.hpp"
 #include "utils.hpp"
-#define CHMUTOV_DEGREE 16
 #include "chebyshev.hpp"
 
 #include "colors.hpp"
 #include "sign_change.hpp"
 #include "surface.hpp"
+
 
 
 __host__ __device__
@@ -226,6 +230,32 @@ extern "C" void launch_raytrace_kernel(uint * pbo, View view, int w, int h)
 
   PrintView( view );
 
+  // i'm tired of doing this the clean way... so let's just make a hack.
+  {
+    for(int i = 0; i < 3; i++)
+      {
+        size_t stride = sizeof(float) * (18+1);
+        Polynomial<> p(view.arb_poly[i]);
+        cudaMemcpyToSymbol( arb_poly_const_coeff, p.coeff, stride, stride * i );
+        cudaMemcpyToSymbol( arb_poly_const_coeff_der, p.coeff_der, stride, stride * i );
+
+//        std::cout << "BUUUU " << i << " " << p.max_deg <<  "\n";
+//        for(int ii = 0; ii < (18+1); ii++)
+//          {
+//            std::cout << 
+//              "   " << ii << 
+//              " " << p.coeff_der[ii] << 
+//              " " << p.coeff[ii] << 
+//              " " << view.arb_poly[i][ii] << 
+//              "\n";
+//          }
+
+        stride = sizeof(int);
+        cudaMemcpyToSymbol( arb_poly_const_size, &p.max_deg, stride, stride * i );
+      }
+
+  }
+
   switch ( view.surf )
     {
     case SURF_CHMUTOV_0:
@@ -256,8 +286,8 @@ extern "C" void launch_raytrace_kernel(uint * pbo, View view, int w, int h)
       TraceScreen< Surface< SURF_BALL > >::run(w,h,view,pbo);
       break;
     case SURF_ARB_POLY:
-      TraceScreen< Surface< SURF_ARB_POLY > >::run(w,h,view,pbo,
-                                                   Surface< SURF_ARB_POLY, float3, float >(view.arb_poly));
+      TraceScreen< Surface< SURF_ARB_POLY > >::run(w,h,view,pbo);
+        //                                                   Surface< SURF_ARB_POLY, float3, float >(view.arb_poly));
       break;
     default:
       break;

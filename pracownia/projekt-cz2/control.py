@@ -37,7 +37,7 @@ class MultiRuler:
         self.send_msg(msg)
 
     def arb_poly_entry_activate(self, widget, entry):
-        msg = widget.param + " " + entry.get_text()
+        msg = widget.param + " " + " ".join(entry.get_text().split())
         self.send_msg(msg)
 
     def surface_combobox_changed(self, combobox):
@@ -108,6 +108,7 @@ class MultiRuler:
             print pos
             text = gtk.Entry(max=300)
             text.set_text( ["3", "2", "1"][i] )
+            text.set_text("+1 0 -128 0 +2688 0 -21504 0 +84480  0 -180224 0  +212992 0  -131072 0  +32768 0 0")
             text.set_editable(True)
             text.show()
             text.param = "arb_poly." + ["x","y","z"][i]

@@ -1,6 +1,7 @@
 #ifndef __POLYNOMIAL_HPP
 #define __POLYNOMIAL_HPP
 
+
 template < typename dom = float, int N = 18 >
 struct Polynomial
 {
@@ -13,18 +14,23 @@ struct Polynomial
   __host__ __device__
   Polynomial( dom coeff_p[N+1] )
   {
-    
+    max_deg = 0;
     for(int i = 0; i < N+1; i++)
       {
-        dom c = coeff_p[i];
-        coeff[N-i] = c;
-        if ( c != 0 )
+        coeff[i] = 0;
+        coeff_der[i] = 0;
+        if (coeff_p[i] != 0)
           max_deg = i;
       }
-
-    for(int i = 0; i < N; i++)
+    
+    for(int i = 0; i < max_deg+1; i++)
       {
-        coeff_der[i] = (N-i) * coeff[i];
+        coeff[max_deg-i] = coeff_p[i];
+      }
+
+    for(int i = 0; i < max_deg; i++)
+      {
+        coeff_der[i] = (max_deg-i) * coeff[i];
       }
 
   }
@@ -93,4 +99,62 @@ struct Polynomial
   }
 };
 
+
+//__constant__ float arb_poly_const_coeff[3*18];
+//__constant__ float arb_poly_const_coeff_der[3*18];
+//__constant__ int arb_poly_const_size[3];
+
+
+template < typename dom = float >
+struct PolynomialSimple
+{
+//  dom * coeff;
+//  dom * coeff_der;
+//  int max_deg;
+
+  const int offset;
+
+  __host__ __device__ PolynomialSimple(int offset) : offset(offset) { }
+  
+//  __host__ __device__
+//  PolynomialSimple( Polynomial< dom, 18 > p ) : coeff(p.coeff), coeff_der(p.coeff_der), max_deg(p.max_deg) { }
+// 
+//  __host__ __device__
+//  PolynomialSimple() : coeff(NULL), coeff_der(NULL), max_deg(0) { }
+
+//  __host__ __device__
+//  PolynomialSimple(const PolynomialSimple & other) :
+//    coeff(other.coeff), coeff_der(other.coeff_der), max_deg(other.max_deg)
+//  {
+//  }
+
+  __device__
+  inline
+  dom evaluate( const dom & x )
+  {
+    dom res = 0;
+    for(int i = 0; i < arb_poly_const_size[offset]+1; i++)
+      {
+        res *= x;
+        res += arb_poly_const_coeff[offset*18+i];
+      }
+    return res;
+  }
+
+  __device__
+  inline
+  dom derivative(const dom & x)
+  {
+    dom res = 0;
+    for(int i = 0; i < arb_poly_const_size[offset]; i++)
+      {
+        res *= x;
+        res += arb_poly_const_coeff_der[offset*18+i];
+      }
+    return res;
+  }
+};
+
+
 #endif
+

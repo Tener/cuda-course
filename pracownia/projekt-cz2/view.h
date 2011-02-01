@@ -1,11 +1,5 @@
 #include "surf.h"
-#include "polynomial.hpp"
-
-
-
-
-
-
+//#include "polynomial.hpp"
 
 struct View 
 {
@@ -16,7 +10,6 @@ struct View
   int bisect_count;
 
   float arb_poly[3][18+1];
-  int arb_poly_deg[3];
 
   View(Surf s = SURF_CHMUTOV_1,
        float3 start = make_float3( 2.2, 1.9, 1.7 ), 
@@ -36,7 +29,7 @@ struct View
       {
         for(int j = 0; j < 18+1; j++)
           {
-            arb_poly[i][j] = chebyshev_coeff_16[j];
+            arb_poly[i][j] = chebyshev_coeff_18[j];
           }
       }
 

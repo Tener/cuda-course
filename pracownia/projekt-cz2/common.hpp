@@ -21,6 +21,9 @@
 #include "surf.h"
 
 
+
+
+
 extern "C" void launch_raytrace_kernel(uint * pbo, View view, int w, int h);
 extern "C" void * server_thread(void * arg);
 
