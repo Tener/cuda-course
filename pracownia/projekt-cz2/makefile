@@ -57,8 +57,7 @@ bench: rt
 
 kno:
 	rm -f obj/*
-#	7z -tzip a projekt-cz1-krzysztof.skrzetnicki_`date +%s`.zip *.hpp *.cpp *.cu makefile thrust obj
-	7z -mx=9 a dist/projekt-cz1-krzysztof.skrzetnicki_`date +%s`.7z *.hpp *.cpp *.cu makefile thrust obj
+	7z -mx=9 a dist/projekt-cz2-krzysztof.skrzetnicki_`date +%s`.7z *.hpp *.cpp *.cu makefile thrust obj keep lib pdf
 
 clean:
 	rm -vf *.o obj/* *.hi a.out *~ rt
