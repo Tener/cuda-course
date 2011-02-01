@@ -50,6 +50,148 @@
 // Nice intro to ray tracing:
 // http://www.siggraph.org/education/materials/HyperGraph/raytrace/rtinter0.htm
 
+// PerspectiveRay class; base_vector specifies how we should locate ourselves in the space
+template < typename dom3 = float3, typename dom = float >
+struct PerspectiveRay
+{
+  int w;
+  int h;
+  int ix_w;
+  int ix_h;
+  dom3 direction_vector;
+  dom3 view_angle;
+  dom3 starting_point;
+  
+  __host__ __device__
+  PerspectiveRay( int w, int h, int ix_w, int ix_h, dom3 view_angle, dom3 starting_point, dom scale, dom3 base_vector = make_float3(1,0,0) )
+    : w(w), h(h), ix_w(ix_w), ix_h(ix_h), view_angle(view_angle), starting_point(starting_point), 
+      // XXX: direction vector should depend on w/h/ix_w/ix_h 
+      direction_vector(rotate_vector< dom3, dom >(base_vector, view_angle)) 
+  {
+  }
+
+  // transform the current point along the ray by given distance. 
+  // negative distance reverses direction of movement.
+  __host__ __device__
+  void move_point( const dom & length )
+  {
+    current_point.x += direction_vector.x * length;
+    current_point.y += direction_vector.y * length;
+    current_point.z += direction_vector.z * length;
+  }
+};
+
+// IsometricRay class; base_vector specifies how we should locate ourselves in the space
+template < typename dom3 = float3, typename dom = float >
+struct IsometricRay
+{
+  int w;
+  int h;
+  int ix_w;
+  int ix_h;
+  dom3 direction_vector;
+  dom3 view_angle;
+  dom3 starting_point;
+
+  dom3 current_point;
+  
+  __host__ __device__
+  IsometricRay( int w, int h, int ix_w, int ix_h, dom3 view_angle, dom3 starting_point, dom scale, dom3 base_vector = make_float3(1,0,0) )
+    : w(w), h(h), ix_w(ix_w), ix_h(ix_h), view_angle(view_angle),
+      // XXX: direction vector should also depend on w/h/ix_w/ix_h 
+      direction_vector(rotate_vector(base_vector, view_angle)),
+      // XXX: starting point should depend on w/h/ix_w/ix_h AND direction vector
+      starting_point(starting_point)
+  {
+  }
+
+  // transform the current point along the ray by given distance. 
+  // negative distance reverses direction of movement.
+  __host__ __device__
+  void move_point( const dom & length )
+  {
+    current_point.x += direction_vector.x * length;
+    current_point.y += direction_vector.y * length;
+    current_point.z += direction_vector.z * length;
+  }
+};
+
+template < typename SurfType, typename RayType >
+struct RayTrace
+{
+  uint background;
+  SurfType surface;
+
+  int steps;
+  int bisect_count;
+
+  int w; int h; int ix_h;
+  float3 view_angle; float3 starting_point; float scale;
+  float view_distance; // how far do we look
+
+  RayTrace(int w, int h, int ix_h,
+           float3 view_angle, float3 starting_point, float scale,
+           float view_distance, 
+           int steps,
+           int bisect_count,
+           SurfType surface = SurfType())
+  :
+    w(w), h(h), ix_h(ix_h),
+    view_angle(view_angle), starting_point(starting_point), scale(scale),
+    view_distance(view_distance),
+    steps(steps), bisect_count(bisect_count)
+  {
+  }
+
+
+  __host__ __device__
+  Color operator()( int ix_w )
+  {
+    RayType ray( w, h, ix_w, ix_h, // which pixel on screen are we calculating
+                 view_angle,       // where do we look
+                 starting_point,   // where do we start
+                 scale             // defines the length of '1.0' in pixels
+                 );
+
+    float surf_value = surface.calculate( ray.current_point );
+    bool sign_change = false;
+    float step = view_distance / steps;
+
+    // root detection
+    for(int i = 0; (i < steps) && !sign_change; i++)
+      {
+        ray.move_point(step);
+        float tmp = surface.calculate( ray.current_point );
+        sign_change = SignChange<>::check( surf_value, tmp );
+        surf_value = tmp;
+      }
+
+    if ( sign_change )
+      {
+        // root refinement
+        for(int i = 0; i < bisect_count; i++)
+	 {
+           step /= 2;
+	   if ( sign_change )
+	     {
+	       step *= -1; // we reverse movement direction if there was a sign change
+	     }
+
+           ray.move_point(step);
+           float tmp = surface.calculate( ray.current_point );
+           sign_change = SignChange<>::check( surf_value, tmp );
+           surf_value = tmp;
+	 }
+
+        // shade calculation
+        return surface.lightning(ray.current_point, make_float3(1, 0, 0));
+      }
+    else
+      {
+        return background;
+      }  
+  }
+};
 
 
 template < typename SurfType >
