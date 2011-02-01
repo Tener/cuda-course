@@ -50,26 +50,25 @@
 // Nice intro to ray tracing:
 // http://www.siggraph.org/education/materials/HyperGraph/raytrace/rtinter0.htm
 
-template < typename SurfTyp >
+
+
+template < typename SurfType >
 struct TracePoint
 {
   const uint background;
-
-  int w; int h; int ix_h;
-  Surf surf;
   int steps;
   int bisect_count;
-  
+  SurfType surfaceInstance;
+
+  // all these variables are related to the viewport:
+  // - this will likely stay:
+  int w; int h; int ix_h; 
   float3 R0;
+  // - but not these:
   float3 Rd;
-  
   float3 Rtrans;
-
-  SurfTyp surfaceInstance;
-
-  // bounding box
-  float range_w;
-  float range_h;
+  float range_w; // bounding box
+  float range_h; // bounding box
 
   // Vmin, Vmax, Vdiff;
   float3 Vmin, Vmax, Vdiff;
@@ -78,9 +77,8 @@ struct TracePoint
   TracePoint(int w, int h, 
              int ix_h, 
              View v,
-             SurfTyp surfInst = SurfTyp())
+             SurfType surfInst = SurfType())
     : w(w), h(h), ix_h(ix_h), 
-      surf(v.surf),
       steps(v.steps),
       bisect_count(v.bisect_count),
       R0(v.StartingPoint),
@@ -118,7 +116,6 @@ struct TracePoint
     Rc.y += Rd.y * t;
     Rc.z += Rd.z * t;
   };
-
 
   __host__ __device__ 
   uint operator()( int ix_w )
@@ -169,18 +166,18 @@ struct TracePoint
   }
 };
 
-template < typename SurfTyp >
+template < typename SurfType >
 struct TraceScreen
 {
   static
-  void run(int w, int h, View view, uint * pbo, SurfTyp s = SurfTyp())
+  void run(int w, int h, View view, uint * pbo, SurfType s = SurfType())
   {
     for(int ix_h = 0; ix_h < h; ix_h++)
     {
       thrust::transform( thrust::make_counting_iterator< short >(0),
                          thrust::make_counting_iterator< short >(w),
                          thrust::device_ptr< uint >(pbo + h * ix_h),
-                         TracePoint< SurfTyp >(w,h,ix_h,view,s));
+                         TracePoint< SurfType >(w,h,ix_h,view,s));
     }
   }
 };
@@ -192,32 +189,6 @@ extern "C" void launch_raytrace_kernel(uint * pbo, View view, int w, int h)
             << "h=" << h << std::endl; 
 
   PrintView( view );
-
-  // i'm tired of doing this the clean way... so let's just make a hack.
-  {
-    for(int i = 0; i < 3; i++)
-      {
-        size_t stride = sizeof(float) * (18+1);
-        Polynomial<> p(view.arb_poly[i]);
-        cudaMemcpyToSymbol( arb_poly_const_coeff, p.coeff, stride, stride * i );
-        cudaMemcpyToSymbol( arb_poly_const_coeff_der, p.coeff_der, stride, stride * i );
-
- //       std::cout << "BUUUU " << i << " " << p.max_deg <<  "\n";
- //       for(int ii = 0; ii < (18+1); ii++)
- //         {
- //           std::cout << 
- //             "   " << ii << 
- //             "\t" << p.coeff_der[ii] << 
- //             "\t" << p.coeff[ii] << 
- //             "\t" << view.arb_poly[i][ii] << 
- //             "\n";
- //         }
-
-        stride = sizeof(int);
-        cudaMemcpyToSymbol( arb_poly_const_size, &p.max_deg, stride, stride * i );
-      }
-
-  }
 
   switch ( view.surf )
     {
@@ -249,8 +220,21 @@ extern "C" void launch_raytrace_kernel(uint * pbo, View view, int w, int h)
       TraceScreen< Surface< SURF_BALL > >::run(w,h,view,pbo);
       break;
     case SURF_ARB_POLY:
-      TraceScreen< Surface< SURF_ARB_POLY > >::run(w,h,view,pbo);
-      break;
+      {
+        // i'm tired of doing this the clean way... so let's just make a hack.
+        // copy arbitrary polynomial's parameters
+        for(int i = 0; i < 3; i++)
+          {
+            size_t stride = sizeof(float) * (18+1);
+            Polynomial<> p(view.arb_poly[i]);
+            cudaMemcpyToSymbol( arb_poly_const_coeff, p.coeff, stride, stride * i );
+            cudaMemcpyToSymbol( arb_poly_const_coeff_der, p.coeff_der, stride, stride * i );
+            stride = sizeof(int);
+            cudaMemcpyToSymbol( arb_poly_const_size, &p.max_deg, stride, stride * i );
+          }
+        TraceScreen< Surface< SURF_ARB_POLY > >::run(w,h,view,pbo);
+        break;
+      }
     default:
       break;
     }
