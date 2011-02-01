@@ -38,37 +38,6 @@ struct Polynomial
   Polynomial()
   {
   }
-  
-//  __host__ __device__
-//  Polynomial()
-//  {
-//    printf("Default const.\n");
-//    for(int i = 0; i < N+1; i++)
-//      {
-//        coeff[i] = i;
-//      }
-// 
-//    for(int i = 0; i < N; i++)
-//      {
-//        coeff_der[i] = i*(i+1);
-//      }
-//  }
- // __host__ __device__
- // inline
- // dom evalDer( const dom & x, dom & y, dom & yd )
- // {
- //   y = 0; yd = 0;
- //   for(int i = 0; i < N; i++)
- //     {
- //       dom c = coeff[i];
- //       y *= x;
- //       y += c;
- //       yd *= x;
- //       yd += (N-1) * c;
- //     }
- //   y *= x;
- //   y += coeff[N];
- // }
 
   __host__ __device__
   inline
@@ -98,12 +67,6 @@ struct Polynomial
     return res;
   }
 };
-
-
-//__constant__ float arb_poly_const_coeff[3*18];
-//__constant__ float arb_poly_const_coeff_der[3*18];
-//__constant__ int arb_poly_const_size[3];
-
 
 template < typename dom = float >
 struct PolynomialSimple

@@ -86,9 +86,6 @@ struct TracePoint
 
   SurfTyp surfaceInstance;
 
-  //  typedef Polynomial< float, 16 > Poly;
-  //Poly poly_surf[3];
-
   // bounding box
   float range_w;
   float range_h;
@@ -130,21 +127,6 @@ struct TracePoint
     Vdiff.x = Vmax.x - Vmin.x;
     Vdiff.y = Vmax.y - Vmin.y;
     Vdiff.z = Vmax.z - Vmin.z;
-
-    // x, y, z
-    /*
-      1, 0, -128, 0, +2688, 0, -21504, 0, +84480, 0, -180224, 0, +212992, 0, -131072, 0, +32768, 0
-     
-    */
-
-//    float chebyshev_coeff_18[18+1] = { -1, 0, +162, 0, -4320, 0, +44352, 0, -228096, 0, +658944, 0, -1118208, 0, +1105920, 0, -589824, 0, 131072 };
-//    float chebyshev_coeff_16[16+1] = { +1, 0, -128, 0, +2688, 0, -21504, 0, +84480,  0, -180224, 0,  +212992, 0,  -131072, 0,  +32768};
-// 
-//    poly_surf[0] = Poly( chebyshev_coeff_18 );
-//    poly_surf[1] = Poly( chebyshev_coeff_18 );
-//    poly_surf[2] = Poly( chebyshev_coeff_18 );
-
-    //    surfaceInstance = SurfaceT();
   };
 
   __host__ __device__
@@ -287,18 +269,8 @@ extern "C" void launch_raytrace_kernel(uint * pbo, View view, int w, int h)
       break;
     case SURF_ARB_POLY:
       TraceScreen< Surface< SURF_ARB_POLY > >::run(w,h,view,pbo);
-        //                                                   Surface< SURF_ARB_POLY, float3, float >(view.arb_poly));
       break;
     default:
       break;
     }
-  
-  //for(int ix_h = 0; ix_h < h; ix_h++)
-  //  {
-  //    thrust::transform( thrust::make_counting_iterator< short >(0),
-  //                       thrust::make_counting_iterator< short >(w),
-  //                       thrust::device_ptr< uint >(pbo + h * ix_h),
-  //                       Surface< SURF_CHMUTOV_1, float3, float, void > >(w,h,ix_h,view));
-  //  }
-
 }

@@ -114,9 +114,7 @@ class MultiRuler:
             text.param = "arb_poly." + ["x","y","z"][i]
             table.attach( text, 0, 2, pos-2, pos-1, gtk.EXPAND|gtk.SHRINK|gtk.FILL, gtk.FILL, 0, 0 )
 
-            # setup callbacks
-            
-
+            # setup callback
             text.connect("activate", self.arb_poly_entry_activate, text)
         
         
@@ -133,21 +131,6 @@ def getSurfaces():
 
 def main():
     gtk.main()
-
-
-## 
-##COMMANDS: 
-##        quit
-##        dirvec
-##        start
-##        steps
-##        surf
-##        range_w
-##        rw
-##        range_h
-##        rh
-##        rr
-
 
 def listener(connection_lock, connection):
     while True:

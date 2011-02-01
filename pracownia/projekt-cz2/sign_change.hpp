@@ -4,7 +4,7 @@ struct SignChange {
   __host__ __device__
   inline
   static 
-  // detault implementation
+  // default implementation
   bool check( const dom & a, const dom & b )
   {
     return checkSlow( a, b );

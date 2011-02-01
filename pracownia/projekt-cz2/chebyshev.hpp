@@ -12,7 +12,6 @@ __device__ __host__
 float Chebyshev_Pol_N( int N, float x )
 {
   float arr[CHMUTOV_DEGREE+1];
-  //  thrust::device_vector< float > arr( N );
   arr[0] = 1;
   arr[1] = x;
 #pragma unroll 16

@@ -9,8 +9,6 @@ namespace rt {
     VBO::VBO(unsigned int n_points, unsigned int vbo_res_flags)
       : d_vbo_buffer(NULL), n_points(n_points)
     {
-      //GLuint* vbo, struct cudaGraphicsResource **vbo_res, 
-	  
       // create buffer object
       glGenBuffers(1, &vbo);
       glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -130,7 +128,6 @@ namespace rt {
 
       glViewport(0, 0, height, width);
       glLoadIdentity();
-      //      glOrtho(-1.0, 1.0, -1.0, 1.0, 0.0, 1.0);
       glOrtho(0.0, 1.0, 0.0, 1.0, 0.0, 1.0);
 
     };
