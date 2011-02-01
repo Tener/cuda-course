@@ -7,7 +7,7 @@ struct Polynomial
 {
   // n is a degree of a polynomial, which means coeff array have n+1 elements
   dom coeff[N+1];
-  dom coeff_der[N];
+  dom coeff_der[N+1];
 
   int max_deg;
 
@@ -19,7 +19,7 @@ struct Polynomial
       {
         coeff[i] = 0;
         coeff_der[i] = 0;
-        if (coeff_p[i] != 0)
+        if (fabs (coeff_p[i]) > 0.00001)
           max_deg = i;
       }
     
@@ -108,35 +108,22 @@ struct Polynomial
 template < typename dom = float >
 struct PolynomialSimple
 {
-//  dom * coeff;
-//  dom * coeff_der;
-//  int max_deg;
-
   const int offset;
 
   __host__ __device__ PolynomialSimple(int offset) : offset(offset) { }
-  
-//  __host__ __device__
-//  PolynomialSimple( Polynomial< dom, 18 > p ) : coeff(p.coeff), coeff_der(p.coeff_der), max_deg(p.max_deg) { }
-// 
-//  __host__ __device__
-//  PolynomialSimple() : coeff(NULL), coeff_der(NULL), max_deg(0) { }
-
-//  __host__ __device__
-//  PolynomialSimple(const PolynomialSimple & other) :
-//    coeff(other.coeff), coeff_der(other.coeff_der), max_deg(other.max_deg)
-//  {
-//  }
 
   __device__
   inline
   dom evaluate( const dom & x )
   {
     dom res = 0;
-    for(int i = 0; i < arb_poly_const_size[offset]+1; i++)
+    int size = arb_poly_const_size[offset];
+    int base = offset*(18+1);
+
+    for(int i = 0; i < size+1; i++)
       {
         res *= x;
-        res += arb_poly_const_coeff[offset*18+i];
+        res += arb_poly_const_coeff[base+i];
       }
     return res;
   }
@@ -146,10 +133,13 @@ struct PolynomialSimple
   dom derivative(const dom & x)
   {
     dom res = 0;
-    for(int i = 0; i < arb_poly_const_size[offset]; i++)
+    int size = arb_poly_const_size[offset];
+    int base = offset*(18+1);
+
+    for(int i = 0; i < size; i++)
       {
         res *= x;
-        res += arb_poly_const_coeff_der[offset*18+i];
+        res += arb_poly_const_coeff_der[base+i];
       }
     return res;
   }

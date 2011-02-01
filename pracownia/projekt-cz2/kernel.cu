@@ -239,16 +239,16 @@ extern "C" void launch_raytrace_kernel(uint * pbo, View view, int w, int h)
         cudaMemcpyToSymbol( arb_poly_const_coeff, p.coeff, stride, stride * i );
         cudaMemcpyToSymbol( arb_poly_const_coeff_der, p.coeff_der, stride, stride * i );
 
-//        std::cout << "BUUUU " << i << " " << p.max_deg <<  "\n";
-//        for(int ii = 0; ii < (18+1); ii++)
-//          {
-//            std::cout << 
-//              "   " << ii << 
-//              " " << p.coeff_der[ii] << 
-//              " " << p.coeff[ii] << 
-//              " " << view.arb_poly[i][ii] << 
-//              "\n";
-//          }
+ //       std::cout << "BUUUU " << i << " " << p.max_deg <<  "\n";
+ //       for(int ii = 0; ii < (18+1); ii++)
+ //         {
+ //           std::cout << 
+ //             "   " << ii << 
+ //             "\t" << p.coeff_der[ii] << 
+ //             "\t" << p.coeff[ii] << 
+ //             "\t" << view.arb_poly[i][ii] << 
+ //             "\n";
+ //         }
 
         stride = sizeof(int);
         cudaMemcpyToSymbol( arb_poly_const_size, &p.max_deg, stride, stride * i );

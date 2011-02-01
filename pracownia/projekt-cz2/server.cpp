@@ -141,7 +141,7 @@ std::string parseLine(std::string data)
 
           for(int i = 1; i < strs.size(); i++)
             {
-              currentView->arb_poly[0][i] = boost::lexical_cast< float >( strs[i] );
+              currentView->arb_poly[0][i-1] = boost::lexical_cast< float >( strs[i] );
             }
         }
 
@@ -154,7 +154,7 @@ std::string parseLine(std::string data)
 
           for(int i = 1; i < strs.size(); i++)
             {
-              currentView->arb_poly[1][i] = boost::lexical_cast< float >( strs[i] );
+              currentView->arb_poly[1][i-1] = boost::lexical_cast< float >( strs[i] );
             }
         }
 
