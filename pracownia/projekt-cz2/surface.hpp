@@ -1,5 +1,4 @@
-
-typedef uint Color;
+#include "colors.hpp"
 
 
 
@@ -14,32 +13,11 @@ struct Surface {
   __host__ __device__
   Color lightning(Vector V, Vector Light)
   {
-#define EXPDAMP( p ) (10.0f + 240.0f * (expf(-fabsf(p))))
-    return RGBA( EXPDAMP( V.x ),
-                 EXPDAMP( V.y ),
-                 EXPDAMP( V.z ),
+    return RGBA( COLOR_EXPDAMP( V.x ),
+                 COLOR_EXPDAMP( V.y ),
+                 COLOR_EXPDAMP( V.z ),
                  0);
-#undef EXPDAMP
   }
-
-//#define COLOR( p, pmin, pmax ) (10.0f + 240.0f * fabs((p-pmin)/(pmax-pmin)) )
-// 
-//       return RGBA( COLOR( Rc.x, Vmin.x, Vmax.x ),
-//        	    COLOR( Rc.y, Vmin.y, Vmax.y ),
-//        	    COLOR( Rc.z, Vmin.z, Vmax.z ),
-//        	    0);
-// 
-//#undef COLOR
- 
-
-//#define TRANS( x ) fabs(240 * (x + 1) / 2)
-// 
-//       return RGBA( TRANS(Rc.x) + 10, 
-// 		    TRANS(Rc.y) + 10,
-// 		    TRANS(Rc.z) + 10,
-//                    0); 
-//#undef TRANS
-
 };
 
 template < typename Vector, typename dom >
@@ -50,8 +28,8 @@ struct Surface< SURF_CHMUTOV, Vector, dom >
   dom calculate(const Vector & V)
   {
     return Chebyshev_T< CHMUTOV_DEGREE >::calculate( V.x ) + 
-      Chebyshev_T< CHMUTOV_DEGREE >::calculate( V.y ) + 
-      Chebyshev_T< CHMUTOV_DEGREE >::calculate( V.z );
+           Chebyshev_T< CHMUTOV_DEGREE >::calculate( V.y ) + 
+           Chebyshev_T< CHMUTOV_DEGREE >::calculate( V.z );
   }
 
   __host__ __device__
@@ -72,8 +50,8 @@ __host__ __device__
 float Surface< SURF_CHMUTOV_ALT >::calculate(const float3 & V)
 {
     return Chebyshev_DiVar< CHMUTOV_DEGREE >::calculate( V.x ) + 
-      Chebyshev_DiVar< CHMUTOV_DEGREE >::calculate( V.y ) + 
-      Chebyshev_DiVar< CHMUTOV_DEGREE >::calculate( V.z );
+           Chebyshev_DiVar< CHMUTOV_DEGREE >::calculate( V.y ) + 
+           Chebyshev_DiVar< CHMUTOV_DEGREE >::calculate( V.z );
 }
 
 
