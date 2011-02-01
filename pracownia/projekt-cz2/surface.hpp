@@ -43,7 +43,7 @@ struct Surface {
 };
 
 template < typename Vector, typename dom >
-struct Surface< SURF_CHMUTOV_1, Vector, dom >
+struct Surface< SURF_CHMUTOV, Vector, dom >
 {
   __host__ __device__ 
   inline
@@ -66,6 +66,16 @@ struct Surface< SURF_CHMUTOV_1, Vector, dom >
 		 0, 0, 0 );
   }
 };
+
+template <>
+__host__ __device__
+float Surface< SURF_CHMUTOV_ALT >::calculate(const float3 & V)
+{
+    return Chebyshev_DiVar< CHMUTOV_DEGREE >::calculate( V.x ) + 
+      Chebyshev_DiVar< CHMUTOV_DEGREE >::calculate( V.y ) + 
+      Chebyshev_DiVar< CHMUTOV_DEGREE >::calculate( V.z );
+}
+
 
 template < typename Vector, typename dom >
 struct Surface< SURF_ARB_POLY, Vector, dom >

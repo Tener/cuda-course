@@ -240,11 +240,11 @@ extern "C" void launch_raytrace_kernel(uint * pbo, View view, int w, int h)
 
   switch ( view.surf )
     {
-    case SURF_CHMUTOV_0:
-    case SURF_CHMUTOV_1:
-    case SURF_CHMUTOV_2:
-    case SURF_CHMUTOV_3:
-      TraceScreen< Surface< SURF_CHMUTOV_1 > >::run(w,h,view,pbo);
+    case SURF_CHMUTOV:
+      TraceScreen< Surface< SURF_CHMUTOV > >::run(w,h,view,pbo);
+      break;
+    case SURF_CHMUTOV_ALT:
+      TraceScreen< Surface< SURF_CHMUTOV_ALT > >::run(w,h,view,pbo);
       break;
     case SURF_HEART:
       TraceScreen< Surface< SURF_HEART > >::run(w,h,view,pbo);

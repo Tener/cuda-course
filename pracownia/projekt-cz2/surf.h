@@ -1,10 +1,9 @@
 #ifndef __SURF_H
 #define __SURF_H
 
-enum Surf { SURF_CHMUTOV_0 = 0, 
-            SURF_CHMUTOV_1,
-            SURF_CHMUTOV_2,
-            SURF_CHMUTOV_3,
+enum Surf { SURF_CHMUTOV = 0, 
+            SURF_ARB_POLY,
+            SURF_CHMUTOV_ALT,
             SURF_HEART,
             SURF_PLANE,
             SURF_TORUS,
@@ -12,7 +11,6 @@ enum Surf { SURF_CHMUTOV_0 = 0,
             SURF_CAYLEY,
             SURF_DIAMOND,
             SURF_BALL,
-            SURF_ARB_POLY
 };
 typedef enum Surf Surf;
 

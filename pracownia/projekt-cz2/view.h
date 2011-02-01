@@ -11,7 +11,7 @@ struct View
 
   float arb_poly[3][18+1];
 
-  View(Surf s = SURF_CHMUTOV_1,
+  View(Surf s = SURF_CHMUTOV,
        float3 start = make_float3( 2.2, 1.9, 1.7 ), 
        float3 dirvec = make_float3(7.1,5.7,4.9), 
        int steps = 500,
