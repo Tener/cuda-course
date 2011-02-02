@@ -517,7 +517,7 @@ void initModelViewMatrix(View view)
     //////
 
     glLoadIdentity();
-    glOrtho( -10, 10, -10, 10, -10, 10 );
+    glOrtho( -1, 1, -1, 1, -1, 1 );
  //   gluLookAt( 0, 0, 0,
  //              view.starting_point.x, view.starting_point.y, view.starting_point.z,
  //              1, 0, 0 );
