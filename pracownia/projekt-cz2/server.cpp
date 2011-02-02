@@ -67,27 +67,56 @@ std::string parseLine(std::string data)
           x = boost::lexical_cast< float >( strs[1] );
           y = boost::lexical_cast< float >( strs[2] );
           z = boost::lexical_cast< float >( strs[3] );
-          currentView->StartingPoint = make_float3( x, y, z );
+          currentView->starting_point = make_float3( x, y, z );
         }
 
       if( boost::starts_with( std::string("start.x"), strs[0] ) )
         {
           if (strs.size() < 1+1) return "ARG???\n";
-          currentView->StartingPoint.x = boost::lexical_cast< float >( strs[1] );;
+          currentView->starting_point.x = boost::lexical_cast< float >( strs[1] );;
         }
 
       if( boost::starts_with( std::string("start.y"), strs[0] ) )
         {
           if (strs.size() < 1+1) return "ARG???\n";
-          currentView->StartingPoint.y = boost::lexical_cast< float >( strs[1] );;
+          currentView->starting_point.y = boost::lexical_cast< float >( strs[1] );;
         }
 
       if( boost::starts_with( std::string("start.z"), strs[0] ) )
         {
           if (strs.size() < 1+1) return "ARG???\n";
-          currentView->StartingPoint.z = boost::lexical_cast< float >( strs[1] );;
+          currentView->starting_point.z = boost::lexical_cast< float >( strs[1] );;
         }
 
+      if( boost::starts_with( std::string("angle.x"), strs[0] ) )
+        {
+          if (strs.size() < 1+1) return "ARG???\n";
+          currentView->angle.x = boost::lexical_cast< float >( strs[1] );;
+        }
+
+      if( boost::starts_with( std::string("angle.y"), strs[0] ) )
+        {
+          if (strs.size() < 1+1) return "ARG???\n";
+          currentView->angle.y = boost::lexical_cast< float >( strs[1] );;
+        }
+
+      if( boost::starts_with( std::string("angle.z"), strs[0] ) )
+        {
+          if (strs.size() < 1+1) return "ARG???\n";
+          currentView->angle.z = boost::lexical_cast< float >( strs[1] );;
+        }
+
+      if( boost::starts_with( std::string("distance"), strs[0] ) )
+        {
+          if (strs.size() < 1+1) return "ARG???\n";
+          currentView->distance = boost::lexical_cast< float >( strs[1] );;
+        }
+
+      if( boost::starts_with( std::string("scale"), strs[0] ) )
+        {
+          if (strs.size() < 1+1) return "ARG???\n";
+          currentView->scale = boost::lexical_cast< float >( strs[1] );;
+        }
 
 
       if( boost::starts_with( std::string("dirvec.x"), strs[0] ) )

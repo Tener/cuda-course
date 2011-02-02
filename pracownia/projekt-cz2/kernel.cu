@@ -61,6 +61,8 @@ struct PerspectiveRay
   dom3 direction_vector;
   dom3 view_angle;
   dom3 starting_point;
+
+  dom3 current_point;
   
   __host__ __device__
   PerspectiveRay( int w, int h, int ix_w, int ix_h, dom3 view_angle, dom3 starting_point, dom scale, dom3 base_vector = make_float3(1,0,0) )
@@ -81,9 +83,9 @@ struct PerspectiveRay
   }
 };
 
-// IsometricRay class; base_vector specifies how we should locate ourselves in the space
+// OrtographicRay class; base_vector specifies how we should locate ourselves in the space
 template < typename dom3 = float3, typename dom = float >
-struct IsometricRay
+struct OrtographicRay
 {
   int w;
   int h;
@@ -91,17 +93,20 @@ struct IsometricRay
   int ix_h;
   dom3 direction_vector;
   dom3 view_angle;
-  dom3 starting_point;
 
   dom3 current_point;
-  
+
   __host__ __device__
-  IsometricRay( int w, int h, int ix_w, int ix_h, dom3 view_angle, dom3 starting_point, dom scale, dom3 base_vector = make_float3(1,0,0) )
+  inline
+  dom rescale(const dom dim, const dom dim_max, const dom scale) { return scale * ((dim - (dim_max/2))/dim_max); }
+  
+  __host__
+  OrtographicRay( int w, int h, int ix_w, int ix_h, dom3 view_angle, dom3 starting_point, dom scale, dom3 base_vector = make_float3(1,0,0) )
     : w(w), h(h), ix_w(ix_w), ix_h(ix_h), view_angle(view_angle),
-      // XXX: direction vector should also depend on w/h/ix_w/ix_h 
-      direction_vector(rotate_vector(base_vector, view_angle)),
+      direction_vector(rotate_vector< dom3, dom >(base_vector, view_angle)),
       // XXX: starting point should depend on w/h/ix_w/ix_h AND direction vector
-      starting_point(starting_point)
+      current_point(translate_point(starting_point, make_float3(0, rescale(ix_w,w,scale), rescale(ix_h,h,scale))))
+      //      current_point(translate_point(starting_point, rotate_vector< dom3, dom >(make_float3(0, rescale(ix_w,w,scale), rescale(ix_h,h,scale)), view_angle)))
   {
   }
 
@@ -114,6 +119,77 @@ struct IsometricRay
     current_point.y += direction_vector.y * length;
     current_point.z += direction_vector.z * length;
   }
+};
+
+template < typename dom3 = float3, typename dom = float >
+struct ModelViewRay
+{
+  
+  dom3 current_point;
+  dom3 direction_vector;
+
+  __host__ __device__
+  inline
+  dom rescale(const dom dim, const dom dim_max, const dom scale) { return scale * ((dim - (dim_max/2))/dim_max); }
+
+  __device__ __host__
+  inline
+  dom3 modelview_matrix_transform( const dom3 vec )
+  {
+    //device_modelview_matrix[16]
+
+    dom arrIn[4] = { vec.x, vec.y, vec.z, 1 }; // homo
+    dom arrOut[4];
+
+    for(int i = 0; i < 4; i++)
+      {
+        dom v = 0;
+        for(int j = 0; j < 4; j++)
+          {
+#if __CUDA_ARCH__ > 0
+            v += device_modelview_matrix[4*j + i] * arrIn[j];
+#else
+            v += host_modelview_matrix[4*j + i] * arrIn[j];
+#endif
+          }
+        arrOut[i] = v;
+      }
+
+    //    arrOut[3] = 1;
+
+    return make_float3( arrOut[0] * arrOut[3], 
+                        arrOut[1] * arrOut[3], 
+                        arrOut[2] * arrOut[3] );
+  } 
+
+  __device__ __host__
+  ModelViewRay( int w, int h, int ix_w, int ix_h, dom scale ) :
+    current_point( modelview_matrix_transform( make_float3(rescale(ix_w,w,scale), rescale(ix_h,h,scale), 0) ) ),
+    direction_vector( modelview_matrix_transform( make_float3(0, 0, 1) ) )
+  {
+
+    Normalize( direction_vector );
+
+    if ( ix_w == 0 && ix_h == 0 )
+      {
+        printf("ix_w=%03d\tix_h=%03d\tcurr=(%f,%f,%f)\tdir=(%f,%f,%f)\n",
+               ix_w, ix_h,
+               current_point.x, current_point.y, current_point.z,
+               direction_vector.x, direction_vector.y, direction_vector.z);
+      }
+  }
+
+  // transform the current point along the ray by given distance. 
+  // negative distance reverses direction of movement.
+  __device__ __host__
+  inline
+  void move_point( const dom & length )
+  {
+    current_point.x += direction_vector.x * length;
+    current_point.y += direction_vector.y * length;
+    current_point.z += direction_vector.z * length;
+  }
+
 };
 
 template < typename SurfType, typename RayType >
@@ -139,19 +215,22 @@ struct RayTrace
     w(w), h(h), ix_h(ix_h),
     view_angle(view_angle), starting_point(starting_point), scale(scale),
     view_distance(view_distance),
-    steps(steps), bisect_count(bisect_count)
+    steps(steps), bisect_count(bisect_count),
+    background(0)
   {
   }
 
 
-  __host__ __device__
+  __device__ __host__
   Color operator()( int ix_w )
   {
-    RayType ray( w, h, ix_w, ix_h, // which pixel on screen are we calculating
-                 view_angle,       // where do we look
-                 starting_point,   // where do we start
-                 scale             // defines the length of '1.0' in pixels
-                 );
+//    RayType ray( w, h, ix_w, ix_h, // which pixel on screen are we calculating
+//        	 view_angle,	   // where do we look
+//        	 starting_point,   // where do we start
+//        	 scale		   // defines the length of '1.0' in pixels
+//        	 );
+
+    RayType ray( w, h, ix_w, ix_h, 1 );
 
     float surf_value = surface.calculate( ray.current_point );
     bool sign_change = false;
@@ -223,7 +302,7 @@ struct TracePoint
     : w(w), h(h), ix_h(ix_h), 
       steps(v.steps),
       bisect_count(v.bisect_count),
-      R0(v.StartingPoint),
+      R0(v.starting_point),
       Rd(v.DirectionVector),
       step_size(sqrt(pow(R0.x - Rd.x,2) + 
 		     pow(R0.y - Rd.y,2) + 
@@ -325,41 +404,194 @@ struct TraceScreen
 };
 
 
+template < typename SurfType, typename RayType = ModelViewRay< > >
+struct RayTraceScreen
+{
+  static
+  void run(int w, int h, View view, uint * pbo, SurfType s = SurfType())
+  {
+    for(int ix_h = 0; ix_h < h; ix_h++)
+    {
+      thrust::transform( thrust::make_counting_iterator< short >(0),
+                         thrust::make_counting_iterator< short >(w),
+                         thrust::device_ptr< uint >(pbo + h * ix_h),
+                         RayTrace< SurfType, RayType >(w,h,ix_h,
+                                                       view.angle, view.starting_point,
+                                                       view.scale, view.distance, 
+                                                       view.steps, view.bisect_count));
+    }
+  }
+};
+
+template < typename RayType >
+struct RayDebug
+{  
+  int steps;
+  int bisect_count;
+
+  int w; int h; int ix_h;
+  float3 view_angle; float3 starting_point; float scale;
+  float view_distance; // how far do we look
+
+  float4 * vbo;
+
+  RayDebug(int w, int h, int ix_h,
+           float3 view_angle, float3 starting_point, float scale,
+           float view_distance, 
+           int steps,
+           int bisect_count,
+           float4 * vbo)
+  :
+    w(w), h(h), ix_h(ix_h),
+    view_angle(view_angle), starting_point(starting_point), scale(scale),
+    view_distance(view_distance),
+    steps(steps), bisect_count(bisect_count),
+    vbo(vbo)
+  {
+  }
+
+  __device__ __host__
+  void operator()( int ix_w )
+  {
+    //    RayType ray( w, h, ix_w, ix_h, scale );
+    RayType ray( w, h, ix_w, ix_h, // which pixel on screen are we calculating
+                 view_angle,       // where do we look
+                 starting_point,   // where do we start
+                 scale             // defines the length of '1.0' in pixels
+                 );
+
+    float step = view_distance / steps;
+
+    vbo += steps * ix_w;
+
+    for(int i = 0; i < steps; i++)
+      {
+        ray.move_point(step);
+        *vbo = make_float4( ray.current_point.x, ray.current_point.y, ray.current_point.z, 1.0 );
+        vbo++;
+      }
+  }
+};
+
+template < typename RayType = ModelViewRay< > >
+struct DebugRayTraceScreen
+{
+  static
+  void run(int w, int h, View view, float4 * vbo, uint * draw_cnt)
+  {
+    view.steps = MIN(view.steps, MAX_DEBUG_STEPS);
+
+    for(int ix_h = 0; ix_h < h; ix_h++)
+    {
+      thrust::for_each( thrust::make_counting_iterator< short >(0),
+                        thrust::make_counting_iterator< short >(w),
+                        RayDebug< OrtographicRay< > >(w,h,ix_h,
+                                            view.angle, view.starting_point,
+                                            view.scale, view.distance, 
+                                            view.steps, view.bisect_count,
+                                            vbo + view.steps * ix_h * w) );
+    }
+    *draw_cnt = view.steps * h * w;
+  }
+};
+
+void initModelViewMatrix(View view)
+{
+  PrintView( view );
+
+  GLfloat modelViewMatrix[16];
+  
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  {
+    glLoadIdentity();
+    glTranslatef( view.starting_point.x, view.starting_point.y, view.starting_point.z );
+
+    glRotatef( view.angle.x, 1, 0, 0 );
+    glRotatef( view.angle.y, 0, 1, 0 );
+    glRotatef( view.angle.z, 0, 0, 1 );
+
+
+    glGetFloatv(GL_MODELVIEW_MATRIX, modelViewMatrix);
+
+    //////
+
+    glLoadIdentity();
+    glOrtho( -10, 10, -10, 10, -10, 10 );
+ //   gluLookAt( 0, 0, 0,
+ //              view.starting_point.x, view.starting_point.y, view.starting_point.z,
+ //              1, 0, 0 );
+
+    glScalef( view.scale, view.scale, view.scale ); // scale along z axis
+    glTranslatef( view.starting_point.x, view.starting_point.y, view.starting_point.z );
+
+    glGetFloatv(GL_MODELVIEW_MATRIX, modelViewMatrix);
+  }
+  glPopMatrix();
+
+  for(int i = 0; i < 4; i++)
+    {
+      printf("\t");
+      for(int j = 0; j < 4; j++)
+        {
+          printf("%f\t", modelViewMatrix[i+j*4]);
+          host_modelview_matrix[i+j*4] = modelViewMatrix[i+j*4];
+        }
+      printf("\n");
+    }
+
+  cudaMemcpyToSymbol(device_modelview_matrix, host_modelview_matrix, sizeof(float) * 16);
+}
+
+extern "C" void launch_debug_kernel(float4 * vbo, unsigned int * draw_cnt, View view, int w, int h)
+{
+  *draw_cnt = 0;
+  initModelViewMatrix(view);
+  DebugRayTraceScreen< >::run( w, h, view, vbo, draw_cnt );
+
+}
+
+
 extern "C" void launch_raytrace_kernel(uint * pbo, View view, int w, int h)
 {
-  std::cerr << "w=" << w << std::endl
-            << "h=" << h << std::endl; 
+//  std::cerr << "w=" << w << std::endl
+//            << "h=" << h << std::endl; 
 
-  PrintView( view );
+  // modelview matrix fun
+  initModelViewMatrix(view);
+  
+
+
+#define TraceEngine RayTraceScreen
 
   switch ( view.surf )
     {
     case SURF_CHMUTOV:
-      TraceScreen< Surface< SURF_CHMUTOV > >::run(w,h,view,pbo);
+      TraceEngine< Surface< SURF_CHMUTOV > >::run(w,h,view,pbo);
       break;
     case SURF_CHMUTOV_ALT:
-      TraceScreen< Surface< SURF_CHMUTOV_ALT > >::run(w,h,view,pbo);
+      TraceEngine< Surface< SURF_CHMUTOV_ALT > >::run(w,h,view,pbo);
       break;
     case SURF_HEART:
-      TraceScreen< Surface< SURF_HEART > >::run(w,h,view,pbo);
+      TraceEngine< Surface< SURF_HEART > >::run(w,h,view,pbo);
       break;
     case SURF_PLANE:
-      TraceScreen< Surface< SURF_PLANE > >::run(w,h,view,pbo);
+      TraceEngine< Surface< SURF_PLANE > >::run(w,h,view,pbo);
       break;
     case SURF_TORUS:
-      TraceScreen< Surface< SURF_TORUS > >::run(w,h,view,pbo);
+      TraceEngine< Surface< SURF_TORUS > >::run(w,h,view,pbo);
       break;
     case SURF_DING_DONG:
-      TraceScreen< Surface< SURF_DING_DONG > >::run(w,h,view,pbo);
+      TraceEngine< Surface< SURF_DING_DONG > >::run(w,h,view,pbo);
       break;
     case SURF_CAYLEY:
-      TraceScreen< Surface< SURF_CAYLEY > >::run(w,h,view,pbo);
+      TraceEngine< Surface< SURF_CAYLEY > >::run(w,h,view,pbo);
       break;
     case SURF_DIAMOND:
-      TraceScreen< Surface< SURF_DIAMOND > >::run(w,h,view,pbo);
+      TraceEngine< Surface< SURF_DIAMOND > >::run(w,h,view,pbo);
       break;
     case SURF_BALL:
-      TraceScreen< Surface< SURF_BALL > >::run(w,h,view,pbo);
+      TraceEngine< Surface< SURF_BALL > >::run(w,h,view,pbo);
       break;
     case SURF_ARB_POLY:
       {
@@ -374,10 +606,12 @@ extern "C" void launch_raytrace_kernel(uint * pbo, View view, int w, int h)
             stride = sizeof(int);
             cudaMemcpyToSymbol( arb_poly_const_size, &p.max_deg, stride, stride * i );
           }
-        TraceScreen< Surface< SURF_ARB_POLY > >::run(w,h,view,pbo);
+        TraceEngine< Surface< SURF_ARB_POLY > >::run(w,h,view,pbo);
         break;
       }
     default:
       break;
     }
+
+#undef TraceEngine
 }

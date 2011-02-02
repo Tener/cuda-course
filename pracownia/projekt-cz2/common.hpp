@@ -20,7 +20,11 @@
 #include "view.h"
 #include "surf.h"
 
+#define MAX_DEBUG_STEPS 150
+
+extern "C" void launch_debug_kernel(float4 * vbo, unsigned int * draw_cnt, View view, int w, int h);
 extern "C" void launch_raytrace_kernel(uint * pbo, View view, int w, int h);
+
 extern "C" void * server_thread(void * arg);
 
 #define SERV_PORT 4000

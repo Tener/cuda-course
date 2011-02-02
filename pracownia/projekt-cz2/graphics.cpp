@@ -7,7 +7,7 @@
 namespace rt {
   namespace graphics {
     VBO::VBO(unsigned int n_points, unsigned int vbo_res_flags)
-      : d_vbo_buffer(NULL), n_points(n_points)
+      : dev_vbo(NULL), n_points(n_points), draw_points(n_points)
     {
       // create buffer object
       glGenBuffers(1, &vbo);
@@ -39,34 +39,30 @@ namespace rt {
     void VBO::render( int point_cnt, float3 color )
     {
       if ( point_cnt == -1 )
-        point_cnt = n_points;
-        
+        point_cnt = draw_points;
 
       glBindBuffer(GL_ARRAY_BUFFER, vbo);
       glVertexPointer(4, GL_FLOAT, 0, 0);
 
       glEnableClientState(GL_VERTEX_ARRAY);
       glColor3f(color.x, color.y, color.z);
-      glDrawArrays(GL_POINTS, 0, point_cnt);
+      glDrawArrays(GL_LINES, 0, point_cnt);
       glDisableClientState(GL_VERTEX_ARRAY);
-
     }
 
-    float4 * VBO::mapResourcesGetMappedPointer()
+    void VBO::map()
     {
-      float4 *dptr;
       size_t num_bytes; 
 
       cutilSafeCall(cudaGraphicsMapResources(1, &cuda_vbo_resource));
-      cutilSafeCall(cudaGraphicsResourceGetMappedPointer((void **)&dptr, &num_bytes,  
+      cutilSafeCall(cudaGraphicsResourceGetMappedPointer((void **)&dev_vbo, &num_bytes,  
                                                          cuda_vbo_resource));
-
-      return dptr;
     }
 
-    void VBO::unmapResources()
+    void VBO::unmap()
     {
       cutilSafeCall(cudaGraphicsUnmapResources(1, &cuda_vbo_resource, 0));
+      dev_vbo = NULL;
     }
   
 
@@ -78,14 +74,15 @@ namespace rt {
       cutilSafeCall(cudaGLRegisterBufferObject(pbo));
     }
 
-    void PBO::mapBufferObject()
+    void PBO::map()
     {
         cudaGLMapBufferObject((void**)&dev_pbo, pbo);
     }
     
-    void PBO::unmapBufferObject()
+    void PBO::unmap()
     {
       cudaGLUnmapBufferObject(pbo);
+      dev_pbo = NULL;
     }
 
     void PBO::render()

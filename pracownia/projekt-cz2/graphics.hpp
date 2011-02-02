@@ -36,46 +36,47 @@ namespace rt {
       // vbo variables
       GLuint vbo;
       struct cudaGraphicsResource *cuda_vbo_resource;
-      void * d_vbo_buffer;
+      float4 * dev_vbo;
       unsigned int n_points;
+      unsigned int draw_points;
 
       VBO(unsigned int n_points, unsigned int vbo_res_flags = cudaGraphicsMapFlagsWriteDiscard);
-
       ~VBO();
 
+      void map();
+      void unmap();
       void render( int point_cnt = -1, float3 color = make_float3( 0.3, 0.65, 0.23 ) );
-      float4 * mapResourcesGetMappedPointer();
-      void unmapResources();
 
     };
 
     struct PBO {
       GLuint pbo;
-      uint *dev_pbo; // device ptr to PBO
+      uint * dev_pbo; // device ptr to PBO
 
       int width;
       int height;
 
       PBO(int width, int height);
       ~PBO() { };
-      void mapBufferObject();
-      void unmapBufferObject();
+      void map();
+      void unmap();
       void render();
     };
 
     // much like scoped ptr
-    class PBO_map_unmap {
+    template < typename Resource >
+    class ScopedMapping {
     
     private:
-      PBO & pbo;
+      Resource & res;
     
     public:
-      PBO_map_unmap( PBO & pbo ) : pbo(pbo) {
-        pbo.mapBufferObject();
+      ScopedMapping( Resource & res ) : res(res) {
+        res.map();
       }
 
-      ~PBO_map_unmap() {
-        pbo.unmapBufferObject();
+      ~ScopedMapping() {
+        res.unmap();
       }
 
     };

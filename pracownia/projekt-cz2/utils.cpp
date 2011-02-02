@@ -35,7 +35,10 @@ void PrintView( View v, std::ostream & out)
   out << "steps=" << v.steps << std::endl;
   out << "bisect_count=" << v.bisect_count << std::endl;
   out << "surf=" << v.surf << "=" << SurfString(v.surf) << std::endl;
-  PrintVector( v.StartingPoint, std::string("start").c_str(), out ); // what point is the center of our view?
-  PrintVector( v.DirectionVector, std::string("dirVec").c_str(), out ); // in which direction and how far does it reach?
+  PrintVector( v.starting_point, std::string("start").c_str(), out );
+  PrintVector( v.DirectionVector, std::string("dirVec").c_str(), out );
+  PrintVector( v.angle, std::string("angle").c_str(), out );
+  out << "scale=" << v.scale << std::endl;
+  out << "distance=" << v.distance << std::endl;
 
 }

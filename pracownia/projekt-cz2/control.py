@@ -10,13 +10,17 @@ import gtk
 
 import thread, telnetlib, time
 import socket
+
+from math import pi
     
 class MultiRuler:
     XSIZE = 550
-    YSIZE = 550
+    YSIZE = 850
 
     # This routine gets control when the close button is clicked
-    def close_application(self, widget, event, data=None):
+    def close_application(self):
+        self.window.hide_all()
+        self.window.emit("destroy")
         gtk.main_quit()
         return False
 
@@ -28,9 +32,7 @@ class MultiRuler:
             connection.write(msg)
         except socket.error:
             print "Connection lost..."
-            self.window.hide_all()
-            self.window.emit("destroy")
-            gtk.main_quit()
+            self.close_application()
 
     def update_value(self, adj, param):
         msg = param + " " + str(adj.value)
@@ -46,6 +48,21 @@ class MultiRuler:
         msg = "surf " + str(index)
         self.send_msg(msg)
 
+    def on_idle(self):
+        try:
+                data = connection.read_very_eager()
+                if data:
+                    print data
+                    sys.stdout.flush()
+                else:
+                    time.sleep(0.01)
+                return True
+        except EOFError:
+            print "EOFError occured, connection closed"
+            self.close_application()
+            return False
+        
+
     def __init__(self, connection):
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         window.connect("delete_event", self.close_application)
@@ -60,10 +77,15 @@ class MultiRuler:
         labels_and_ranges = [("start.x", (-10, 10, 0, 0.01)),
                              ("start.y", (-10, 10, 0, 0.01)),
                              ("start.z", (-10, 10, 0, 0.01)),
+                             ("angle.x", (-20, 20, 0, 0.01)),
+                             ("angle.y", (-20, 20, 0, 0.01)),
+                             ("angle.z", (-20, 20, 0, 0.01)),
+                             ("scale", (-100, 100, 0.1, 0.0001)),
+                             ("distance", (-100, 100, 10, 0.01)),
                              ("dirvec.x", (-10, 10, 0, 0.01)),
                              ("dirvec.y", (-10, 10, 0, 0.01)),
                              ("dirvec.z", (-10, 10, 0, 0.01)),
-                             ("steps", (100, 5000, 500, 1)),
+                             ("steps", (0, 5000, 2, 1)),
                              ("bisect", (0, 10, 0, 1))
                              ]
 
@@ -72,8 +94,8 @@ class MultiRuler:
         window.add(table)
 
         for (i,(label_txt,(r_low, r_high, r_def, step_inc))) in enumerate(labels_and_ranges):
-            page_size = 1
-            adj = gtk.Adjustment(r_def, r_low, r_high, step_inc, page_size)
+            page_size = 0.1
+            adj = gtk.Adjustment(r_def, r_low, r_high, step_inc, (r_high-r_low) / 300.0)
             scale = gtk.HScale(adj)
 
             adj.connect("value_changed", self.update_value, label_txt)
@@ -107,7 +129,6 @@ class MultiRuler:
             pos += 1
             print pos
             text = gtk.Entry(max=300)
-            text.set_text( ["3", "2", "1"][i] )
             text.set_text("+1 0 -128 0 +2688 0 -21504 0 +84480  0 -180224 0  +212992 0  -131072 0  +32768 0 0")
             text.set_editable(True)
             text.show()
@@ -121,8 +142,10 @@ class MultiRuler:
         # show
         table.show()
         window.show()
+        import gobject
+        gobject.idle_add(self.on_idle)
 
-        window.move(800, 0)
+        window.move(1030, 50)
 
 def getSurfaces():
     surf_def = filter( lambda s: s.startswith('SURF_'), open('surf.h').read().replace(',',' ').split() )
@@ -132,39 +155,12 @@ def getSurfaces():
 def main():
     gtk.main()
 
-def listener(connection_lock, connection):
-    while True:
-
-        if not connection_lock.acquire(0):
-            print "connection lock acquired by main thread, exit now"
-            return
-        connection_lock.release()
-
-        try:
-                data = connection.read_eager()
-                if data:
-                    print data
-                    sys.stdout.flush()
-                else:
-                    time.sleep(0.01)
-        except EOFError:
-            print "EOFError occured, connection closed"
-            return
-            
-
 if __name__ == "__main__":
-    connection_lock = thread.allocate_lock()
-    
     while True:
         try:
-            connection = None
-            with connection_lock:
-                time.sleep(0.5)
-                connection = telnetlib.Telnet("localhost",4000)
-            thread.start_new_thread( listener, (connection_lock, connection) )
+            connection = telnetlib.Telnet("localhost",4000)
             MultiRuler(connection)
             main()
         except socket.error:
             print "Couldn't connect, retrying in 1 sec..."
             time.sleep(1)
-            

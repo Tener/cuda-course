@@ -4,10 +4,14 @@
 struct View 
 {
   Surf surf;
-  float3 StartingPoint; // what point is the center of our view?
+  float3 starting_point; // what point is the center of our view?
   float3 DirectionVector; // in which direction and how far does it reach?
   int steps;
   int bisect_count;
+
+  float3 angle;
+  float scale;
+  float distance;
 
   float arb_poly[3][18+1];
 
@@ -17,10 +21,14 @@ struct View
        int steps = 500,
        int bisect_count = 5)
   : surf(s), 
-    StartingPoint(start), 
+    starting_point(start), 
     DirectionVector(dirvec), 
-    steps(steps)
+    steps(steps),
+    scale(1),
+    distance(25)
   { 
+    angle = make_float3(0, 0, 0);
+    
     //float chebyshev_coeff_16[18+1] = { +1, 0, -128, 0, +2688, 0, -21504, 0, +84480,  0, -180224, 0,  +212992, 0,  -131072, 0,  +32768, 0, 0};
 
     float chebyshev_coeff_18[18+1] = { -1, 0, +162, 0, -4320, 0, +44352, 0, -228096, 0, +658944, 0, -1118208, 0, +1105920, 0, -589824, 0, 131072 };
