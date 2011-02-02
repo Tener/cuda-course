@@ -13,9 +13,9 @@ struct Surface {
   __host__ __device__
   Color lightning(Vector V, Vector Light)
   {
-    return RGBA( COLOR_EXPDAMP( V.x ),
-                 COLOR_EXPDAMP( V.y ),
-                 COLOR_EXPDAMP( V.z ),
+    return RGBA( COLOR_EXPDAMP( V.x * 2 ),
+                 COLOR_EXPDAMP( V.y * 2 ),
+                 COLOR_EXPDAMP( V.z * 2 ),
                  0);
   }
 };
@@ -35,13 +35,27 @@ struct Surface< SURF_CHMUTOV, Vector, dom >
   __host__ __device__
   Color lightning(Vector V, Vector Light)
   {
-    float dot_pr = DotProduct( Light.x, Light.y, Light.z,
-			       Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.x ),
-			       Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.y ),
-			       Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.z ));
+    float dot_pr_r = DotProduct( Light.x, Light.y, Light.z,
+                                 Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.x ),
+                                 Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.y ),
+                                 Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.z ));
 
-    return RGBA( 30 + 100 + 100 * dot_pr,
-		 0, 0, 0 );
+    float dot_pr_g = DotProduct( Light.x+1, Light.y+1, Light.z+1,
+                                 Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.x ),
+                                 Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.y ),
+                                 Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.z ));
+
+    float dot_pr_b = DotProduct( Light.x+2, Light.y-2, Light.z-3,
+                                 Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.x ),
+                                 Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.y ),
+                                 Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.z ));
+
+    
+
+    return RGBA( 30 + 100 + 100 * dot_pr_r,
+                 30 + 100 + 100 * dot_pr_g,
+                 30 + 100 + 100 * dot_pr_b,
+                 0);
   }
 };
 

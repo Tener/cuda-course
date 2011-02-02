@@ -505,25 +505,17 @@ void initModelViewMatrix(View view)
   glPushMatrix();
   {
     glLoadIdentity();
-    glTranslatef( view.starting_point.x, view.starting_point.y, view.starting_point.z );
-
-    glRotatef( view.angle.x, 1, 0, 0 );
-    glRotatef( view.angle.y, 0, 1, 0 );
-    glRotatef( view.angle.z, 0, 0, 1 );
-
-
-    glGetFloatv(GL_MODELVIEW_MATRIX, modelViewMatrix);
-
-    //////
-
-    glLoadIdentity();
     glOrtho( -1, 1, -1, 1, -1, 1 );
- //   gluLookAt( 0, 0, 0,
- //              view.starting_point.x, view.starting_point.y, view.starting_point.z,
- //              1, 0, 0 );
 
     glScalef( view.scale, view.scale, view.scale ); // scale along z axis
-    glTranslatef( view.starting_point.x, view.starting_point.y, view.starting_point.z );
+
+    glRotatef( view.angle.x * 10, 1, 0, 0 );
+    glRotatef( view.angle.y * 10, 0, 1, 0 );
+    glRotatef( view.angle.z * 10, 0, 0, 1 );
+
+    glTranslatef( view.starting_point.x/view.scale, 
+                  view.starting_point.y/view.scale, 
+                  view.starting_point.z/view.scale );
 
     glGetFloatv(GL_MODELVIEW_MATRIX, modelViewMatrix);
   }

@@ -85,8 +85,8 @@ class MultiRuler:
                              ("dirvec.x", (-10, 10, 0, 0.01)),
                              ("dirvec.y", (-10, 10, 0, 0.01)),
                              ("dirvec.z", (-10, 10, 0, 0.01)),
-                             ("steps", (0, 5000, 2, 1)),
-                             ("bisect", (0, 10, 0, 1))
+                             ("steps", (0, 5000, 500, 1)),
+                             ("bisect", (0, 10, 10, 1))
                              ]
 
         # Create a table

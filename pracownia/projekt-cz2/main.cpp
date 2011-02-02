@@ -3,39 +3,6 @@
 #include "graphics.hpp"
 #include "utils.hpp"
 
-#include <boost/lexical_cast.hpp>
-
-void ReadVector( float3 & v )
-{
-  std::cin >> v.x;
-  std::cin >> v.y;
-  std::cin >> v.z;
-}
-
-View ReadView(  )
-{
-  View v;
-
-  int surf_t;
-
-  std::cout << "steps="; std::cin >> v.steps; std::cout << std::endl;
-  std::cout << "surf="; std::cin >> surf_t; v.surf = (Surf)surf_t;
-  std::cout << "start="; ReadVector( v.starting_point ); // what point is the center of our view?
-  std::cout << "dir=" ; ReadVector( v.DirectionVector ); // in which direction and how far does it reach?
-
-  return v;
-}
-
-void * cli_thread( void * arg )
-{
-  View * activeView = (View*) arg;
-  while( true )
-    {
-      PrintView( *activeView );
-      *activeView = ReadView();
-    }
-}
-
 View activeView;
 
 void * raytrace_wrapper( void * arg )

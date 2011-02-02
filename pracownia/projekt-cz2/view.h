@@ -16,19 +16,19 @@ struct View
   float arb_poly[3][18+1];
 
   View(Surf s = SURF_CHMUTOV,
-       float3 start = make_float3(0,0,0),
-//       float3 start = make_float3( 2.2, 1.9, 1.7 ), 
+       float3 start = make_float3(0,0,-2),
        float3 dirvec = make_float3(7.1,5.7,4.9), 
        int steps = 500,
-       int bisect_count = 5)
+       int bisect_count = 10)
   : surf(s), 
     starting_point(start), 
     DirectionVector(dirvec), 
     steps(steps),
-    scale(1),
-    distance(25)
+    scale(5.2),
+    distance(20),
+    bisect_count(bisect_count),
+    angle(make_float3(3.5, -19.5, -11.4))
   { 
-    angle = make_float3(0, 0, 0);
     
     //float chebyshev_coeff_16[18+1] = { +1, 0, -128, 0, +2688, 0, -21504, 0, +84480,  0, -180224, 0,  +212992, 0,  -131072, 0,  +32768, 0, 0};
 
