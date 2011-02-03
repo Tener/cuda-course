@@ -126,8 +126,7 @@ struct ModelViewRay
 {
   
   dom3 current_point;
-  dom3 starting_point;
-  dom3 direction_vector;
+  const dom3 direction_vector;
 
   __host__ __device__
   inline
@@ -164,10 +163,8 @@ struct ModelViewRay
   __device__ __host__
   ModelViewRay( int w, int h, int ix_w, int ix_h, dom scale ) :
     current_point( modelview_matrix_transform( make_float3(rescale(ix_w,w,scale), rescale(ix_h,h,scale), 0) ) ),
-    
     direction_vector( Normalize( modelview_matrix_transform( make_float3(0, 0, 1) ) ) )
   {
-    starting_point = current_point;
   }
 
   // transform the current point along the ray by given distance. 
@@ -179,13 +176,6 @@ struct ModelViewRay
     current_point.x += direction_vector.x * length;
     current_point.y += direction_vector.y * length;
     current_point.z += direction_vector.z * length;
-  }
-
-  __device__ __host__
-  inline
-  void reset()
-  {
-    current_point = starting_point;
   }
 
 };
@@ -233,39 +223,23 @@ struct RayTrace
     float surf_value = surface.calculate( ray.current_point );
     bool sign_change = false;
     float step = view_distance / steps;
-    //float pos = 0; // position along the ray
+    float pos = 0; // position along the ray
 
-    // root detection - fast forward
-    for(float pos = 0; pos < view_distance && !sign_change;)
-      //    for(int i = 0; (i < steps) && !sign_change; i++)
+    // root detection 
+    for(; pos < view_distance && !sign_change;)
       {
+        step += (view_distance / steps) / 10; // if there is no root we go faster each step
         ray.move_point(step);
         pos += step;
         float tmp = surface.calculate( ray.current_point );
         sign_change = SignChange<>::check( surf_value, tmp );
         surf_value = tmp;
-        if (__all(!sign_change))
-          {
-            step += (view_distance / steps);
-          }
       }
+
+
 
     if ( sign_change )
       {
-        // root detection, once again
-        ray.reset();
-        step = view_distance / steps;
-        sign_change = false;
-        surf_value = surface.calculate( ray.current_point );
-        for(float pos = 0; pos < view_distance && !sign_change;)
-          {
-            ray.move_point(step);
-            pos += step;
-            float tmp = surface.calculate( ray.current_point );
-            sign_change = SignChange<>::check( surf_value, tmp );
-            surf_value = tmp;
-          }
-
         // root refinement
         for(int i = 0; i < bisect_count; i++)
 	 {
