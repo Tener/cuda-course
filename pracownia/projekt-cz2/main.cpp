@@ -14,8 +14,10 @@ void * raytrace_wrapper( void * arg )
 
 
   bool run = true;
+  int cnt = 0;
   while( run )
     {
+      cnt++;
       rt::utils::CudaIntervalAutoTimer t(timer);
       
       {
@@ -38,40 +40,40 @@ void * raytrace_wrapper( void * arg )
   return NULL;
 }
 
-void * vbo_debug_wraper( void * arg )
-{
-  rt::utils::CudaStartEndTimer timer;
-
-  std::cout << "VBO - 1" << std::endl; std::cout.flush();
-  rt::graphics::VBO vbo(512 * 512 * MAX_DEBUG_STEPS);
-  std::cout << "VBO - 2" << std::endl; std::cout.flush();
-
-
-  bool run = true;
-  while( run )
-    {
-      rt::utils::CudaIntervalAutoTimer t(timer);
-      
-      {
-        rt::graphics::ScopedMapping< rt::graphics::VBO > mapper(vbo);
-        launch_debug_kernel(vbo.dev_vbo, &vbo.draw_points,
-                            activeView, 
-                            rt::graphics::global_glm.width, 
-                            rt::graphics::global_glm.height);
-      }
-
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-      glLoadIdentity();
-      glOrtho(-10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
-      vbo.render();
-      glfwSwapBuffers();
-    
-      run = !glfwGetKey( GLFW_KEY_ESC ) && glfwGetWindowParam( GLFW_OPENED );
-    }
-
-
-  return NULL;
-}
+//void * vbo_debug_wraper( void * arg )
+//{
+//  rt::utils::CudaStartEndTimer timer;
+// 
+//  std::cout << "VBO - 1" << std::endl; std::cout.flush();
+//  rt::graphics::VBO vbo(512 * 512 * MAX_DEBUG_STEPS);
+//  std::cout << "VBO - 2" << std::endl; std::cout.flush();
+// 
+// 
+//  bool run = true;
+//  while( run )
+//    {
+//      rt::utils::CudaIntervalAutoTimer t(timer);
+//      
+//      {
+//        rt::graphics::ScopedMapping< rt::graphics::VBO > mapper(vbo);
+//        launch_debug_kernel(vbo.dev_vbo, &vbo.draw_points,
+//                            activeView, 
+//                            rt::graphics::global_glm.width, 
+//                            rt::graphics::global_glm.height);
+//      }
+// 
+//      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+//      glLoadIdentity();
+//      glOrtho(-10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+//      vbo.render();
+//      glfwSwapBuffers();
+//    
+//      run = !glfwGetKey( GLFW_KEY_ESC ) && glfwGetWindowParam( GLFW_OPENED );
+//    }
+// 
+// 
+//  return NULL;
+//}
 
 
 

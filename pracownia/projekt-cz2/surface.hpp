@@ -8,7 +8,10 @@ struct Surface {
   Surface() { };
 
   __host__ __device__ 
-  dom calculate(const Vector & V){ return 0; };
+  dom calculate(const Vector & V);
+
+  __host__ __device__ 
+  dom calculate(const dom & x, const dom & y, const dom & z){ return calculate( make_float3( x, y, z ) ); }
     
   __host__ __device__
   Color lightning(Vector V, Vector Light)
@@ -30,6 +33,15 @@ struct Surface< SURF_CHMUTOV, Vector, dom >
     return Chebyshev_T< CHMUTOV_DEGREE >::calculate( V.x ) + 
            Chebyshev_T< CHMUTOV_DEGREE >::calculate( V.y ) + 
            Chebyshev_T< CHMUTOV_DEGREE >::calculate( V.z );
+  }
+
+  __host__ __device__ 
+  inline
+  dom calculate(const dom & x, const dom & y, const dom & z)
+  {
+    return Chebyshev_T< CHMUTOV_DEGREE >::calculate( x ) + 
+           Chebyshev_T< CHMUTOV_DEGREE >::calculate( y ) + 
+           Chebyshev_T< CHMUTOV_DEGREE >::calculate( z );
   }
 
   __host__ __device__
@@ -90,6 +102,9 @@ struct Surface< SURF_ARB_POLY, Vector, dom >
   {
     return params_s_x.evaluate(V.x) + params_s_y.evaluate(V.y) + params_s_z.evaluate(V.z);    
   }
+
+  __device__ 
+  dom calculate(const dom & x, const dom & y, const dom & z){ return calculate( make_float3( x, y, z ) ); }
 
   __device__
   Color lightning(Vector V, Vector Light)

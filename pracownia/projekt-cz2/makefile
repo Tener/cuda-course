@@ -30,17 +30,17 @@ BOOST_RANDOM_FLAGS :=
 OPENGL := -DUSE_OPENGL 
 OPENGL := 
 
-PTX := --ptxas-options '--verbose -O4'
 PTX := 
-KEEP := --keep --keep-dir keep
+PTX := --ptxas-options '--verbose -O4'
 KEEP :=
+KEEP := --keep --keep-dir keep
 
 OBJ = obj/
 O_FILES := $(addprefix $(OBJ),$(patsubst %.cpp,%.o,$(wildcard *.cpp)))
 
 INCLUDES := -I${CUDA_SDK}/C/common/inc -I${CUDA_SDK}/shared/inc/ -I.
-GCC_FLAGS := --compiler-options -mtune=native,-march=native
-FLOAT_PREC_OPTS := -use_fast_math --prec-sqrt=true --prec-div=true
+GCC_FLAGS := --compiler-options -mtune=native,-march=native,-O3
+FLOAT_PREC_OPTS := -use_fast_math --prec-sqrt=false --prec-div=false
 NVCC_FLAGS := -O3 ${FLOAT_PREC_OPTS} ${KEEP} ${LIBS} ${GENCODE_F} ${INCLUDES} ${GCC_FLAGS} ${OPENGL} ${BOOST_RANDOM_FLAGS} ${PTX}
 
 rt: $(O_FILES)

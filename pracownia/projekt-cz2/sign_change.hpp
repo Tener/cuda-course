@@ -7,7 +7,7 @@ struct SignChange {
   // default implementation
   bool check( const dom & a, const dom & b )
   {
-    return checkSlow( a, b );
+    return (a * b < 0);
   }  
 
   __host__ __device__

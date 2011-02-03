@@ -24,6 +24,13 @@ void Normalize( float3 & Vec )
   Vec.z /= len;
 }
 
+__host__ __device__
+float3 Normalize( const float3 & Vec )
+{
+  float len = sqrt(Vec.x * Vec.x + Vec.y * Vec.y + Vec.z * Vec.z);
+  return make_float3( Vec.x / len, Vec.y / len, Vec.z / len );
+}
+
 template < typename dom >
 __host__ __device__
 inline
