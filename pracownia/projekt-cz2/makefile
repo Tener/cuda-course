@@ -39,9 +39,9 @@ OBJ = obj/
 O_FILES := $(addprefix $(OBJ),$(patsubst %.cpp,%.o,$(wildcard *.cpp)))
 
 INCLUDES := -I${CUDA_SDK}/C/common/inc -I${CUDA_SDK}/shared/inc/ -I.
-GCC_FLAGS := --compiler-options -mtune=native,-march=native,-O3
+SLAVE_FLAGS := --compiler-options -mtune=native,-march=native,-O3 --opencc-options -OPT:Olimit=0
 FLOAT_PREC_OPTS := -use_fast_math --prec-sqrt=false --prec-div=false
-NVCC_FLAGS := -O3 ${FLOAT_PREC_OPTS} ${KEEP} ${LIBS} ${GENCODE_F} ${INCLUDES} ${GCC_FLAGS} ${OPENGL} ${BOOST_RANDOM_FLAGS} ${PTX}
+NVCC_FLAGS := -O3 -v ${FLOAT_PREC_OPTS} ${KEEP} ${LIBS} ${GENCODE_F} ${INCLUDES} ${SLAVE_FLAGS} ${OPENGL} ${BOOST_RANDOM_FLAGS} ${PTX}
 
 rt: $(O_FILES)
 	nvcc ${NVCC_FLAGS} *.cu $(O_FILES) -o rt
