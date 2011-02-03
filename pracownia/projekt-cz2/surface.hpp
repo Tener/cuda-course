@@ -123,6 +123,20 @@ struct Surface< SURF_ARB_POLY, Vector, dom >
 
 template <>
 __host__ __device__
+float Surface< SURF_BARTH >::calculate(const float3 & V)
+{
+    float x = V.x; float y = V.y; float z = V.z;
+    float phi = 1.618033988; //(1 + sqrtf(5))/2;
+    float phi4 = phi * phi * phi * phi;
+
+    return (5*phi+3)*((x*x)+(y*y)+(z*z)-1)*((x*x)+(y*y)+(z*z)-1)*((x*x)+(y*y)+(z*z)+phi-2)*((x*x)+(y*y)+(z*z)+phi-2)+
+      8*((x*x*x*x)-2*(x*x)*(y*y)-2*(x*x)*(z*z)+(y*y*y*y)-2*(y*y)*(z*z)+(z*z*z*z))*((x*x)-(y*y)*phi4)*((z*z)-(x*x)*phi4)*((y*y)-(z*z)*phi4);
+
+}
+
+
+template <>
+__host__ __device__
 float Surface< SURF_HEART >::calculate(const float3 & V)
 {
     float x = V.x; float y = V.y; float z = V.z;

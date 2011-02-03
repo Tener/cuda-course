@@ -551,6 +551,9 @@ extern "C" void launch_raytrace_kernel(uint * pbo, View view, int w, int h)
 
   switch ( view.surf )
     {
+    case SURF_BARTH:
+      TraceEngine< Surface< SURF_BARTH > >::run(w,h,view,pbo);
+      break;
     case SURF_CHMUTOV:
       TraceEngine< Surface< SURF_CHMUTOV > >::run(w,h,view,pbo);
       break;
