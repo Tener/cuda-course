@@ -48,6 +48,12 @@ std::string parseLine(std::string data)
           return "QUIT";
         }
 
+      if( boost::starts_with( std::string("screenshot"), strs[0] ) )
+        {
+          currentView->screenshot = true;
+        }
+
+
       if( boost::starts_with( std::string("dirvec"), strs[0] ) )
         {
           if (strs.size() < 1+3) return "ARG???\n";

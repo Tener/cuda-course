@@ -13,6 +13,8 @@ struct View
   float scale;
   float distance;
 
+  bool screenshot;
+
   float arb_poly[3][18+1];
 
   View(Surf s = SURF_CHMUTOV,
@@ -27,7 +29,8 @@ struct View
     scale(5.2),
     distance(20),
     bisect_count(bisect_count),
-    angle(make_float3(3.5, -19.5, -11.4))
+    angle(make_float3(3.5, -19.5, -11.4)),
+    screenshot(false)
   { 
     
     //float chebyshev_coeff_16[18+1] = { +1, 0, -128, 0, +2688, 0, -21504, 0, +84480,  0, -180224, 0,  +212992, 0,  -131072, 0,  +32768, 0, 0};

@@ -3,7 +3,7 @@ CUDA_PLATFORM ?= $(shell uname -m)
 
 FILES := makefile main.cpp
 FTGL :=  $(shell freetype-config --cflags) -lftgl
-LIBS := -L${CUDA_SDK}/C/lib -lcurand -lcutil_${CUDA_PLATFORM} -lparamgl_${CUDA_PLATFORM} -lglut -lGL -lglfw -lGLEW -lpthread -lboost_system -lboost_thread-mt
+LIBS := -L${CUDA_SDK}/C/lib -lglut -lGL -lglfw -lGLEW -lpthread -lboost_system -lboost_thread-mt  $(shell libpng-config --ldflags)
 #LIBS := -L${CUDA_SDK}/C/lib -lcurand -lcutil_${CUDA_PLATFORM} -lparamgl_${CUDA_PLATFORM} -lglut -lGL -lglfw -lGLEW -lpthread -Llib -lboost_system -lboost_thread
 GENCODE_FULL :=	-gencode arch=compute_10,code=sm_10 \
 		-gencode arch=compute_10,code=sm_11 \
@@ -38,8 +38,8 @@ KEEP := --keep --keep-dir keep
 OBJ = obj/
 O_FILES := $(addprefix $(OBJ),$(patsubst %.cpp,%.o,$(wildcard *.cpp)))
 
-INCLUDES := -I${CUDA_SDK}/C/common/inc -I${CUDA_SDK}/shared/inc/ -I.
-SLAVE_FLAGS := --compiler-options -mtune=native,-march=native,-O3 # --opencc-options -OPT:Olimit=0
+INCLUDES := -I${CUDA_SDK}/C/common/inc -I${CUDA_SDK}/shared/inc/ -I. $(shell libpng-config --cflags)
+SLAVE_FLAGS := --compiler-options -mtune=native,-march=native,-O3
 FLOAT_PREC_OPTS := -use_fast_math --prec-sqrt=false --prec-div=false
 NVCC_FLAGS := -O3 ${FLOAT_PREC_OPTS} ${KEEP} ${LIBS} ${GENCODE_F} ${INCLUDES} ${SLAVE_FLAGS} ${OPENGL} ${BOOST_RANDOM_FLAGS} ${PTX}
 

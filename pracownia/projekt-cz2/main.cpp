@@ -27,6 +27,9 @@ void * raytrace_wrapper( void * arg )
                                rt::graphics::global_glm.width, 
                                rt::graphics::global_glm.height);
       }
+      
+      if ( activeView.screenshot )
+        activeView.screenshot = false; // i don't like the fact this line is here
 
       glLoadIdentity();
       glOrtho(0.0, 1.0, 0.0, 1.0, 0.0, 1.0);

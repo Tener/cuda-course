@@ -3,6 +3,9 @@
 #include <algorithm>
 #include <iostream>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 // CUDA
 #include <cuda_runtime_api.h>
 #include <cuda.h>
@@ -28,6 +31,11 @@
 #include <thrust/sort.h>
 #include <thrust/unique.h>
 
+//png++
+#include <png++/png.hpp>
+
+
+// local includes
 #define CHMUTOV_DEGREE 16
 
 #include "constant_vars.hpp"
@@ -397,11 +405,52 @@ struct RayTrace
 //};
 
 
+
+
+
 template < typename SurfType, typename RayType = ModelViewRay< > >
 struct RayTraceScreen
 {
+  int w;
+  int h;
+  View view;
+  uint * pbo;
+
+    
+  RayTraceScreen(int w, int h, View view, uint * pbo) :
+    w(w), h(h), view(view), pbo(pbo)
+  {
+  }
+
   static
-  void run(int w, int h, View view, uint * pbo, SurfType s = SurfType())
+  __host__
+  png::rgba_pixel
+  unpack_Color(const uint rgba)
+  {
+    char * rgba_arr = (char *)(&rgba);
+    return png::rgba_pixel( rgba_arr[0], rgba_arr[1], rgba_arr[2], 255 );
+  }
+
+  __host__
+  void screenshot(const std::string filename)
+  {
+    png::image< png::rgba_pixel > img(w,h);
+    thrust::device_ptr< uint > dev_pbo(pbo);
+    thrust::host_vector< uint > pixels(dev_pbo, dev_pbo + w * h );
+
+    thrust::host_vector< uint >::iterator pix(pixels.begin());
+        
+    for(int i = 0; i < img.get_width(); i++)
+      for(int j = 0; j < img.get_height(); j++)
+        {
+          img[i][j] = unpack_Color(*pix);
+          pix++;
+        }
+    img.write(filename);
+    printf("file written! %s\n", filename.c_str());
+  }
+
+  void run()
   {
     for(int ix_h = 0; ix_h < h; ix_h++)
     {
@@ -413,6 +462,47 @@ struct RayTraceScreen
                                                        view.scale, view.distance, 
                                                        view.steps, view.bisect_count));
     }
+
+
+    if ( view.screenshot )
+      {
+        char filename[256];
+        sprintf(filename, "screenshots/shot_%d.png", time(0)); // XXX: make '/' portable
+        screenshot(std::string(filename));
+        
+        // we made the screenshot. now, to not confuse 'movie' making part below, disable screenshot flag.
+        view.screenshot = false;
+      }
+
+    {
+      static int session_start = 0;
+      static int count = 0;
+      static char path[1024];
+      static View last_view;
+
+      if (!session_start)
+        {
+          session_start = time(0);
+          sprintf(path, "movie/%s/%d", SurfString(SurfType::surface_id).c_str(), session_start);
+          // call 'mkdir -p' for recursive mkdir
+          {
+            char cmd[1024];
+            sprintf(cmd, "mkdir -p '%s'", path);
+            system(cmd);
+            //mkdir(path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+          }
+          last_view = view;
+        }
+      
+      if (memcmp( (&last_view), (&view), sizeof(View)))
+        {
+          char filename[1024];
+          sprintf(filename,"%s/%010d.png", path, count);
+          count++;
+          screenshot(std::string(filename));
+        }
+    }
+
   }
 };
 
@@ -552,34 +642,34 @@ extern "C" void launch_raytrace_kernel(uint * pbo, View view, int w, int h)
   switch ( view.surf )
     {
     case SURF_BARTH:
-      TraceEngine< Surface< SURF_BARTH > >::run(w,h,view,pbo);
+      TraceEngine< Surface< SURF_BARTH > >(w,h,view,pbo).run();
       break;
     case SURF_CHMUTOV:
-      TraceEngine< Surface< SURF_CHMUTOV > >::run(w,h,view,pbo);
+      TraceEngine< Surface< SURF_CHMUTOV > >(w,h,view,pbo).run();
       break;
     case SURF_CHMUTOV_ALT:
-      TraceEngine< Surface< SURF_CHMUTOV_ALT > >::run(w,h,view,pbo);
+      TraceEngine< Surface< SURF_CHMUTOV_ALT > >(w,h,view,pbo).run();
       break;
     case SURF_HEART:
-      TraceEngine< Surface< SURF_HEART > >::run(w,h,view,pbo);
+      TraceEngine< Surface< SURF_HEART > >(w,h,view,pbo).run();
       break;
     case SURF_PLANE:
-      TraceEngine< Surface< SURF_PLANE > >::run(w,h,view,pbo);
+      TraceEngine< Surface< SURF_PLANE > >(w,h,view,pbo).run();
       break;
     case SURF_TORUS:
-      TraceEngine< Surface< SURF_TORUS > >::run(w,h,view,pbo);
+      TraceEngine< Surface< SURF_TORUS > >(w,h,view,pbo).run();
       break;
     case SURF_DING_DONG:
-      TraceEngine< Surface< SURF_DING_DONG > >::run(w,h,view,pbo);
+      TraceEngine< Surface< SURF_DING_DONG > >(w,h,view,pbo).run();
       break;
     case SURF_CAYLEY:
-      TraceEngine< Surface< SURF_CAYLEY > >::run(w,h,view,pbo);
+      TraceEngine< Surface< SURF_CAYLEY > >(w,h,view,pbo).run();
       break;
     case SURF_DIAMOND:
-      TraceEngine< Surface< SURF_DIAMOND > >::run(w,h,view,pbo);
+      TraceEngine< Surface< SURF_DIAMOND > >(w,h,view,pbo).run();
       break;
     case SURF_BALL:
-      TraceEngine< Surface< SURF_BALL > >::run(w,h,view,pbo);
+      TraceEngine< Surface< SURF_BALL > >(w,h,view,pbo).run();
       break;
     case SURF_ARB_POLY:
       {
@@ -594,7 +684,7 @@ extern "C" void launch_raytrace_kernel(uint * pbo, View view, int w, int h)
             stride = sizeof(int);
             cudaMemcpyToSymbol( arb_poly_const_size, &p.max_deg, stride, stride * i );
           }
-        TraceEngine< Surface< SURF_ARB_POLY > >::run(w,h,view,pbo);
+        TraceEngine< Surface< SURF_ARB_POLY > >(w,h,view,pbo).run();
         break;
       }
     default:

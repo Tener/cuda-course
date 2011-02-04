@@ -4,6 +4,8 @@
 
 template <Surf surface, typename Vector = float3, typename dom = float>
 struct Surface {
+  static const Surf surface_id = surface;
+
   __host__ __device__
   Surface() { };
 
@@ -26,6 +28,8 @@ struct Surface {
 template < typename Vector, typename dom >
 struct Surface< SURF_CHMUTOV, Vector, dom >
 {
+  static const Surf surface_id = SURF_CHMUTOV;
+
   __host__ __device__ 
   inline
   dom calculate(const Vector & V)
@@ -84,6 +88,8 @@ float Surface< SURF_CHMUTOV_ALT >::calculate(const float3 & V)
 template < typename Vector, typename dom >
 struct Surface< SURF_ARB_POLY, Vector, dom >
 {
+  static const Surf surface_id = SURF_ARB_POLY;
+
   PolynomialSimple<> params_s_x;
   PolynomialSimple<> params_s_y;
   PolynomialSimple<> params_s_z;

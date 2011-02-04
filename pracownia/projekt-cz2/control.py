@@ -24,6 +24,9 @@ class MultiRuler:
         gtk.main_quit()
         return False
 
+    def do_screenshot(self, _ignore):
+        self.send_msg("screenshot")
+
     def send_msg(self, msg):
         try:
             msg += "\n"
@@ -137,7 +140,14 @@ class MultiRuler:
 
             # setup callback
             text.connect("activate", self.arb_poly_entry_activate, text)
+
+        # screenshot button
+        pos += 1
+        screenshot = gtk.Button("screenshot!")
+        screenshot.connect( "clicked", self.do_screenshot )
+        table.attach( screenshot, 0, 1, pos-2, pos-1, 0, 0, 0 )
         
+        screenshot.show()
         
         # show
         table.show()
