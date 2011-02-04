@@ -46,6 +46,15 @@ NVCC_FLAGS := -O3 ${FLOAT_PREC_OPTS} ${KEEP} ${LIBS} ${GENCODE_F} ${INCLUDES} ${
 rt: $(O_FILES)
 	nvcc ${NVCC_FLAGS} *.cu $(O_FILES) -o rt
 
+movies:
+	find movie/ -name "0000000000.png" -not -execdir find session.avi -quit \; -execdir mencoder -mf fps=10 'mf://*.png' -ovc lavc -o session.avi \;
+
+movies-play:
+	find movie/ -name "*.avi" -exec mplayer {} +
+
+movies-delete:
+	find movie/ -name "session.avi" -print -delete
+
 $(OBJ)%.o: %.cpp
 	nvcc -c ${NVCC_FLAGS} $< -o $@
 
