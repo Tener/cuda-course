@@ -431,23 +431,51 @@ struct RayTraceScreen
     return png::rgba_pixel( rgba_arr[0], rgba_arr[1], rgba_arr[2], 255 );
   }
 
+  struct PNGWriterArgs { 
+    thrust::host_vector< uint > pixels;
+    std::string filename;
+    png::image< png::rgba_pixel > img;
+
+    void write()
+    {
+      //      PNGWriterArgs * args = (PNGWriterArgs *) arg;
+
+      thrust::host_vector< uint >::iterator pix(pixels.begin());
+        
+      for(int i = 0; i < img.get_width(); i++)
+        for(int j = 0; j < img.get_height(); j++)
+          {
+            img[i][j] = unpack_Color(*pix);
+            pix++;
+          }
+
+      printf("writing file... %s\n", filename.c_str());
+      img.write(filename);
+      printf("file written! %s\n", filename.c_str());
+    }
+
+    static void * write_wrapper(void * arg)
+    {
+      PNGWriterArgs * pngwr = (PNGWriterArgs *) arg;
+      pngwr->write();
+      delete pngwr;
+      return NULL;
+    }    
+  };
+
   __host__
   void screenshot(const std::string filename)
   {
-    png::image< png::rgba_pixel > img(w,h);
     thrust::device_ptr< uint > dev_pbo(pbo);
-    thrust::host_vector< uint > pixels(dev_pbo, dev_pbo + w * h );
 
-    thrust::host_vector< uint >::iterator pix(pixels.begin());
-        
-    for(int i = 0; i < img.get_width(); i++)
-      for(int j = 0; j < img.get_height(); j++)
-        {
-          img[i][j] = unpack_Color(*pix);
-          pix++;
-        }
-    img.write(filename);
-    printf("file written! %s\n", filename.c_str());
+    PNGWriterArgs * args = new PNGWriterArgs;
+    args->pixels = thrust::host_vector< uint >(dev_pbo, dev_pbo + w * h );
+    args->filename = filename;
+    args->img = png::image< png::rgba_pixel >(w,h);
+    
+    pthread_t th;
+
+    pthread_create( &th, NULL, PNGWriterArgs::write_wrapper, (void*)args );
   }
 
   void run()
