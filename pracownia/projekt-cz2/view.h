@@ -14,6 +14,7 @@ struct View
   float distance;
 
   bool screenshot;
+  bool movie;
 
   float arb_poly[3][18+1];
 
@@ -30,7 +31,8 @@ struct View
     distance(20),
     bisect_count(bisect_count),
     angle(make_float3(3.5, -19.5, -11.4)),
-    screenshot(false)
+    screenshot(false),
+    movie(false)
   { 
     
     //float chebyshev_coeff_16[18+1] = { +1, 0, -128, 0, +2688, 0, -21504, 0, +84480,  0, -180224, 0,  +212992, 0,  -131072, 0,  +32768, 0, 0};

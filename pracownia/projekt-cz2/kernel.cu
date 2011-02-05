@@ -502,6 +502,7 @@ struct RayTraceScreen
         view.screenshot = false;
       }
 
+    if ( view.movie )
     {
       static int session_start = 0;
       static int count = 0;
