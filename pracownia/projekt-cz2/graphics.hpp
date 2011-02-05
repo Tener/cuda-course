@@ -26,7 +26,7 @@ namespace rt {
       void closeGlWindow();
       void reshape(int w, int h);
 
-      GLManager( int w = 512, int h = 512 ) : width(w), height(h) { };
+      GLManager( int w = 1024, int h = 1024 ) : width(w), height(h) { };
         ~GLManager() { };
     };
 
