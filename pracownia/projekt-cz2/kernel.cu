@@ -500,6 +500,7 @@ struct RayTraceScreen
           sprintf(filename,"%s/%010d.png", path, count);
           count++;
           screenshot(std::string(filename));
+          last_view = view;
         }
     }
 
