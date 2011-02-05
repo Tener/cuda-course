@@ -47,7 +47,7 @@ rt: $(O_FILES)
 	nvcc ${NVCC_FLAGS} *.cu $(O_FILES) -o rt
 
 movies:
-	find movie/ -name "0000000000.png" -not -execdir find session.avi -quit \; -execdir mencoder -mf fps=10 'mf://*.png' -ovc lavc -o session.avi \;
+	find movie/ -name "0000000000.png" -not -execdir find session.avi -quit \; -execdir mencoder -mf fps=10 'mf://*.png' -ovc lavc -lavcopts threads=8:vbitrate=8000 -o session.avi \;
 
 movies-play:
 	find movie/ -name "*.avi" -exec mplayer {} +
