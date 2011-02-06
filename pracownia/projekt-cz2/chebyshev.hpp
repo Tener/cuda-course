@@ -30,11 +30,29 @@ struct Chebyshev_DiVar
   {
     float arr_0 = 1;
     float arr_1 = x;
-#pragma unroll 16
-    for(unsigned int i = 1; i < N/2; i++)
+#pragma unroll 200
+    for(unsigned int i = 0; i < (N/2); i++)
       {
-        arr_0 = 2 * x * arr_0 - arr_1;
-        arr_1 = 2 * x * arr_1 - arr_0;
+        arr_0 = 2 * x * arr_1 - arr_0;
+        arr_1 = 2 * x * arr_0 - arr_1;
+      }
+    return arr_0;
+  }
+};
+
+template <int N>
+struct Chebyshev_U_DiVar
+{
+  __host__ __device__
+  static float calculate(float x)
+  {
+    float arr_0 = 1;
+    float arr_1 = 2*x;
+#pragma unroll 200
+    for(unsigned int i = 0; i < (N/2); i++)
+      {
+        arr_0 = 2 * x * arr_1 - arr_0;
+        arr_1 = 2 * x * arr_0 - arr_1;
       }
     return arr_0;
   }

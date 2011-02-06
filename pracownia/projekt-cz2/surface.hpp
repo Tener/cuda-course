@@ -75,14 +75,42 @@ struct Surface< SURF_CHMUTOV, Vector, dom >
   }
 };
 
+#define CHMUTOV_DI_DEGREE 2
+
 template <>
 __host__ __device__
 float Surface< SURF_CHMUTOV_ALT >::calculate(const float3 & V)
 {
-    return Chebyshev_DiVar< CHMUTOV_DEGREE >::calculate( V.x ) + 
-           Chebyshev_DiVar< CHMUTOV_DEGREE >::calculate( V.y ) + 
-           Chebyshev_DiVar< CHMUTOV_DEGREE >::calculate( V.z );
+    return Chebyshev_DiVar< CHMUTOV_DI_DEGREE >::calculate( V.x ) + 
+           Chebyshev_DiVar< CHMUTOV_DI_DEGREE >::calculate( V.y ) + 
+           Chebyshev_DiVar< CHMUTOV_DI_DEGREE >::calculate( V.z );
 }
+
+template <>
+__host__ __device__
+Color Surface< SURF_CHMUTOV_ALT >::lightning(float3 V, float3 Light)
+{
+    float dot_pr_r = DotProduct( Light.x, Light.y, Light.z,
+                                 Chebyshev_U_DiVar< CHMUTOV_DI_DEGREE >::calculate( V.x ),
+                                 Chebyshev_U_DiVar< CHMUTOV_DI_DEGREE >::calculate( V.y ),
+                                 Chebyshev_U_DiVar< CHMUTOV_DI_DEGREE >::calculate( V.z ));
+
+    float dot_pr_g = DotProduct( Light.x+1, Light.y+1, Light.z+1,
+                                 Chebyshev_U_DiVar< CHMUTOV_DI_DEGREE >::calculate( V.x ),
+                                 Chebyshev_U_DiVar< CHMUTOV_DI_DEGREE >::calculate( V.y ),
+                                 Chebyshev_U_DiVar< CHMUTOV_DI_DEGREE >::calculate( V.z ));
+
+    float dot_pr_b = DotProduct( Light.x+2, Light.y-2, Light.z-3,
+                                 Chebyshev_U_DiVar< CHMUTOV_DI_DEGREE >::calculate( V.x ),
+                                 Chebyshev_U_DiVar< CHMUTOV_DI_DEGREE >::calculate( V.y ),
+                                 Chebyshev_U_DiVar< CHMUTOV_DI_DEGREE >::calculate( V.z ));
+
+    return RGBA( 30 + 100 + 100 * dot_pr_r,
+                 30 + 100 + 100 * dot_pr_g,
+                 30 + 100 + 100 * dot_pr_b,
+                 0);
+  }
+
 
 
 template < typename Vector, typename dom >

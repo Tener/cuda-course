@@ -35,7 +35,7 @@
 #include <png++/png.hpp>
 
 // local includes
-#define CHMUTOV_DEGREE 16
+#define CHMUTOV_DEGREE 4
 
 #include "constant_vars.hpp"
 
@@ -48,9 +48,10 @@
 
 #include "colors.hpp"
 #include "sign_change.hpp"
+#include "linear_algebra.hpp"
+
 #include "surface.hpp"
 
-#include "linear_algebra.hpp"
     
 // Nice intro to ray tracing:
 // http://www.siggraph.org/education/materials/HyperGraph/raytrace/rtinter0.htm
