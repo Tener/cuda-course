@@ -287,10 +287,21 @@ struct RayTraceScreen
     if ( view.screenshot )
       {
         char filename[256];
-        sprintf(filename, "screenshots/shot_%d.png", time(0)); // XXX: make '/' portable
+        static int session = 0;
+        static int cnt = 0;
+        if (!session)
+          {
+            session = time(0);
+            char cmd[1024];
+            sprintf(cmd, "mkdir -p 'screenshots/%d/'",session);
+            system(cmd);
+          }
+
+        sprintf(filename, "screenshots/%d/shot_%010d.png", session, cnt); // XXX: make '/' portable
         screenshot(std::string(filename));
         
         // we made a screenshot. now, to not confuse 'movie' making part below, disable screenshot flag.
+        cnt++;
         view.screenshot = false;
       }
 
@@ -310,7 +321,6 @@ struct RayTraceScreen
             char cmd[1024];
             sprintf(cmd, "mkdir -p '%s'", path);
             system(cmd);
-            //mkdir(path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
           }
           last_view = view;
         }
