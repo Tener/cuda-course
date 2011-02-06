@@ -11,6 +11,8 @@ import gtk
 import thread, telnetlib, time
 import socket
 
+import surfaces
+
 from math import pi
     
 class MultiRuler:
@@ -18,7 +20,7 @@ class MultiRuler:
     YSIZE = 850
 
     # This routine gets control when the close button is clicked
-    def close_application(self):
+    def close_application(self, *args):
         self.window.hide_all()
         self.window.emit("destroy")
         gtk.main_quit()
@@ -116,12 +118,12 @@ class MultiRuler:
         pos = len(labels_and_ranges)+2
         
         combobox = gtk.combo_box_new_text()
-        slist = getSurfaces()
+        slist = surfaces.get()
         for el in slist:
             combobox.append_text(el)
             
         combobox.connect('changed', self.surface_combobox_changed)
-        combobox.set_active(0)
+        combobox.set_active(1)
         combobox.show()
         table.attach( combobox, 0, 2, pos-2, pos-1, gtk.EXPAND|gtk.SHRINK|gtk.FILL, gtk.FILL, 0, 0 )
 
@@ -157,10 +159,6 @@ class MultiRuler:
 
         window.move(1030, 50)
 
-def getSurfaces():
-    surf_def = filter( lambda s: s.startswith('SURF_'), open('surf.h').read().replace(',',' ').split() )
-    return surf_def
-    
 
 def main():
     gtk.main()
