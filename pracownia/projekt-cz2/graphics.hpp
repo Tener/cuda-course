@@ -12,6 +12,9 @@
 #include <cuda.h>
 #include <curand_kernel.h>
 
+#define DIM 512
+#define DIM_X DIM
+#define DIM_Y DIM
 
 namespace rt {
   namespace graphics {
@@ -26,7 +29,7 @@ namespace rt {
       void closeGlWindow();
       void reshape(int w, int h);
 
-      GLManager( int w = 1024, int h = 1024 ) : width(w), height(h) { };
+      GLManager( int w = DIM_X, int h = DIM_Y ) : width(w), height(h) { };
         ~GLManager() { };
     };
 
