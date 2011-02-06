@@ -126,13 +126,17 @@ struct RayTrace
   float3 view_angle; float3 starting_point; float scale;
   float view_distance; // how far do we look
 
-  RayTrace(int w, int h, int ix_h,
+  int frame_cnt;
+
+  RayTrace(int frame_cnt,
+	   int w, int h, int ix_h,
            float3 view_angle, float3 starting_point, float scale,
            float view_distance, 
            int steps,
            int bisect_count,
            SurfType surface = SurfType())
   :
+    frame_cnt(frame_cnt),
     w(w), h(h), ix_h(ix_h),
     view_angle(view_angle), starting_point(starting_point), scale(scale),
     view_distance(view_distance),
@@ -140,7 +144,6 @@ struct RayTrace
     background(0)
   {
   }
-
 
   __device__
   Color operator()( int ix_w )
@@ -183,7 +186,7 @@ struct RayTrace
 	 }
 
         // shade calculation
-        return surface.lightning(ray.current_point, make_float3(1, 0, 0));
+        return surface.lightning(ray.current_point, make_float3(1, sinf(frame_cnt * 0.01), cosf(frame_cnt * 0.02)));
       }
     else
       {
@@ -264,16 +267,21 @@ struct RayTraceScreen
 
   void run()
   {
+    static int frame_cnt = 0;
+
     for(int ix_h = 0; ix_h < h; ix_h++)
     {
       thrust::transform( thrust::make_counting_iterator< short >(0),
                          thrust::make_counting_iterator< short >(w),
                          thrust::device_ptr< uint >(pbo + h * ix_h),
-                         RayTrace< SurfType, RayType >(w,h,ix_h,
+                         RayTrace< SurfType, RayType >(frame_cnt,
+						       w,h,ix_h,
                                                        view.angle, view.starting_point,
                                                        view.scale, view.distance, 
                                                        view.steps, view.bisect_count));
     }
+    
+    frame_cnt++;
 
 
     if ( view.screenshot )
