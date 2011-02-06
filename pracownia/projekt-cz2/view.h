@@ -15,6 +15,7 @@ struct View
 
   bool screenshot;
   bool movie;
+  bool asyncRender;
 
   float arb_poly[3][18+1];
 
@@ -32,7 +33,8 @@ struct View
     bisect_count(bisect_count),
     angle(make_float3(3.5, -19.5, -11.4)),
     screenshot(false),
-    movie(false)
+    movie(true),
+    asyncRender(true)
   { 
     float chebyshev_coeff_18[18+1] = { -1, 0, +162, 0, -4320, 0, +44352, 0, -228096, 0, +658944, 0, -1118208, 0, +1105920, 0, -589824, 0, 131072 };
 

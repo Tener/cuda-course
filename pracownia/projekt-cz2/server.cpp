@@ -23,6 +23,7 @@
 
 #include "common.hpp"
 #include "utils.hpp"
+#include "server.hpp"
 
 using boost::asio::ip::tcp;
 
@@ -48,6 +49,24 @@ std::string parseLine(std::string data)
           return "QUIT";
         }
 
+      if( boost::starts_with( std::string("serverquit"), strs[0] ) )
+        {
+          serverquit = true;
+        }
+
+      if( boost::starts_with( std::string("async"), strs[0] ) )
+        {
+          bool async = boost::lexical_cast< float >( strs.at(1) ) > 0.5;
+          set_async_render_state(async);
+        }
+
+      // 'flush' currently set view when doing synchronized rendering
+      if( boost::starts_with( std::string("flush"), strs[0] ) )
+        {
+          syncRenderStartBarrier->wait();
+          syncRenderEndBarrier->wait();
+        }
+
       if( boost::starts_with( std::string("screenshot"), strs[0] ) )
         {
           currentView->screenshot = true;
@@ -56,12 +75,10 @@ std::string parseLine(std::string data)
 
       if( boost::starts_with( std::string("dirvec"), strs[0] ) )
         {
-          if (strs.size() < 1+3) return "ARG???\n";
-      
           float x, y, z;
-          x = boost::lexical_cast< float >( strs[1] );
-          y = boost::lexical_cast< float >( strs[2] );
-          z = boost::lexical_cast< float >( strs[3] );
+          x = boost::lexical_cast< float >( strs.at(1) );
+          y = boost::lexical_cast< float >( strs.at(2) );
+          z = boost::lexical_cast< float >( strs.at(3) );
           currentView->DirectionVector = make_float3( x, y, z );
         }
 
