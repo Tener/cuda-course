@@ -10,6 +10,7 @@
 #include <cuda_runtime_api.h>
 #include <cuda.h>
 #include <cutil.h>
+#include <cutil_math.h>
 #include <curand_kernel.h>
 
 #include <math_functions.h>
@@ -62,6 +63,7 @@ struct ModelViewRay
   
   dom3 current_point;
   const dom3 direction_vector;
+  dom position;
 
   __host__ __device__
   inline
@@ -96,7 +98,8 @@ struct ModelViewRay
   __device__ __host__
   ModelViewRay( int w, int h, int ix_w, int ix_h, dom scale ) :
     current_point( modelview_matrix_transform( make_float3(rescale(ix_w,w,scale), rescale(ix_h,h,scale), 0) ) ),
-    direction_vector( Normalize( modelview_matrix_transform( make_float3(0, 0, 1) ) ) )
+    direction_vector( Normalize( modelview_matrix_transform( make_float3(0, 0, 1) ) ) ),
+    position(0)
   {
   }
 
@@ -109,6 +112,8 @@ struct ModelViewRay
     current_point.x += direction_vector.x * length;
     current_point.y += direction_vector.y * length;
     current_point.z += direction_vector.z * length;
+    
+    position += length;
   }
 
 };
@@ -149,49 +154,50 @@ struct RayTrace
   Color operator()( int ix_w )
   {
     RayType ray( w, h, ix_w, ix_h, 1 );
-
     float surf_value = surface.calculate( ray.current_point );
-    bool sign_change = false;
-    float step = view_distance / steps;
-    float pos = 0; // position along the ray
 
-    // root detection 
-    for(; pos < view_distance && !sign_change;)
+    Color4 color = make_float4( 0, 0, 0, 0 );
+
+    const int MAX_ROOT = 1;
+
+    for(int root_number = 0; root_number < MAX_ROOT; root_number++)
       {
-        step += (view_distance / steps) / 10; // if there is no root we go faster each step
-        ray.move_point(step);
-        pos += step;
-        float tmp = surface.calculate( ray.current_point );
-        sign_change = SignChange<>::check( surf_value, tmp );
-        surf_value = tmp;
+        bool sign_change = false;
+        float step = view_distance / steps;
+        // root detection 
+        for(; ray.position < view_distance && !sign_change;)
+          {
+            //            step += (view_distance / steps) / 10; // if there is no root we go faster each step
+            ray.move_point(step);
+            float tmp = surface.calculate( ray.current_point );
+            sign_change = SignChange<>::check( surf_value, tmp );
+            surf_value = tmp;
+          }
+       
+        if ( sign_change )
+          {
+            // root refinement
+            for(int i = 0; i < bisect_count; i++)
+              {
+                /// XXX: check alternate implementation of step changing
+                step /= 2;
+                if ( sign_change )
+                  {
+                    step *= -1; // we reverse movement direction if there was a sign change
+                  }
+                
+                ray.move_point(step);
+                float tmp = surface.calculate( ray.current_point );
+                sign_change = SignChange<>::check( surf_value, tmp );
+                surf_value = tmp;
+              }
+            
+            // shade calculation
+            Color4 newcolor = surface.lightning(ray.current_point, make_float3(1, sinf(frame_cnt * 0.01), cosf(frame_cnt * 0.02)));
+            color = lerp( color, newcolor, expf( -root_number ));
+          }
       }
-
-
-
-    if ( sign_change )
-      {
-        // root refinement
-        for(int i = 0; i < bisect_count; i++)
-	 {
-           step /= 2;
-	   if ( sign_change )
-	     {
-	       step *= -1; // we reverse movement direction if there was a sign change
-	     }
-
-           ray.move_point(step);
-           float tmp = surface.calculate( ray.current_point );
-           sign_change = SignChange<>::check( surf_value, tmp );
-           surf_value = tmp;
-	 }
-
-        // shade calculation
-        return surface.lightning(ray.current_point, make_float3(1, sinf(frame_cnt * 0.01), cosf(frame_cnt * 0.02)));
-      }
-    else
-      {
-        return background;
-      }  
+    return make_color(color);
   }
 };
 
@@ -324,6 +330,7 @@ struct RayTraceScreen
           }
           last_view = view;
         }
+      
       
       if (memcmp( (&last_view), (&view), sizeof(View)))
         {

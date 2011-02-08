@@ -1,6 +1,12 @@
 #include "colors.hpp"
 
-
+__host__ __device__
+inline
+float scale_dot_pr( float dot_pr )
+{
+    const float p = 0.3;
+    return (dot_pr * p) + (1-p);
+}
 
 template <Surf surface, typename Vector = float3, typename dom = float>
 struct Surface {
@@ -16,12 +22,12 @@ struct Surface {
   dom calculate(const dom & x, const dom & y, const dom & z){ return calculate( make_float3( x, y, z ) ); }
     
   __host__ __device__
-  Color lightning(Vector V, Vector Light)
+  Color4 lightning(Vector V, Vector Light)
   {
-    return RGBA( COLOR_EXPDAMP( V.x * 2 ),
-                 COLOR_EXPDAMP( V.y * 2 ),
-                 COLOR_EXPDAMP( V.z * 2 ),
-                 0);
+    return make_float4( COLOR_EXPDAMP( V.x * 2 ),
+                        COLOR_EXPDAMP( V.y * 2 ),
+                        COLOR_EXPDAMP( V.z * 2 ),
+                        0);
   }
 };
 
@@ -49,7 +55,7 @@ struct Surface< SURF_CHMUTOV, Vector, dom >
   }
 
   __host__ __device__
-  Color lightning(Vector V, Vector Light)
+  Color4 lightning(Vector V, Vector Light)
   {
     float dot_pr_r = DotProduct( Light.x, Light.y, Light.z,
                                  Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.x ),
@@ -66,16 +72,15 @@ struct Surface< SURF_CHMUTOV, Vector, dom >
                                  Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.y ),
                                  Chebyshev_U< CHMUTOV_DEGREE >::calculate( V.z ));
 
-    
+    return make_float4( scale_dot_pr( dot_pr_r ),
+                        scale_dot_pr( dot_pr_g ),
+                        scale_dot_pr( dot_pr_b ),
+                        0 );
 
-    return RGBA( 30 + 100 + 100 * dot_pr_r,
-                 30 + 100 + 100 * dot_pr_g,
-                 30 + 100 + 100 * dot_pr_b,
-                 0);
   }
 };
 
-#define CHMUTOV_DI_DEGREE 2
+#define CHMUTOV_DI_DEGREE 4
 
 template <>
 __host__ __device__
@@ -88,7 +93,7 @@ float Surface< SURF_CHMUTOV_ALT >::calculate(const float3 & V)
 
 template <>
 __host__ __device__
-Color Surface< SURF_CHMUTOV_ALT >::lightning(float3 V, float3 Light)
+Color4 Surface< SURF_CHMUTOV_ALT >::lightning(float3 V, float3 Light)
 {
     float dot_pr_r = DotProduct( Light.x, Light.y, Light.z,
                                  Chebyshev_U_DiVar< CHMUTOV_DI_DEGREE >::calculate( V.x ),
@@ -105,10 +110,10 @@ Color Surface< SURF_CHMUTOV_ALT >::lightning(float3 V, float3 Light)
                                  Chebyshev_U_DiVar< CHMUTOV_DI_DEGREE >::calculate( V.y ),
                                  Chebyshev_U_DiVar< CHMUTOV_DI_DEGREE >::calculate( V.z ));
 
-    return RGBA( 30 + 100 + 100 * dot_pr_r,
-                 30 + 100 + 100 * dot_pr_g,
-                 30 + 100 + 100 * dot_pr_b,
-                 0);
+    return make_float4( scale_dot_pr( dot_pr_r ),
+                        scale_dot_pr( dot_pr_g ),
+                        scale_dot_pr( dot_pr_b ),
+                        0 );
   }
 
 
@@ -141,7 +146,7 @@ struct Surface< SURF_ARB_POLY, Vector, dom >
   dom calculate(const dom & x, const dom & y, const dom & z){ return calculate( make_float3( x, y, z ) ); }
 
   __device__
-  Color lightning(Vector V, Vector Light)
+  Color4 lightning(Vector V, Vector Light)
   {          
     float dot_pr = 0;
     dot_pr = DotProduct( Light.x, Light.y, Light.z,
@@ -149,8 +154,10 @@ struct Surface< SURF_ARB_POLY, Vector, dom >
 			 params_s_y.derivative(V.y),
 			 params_s_z.derivative(V.z));
     
-    return RGBA( 30 + 100 + 100 * dot_pr,
-		 0, 0, 0 );        
+    return make_float4( scale_dot_pr( dot_pr ),
+                        0,
+                        0,
+                        0 );
 
   }
 };

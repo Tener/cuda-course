@@ -2,6 +2,9 @@
 #define __COLORS_HPP
 
 typedef uint Color;
+typedef float4 Color4;
+
+
 
 __host__ __device__
 inline uint RGBA( unsigned char r, unsigned char g, unsigned char b, unsigned char a )
@@ -13,7 +16,17 @@ inline uint RGBA( unsigned char r, unsigned char g, unsigned char b, unsigned ch
     (r << (0 * 8));
 }
 
-#define COLOR_EXPDAMP( p ) (10.0f + 240.0f * (expf(-fabsf(p))))
+__host__ __device__
+inline
+Color make_color(Color4 c)
+{
+  return RGBA( lerp( 0, 255, c.x ),
+               lerp( 0, 255, c.y ),
+               lerp( 0, 255, c.z ),
+               lerp( 0, 255, c.w ));
+}
+
+#define COLOR_EXPDAMP( p ) ((expf(-fabsf(p))))
 #define COLOR_BYRANGE( p, pmin, pmax ) (10.0f + 240.0f * fabs((p-pmin)/(pmax-pmin)) )
 #define COLOR_UNIT_RANGE( x ) fabs(240 * (x + 1) / 2)
 
