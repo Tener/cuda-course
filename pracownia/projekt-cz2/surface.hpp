@@ -11,6 +11,7 @@ float scale_dot_pr( float dot_pr )
 template <Surf surface, typename Vector = float3, typename dom = float>
 struct Surface {
   static const Surf surface_id = surface;
+  int frame_cnt;
 
   __host__ __device__
   Surface() { };
@@ -35,6 +36,7 @@ template < typename Vector, typename dom >
 struct Surface< SURF_CHMUTOV, Vector, dom >
 {
   static const Surf surface_id = SURF_CHMUTOV;
+  int frame_cnt;
 
   __host__ __device__ 
   inline
@@ -91,30 +93,40 @@ float Surface< SURF_CHMUTOV_ALT >::calculate(const float3 & V)
            Chebyshev_DiVar< CHMUTOV_DI_DEGREE >::calculate( V.z );
 }
 
+__host__ __device__
+float CalcLight(float x1, float y1, float z1,
+		float x2, float y2, float z2)
+{
+  return DotProduct( x1 / VecMagnitude(x1,y1,z1),
+		     y1 / VecMagnitude(x1,y1,z1),
+		     z1 / VecMagnitude(x1,y1,z1),
+		     x2 / VecMagnitude(x2,y2,z2),
+		     y2 / VecMagnitude(x2,y2,z2),
+		     z2 / VecMagnitude(x2,y2,z2));
+}
+
 template <>
 __host__ __device__
 Color4 Surface< SURF_CHMUTOV_ALT >::lightning(float3 V, float3 Light)
 {
-    float dot_pr_r = DotProduct( Light.x, Light.y, Light.z,
-                                 Chebyshev_U_DiVar< CHMUTOV_DI_DEGREE >::calculate( V.x ),
-                                 Chebyshev_U_DiVar< CHMUTOV_DI_DEGREE >::calculate( V.y ),
-                                 Chebyshev_U_DiVar< CHMUTOV_DI_DEGREE >::calculate( V.z ));
+  float dx = Chebyshev_U_DiVar< CHMUTOV_DI_DEGREE >::calculate( V.x );
+  float dy = Chebyshev_U_DiVar< CHMUTOV_DI_DEGREE >::calculate( V.y );
+  float dz = Chebyshev_U_DiVar< CHMUTOV_DI_DEGREE >::calculate( V.z );
 
-    float dot_pr_g = DotProduct( Light.x+1, Light.y+1, Light.z+1,
-                                 Chebyshev_U_DiVar< CHMUTOV_DI_DEGREE >::calculate( V.x ),
-                                 Chebyshev_U_DiVar< CHMUTOV_DI_DEGREE >::calculate( V.y ),
-                                 Chebyshev_U_DiVar< CHMUTOV_DI_DEGREE >::calculate( V.z ));
-
-    float dot_pr_b = DotProduct( Light.x+2, Light.y-2, Light.z-3,
-                                 Chebyshev_U_DiVar< CHMUTOV_DI_DEGREE >::calculate( V.x ),
-                                 Chebyshev_U_DiVar< CHMUTOV_DI_DEGREE >::calculate( V.y ),
-                                 Chebyshev_U_DiVar< CHMUTOV_DI_DEGREE >::calculate( V.z ));
-
-    return make_float4( scale_dot_pr( dot_pr_r ),
-                        scale_dot_pr( dot_pr_g ),
-                        scale_dot_pr( dot_pr_b ),
-                        0 );
-  }
+  float dot_pr_r = CalcLight( Light.x, Light.y, Light.z,
+			      dx, dy, dz );
+  
+  float dot_pr_g = CalcLight( Light.x+1, Light.y+1, Light.z+1,
+			      dx, dy, dz );
+  
+  float dot_pr_b = CalcLight( Light.x+2, Light.y-2, Light.z-3,
+			      dx, dy, dz );
+  
+  return make_float4( scale_dot_pr( dot_pr_r),
+		      scale_dot_pr( dot_pr_g),
+		      scale_dot_pr( dot_pr_b),
+		      0 );
+}
 
 
 
@@ -122,6 +134,7 @@ template < typename Vector, typename dom >
 struct Surface< SURF_ARB_POLY, Vector, dom >
 {
   static const Surf surface_id = SURF_ARB_POLY;
+  int frame_cnt;
 
   PolynomialSimple<> params_s_x;
   PolynomialSimple<> params_s_y;
