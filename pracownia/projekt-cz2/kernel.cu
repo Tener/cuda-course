@@ -167,7 +167,7 @@ struct RayTrace
         // root detection 
         for(; ray.position < view_distance && !sign_change;)
           {
-            //            step += (view_distance / steps) / 10; // if there is no root we go faster each step
+	    step += (view_distance / steps); // if there is no root we go faster each step
             ray.move_point(step);
             float tmp = surface.calculate( ray.current_point );
             sign_change = SignChange<>::check( surf_value, tmp );
