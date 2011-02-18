@@ -16,25 +16,27 @@ struct View
   bool screenshot;
   bool movie;
   bool asyncRender;
+  bool allframes;
 
   float arb_poly[3][18+1];
 
   View(Surf s = SURF_CHMUTOV,
-       float3 start = make_float3(0,0,-2),
+       float3 start = make_float3(-0.1,0.1,-0.9),
        float3 dirvec = make_float3(7.1,5.7,4.9), 
        int steps = 500,
-       int bisect_count = 10)
+       int bisect_count = 15)
   : surf(s), 
     starting_point(start), 
     DirectionVector(dirvec), 
     steps(steps),
-    scale(5.2),
-    distance(20),
+    scale(2.5),
+    distance(1.6),
     bisect_count(bisect_count),
-    angle(make_float3(3.5, -19.5, -11.4)),
+    angle(make_float3(-1.4, 6.8, -9.4)),
     screenshot(false),
-    movie(true),
-    asyncRender(true)
+    movie(false),
+    asyncRender(true),
+    allframes(true)
   { 
     float chebyshev_coeff_18[18+1] = { -1, 0, +162, 0, -4320, 0, +44352, 0, -228096, 0, +658944, 0, -1118208, 0, +1105920, 0, -589824, 0, 131072 };
 
