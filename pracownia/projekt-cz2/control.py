@@ -82,9 +82,9 @@ class MultiRuler:
         labels_and_ranges = [("start.x", (-10, 10, 0, 0.01)),
                              ("start.y", (-10, 10, 0, 0.01)),
                              ("start.z", (-10, 10, 0, 0.01)),
-                             ("angle.x", (-20, 20, 0, 0.01)),
-                             ("angle.y", (-20, 20, 0, 0.01)),
-                             ("angle.z", (-20, 20, 0, 0.01)),
+                             ("angle.x", (-200, 200, 0, 0.01)),
+                             ("angle.y", (-200, 200, 0, 0.01)),
+                             ("angle.z", (-200, 200, 0, 0.01)),
                              ("scale", (-10, 10, 0.1, 0.0001)),
                              ("distance", (-100, 100, 10, 0.01)),
                              ("dirvec.x", (-10, 10, 0, 0.01)),
@@ -100,7 +100,7 @@ class MultiRuler:
 
         for (i,(label_txt,(r_low, r_high, r_def, step_inc))) in enumerate(labels_and_ranges):
             page_size = 0.1
-            adj = gtk.Adjustment(r_def, r_low, r_high, step_inc, (r_high-r_low) / 300.0)
+            adj = gtk.Adjustment(r_def, r_low, r_high, step_inc, (r_high-r_low) / 3000.0)
             scale = gtk.HScale(adj)
 
             adj.connect("value_changed", self.update_value, label_txt)
@@ -123,7 +123,7 @@ class MultiRuler:
             combobox.append_text(el)
             
         combobox.connect('changed', self.surface_combobox_changed)
-        combobox.set_active(1)
+        combobox.set_active(4)
         combobox.show()
         table.attach( combobox, 0, 2, pos-2, pos-1, gtk.EXPAND|gtk.SHRINK|gtk.FILL, gtk.FILL, 0, 0 )
 
