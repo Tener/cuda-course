@@ -175,6 +175,41 @@ float Surface< SURF_BARTH >::calculate(const float3 & V)
 
 }
 
+template <>
+__host__ __device__
+Color4 Surface< SURF_HEART >::lightning(float3 V, float3 Light)
+{
+    float x = V.x; float y = V.y; float z = V.z;
+    // derivatives
+    // dx: 12 x (2 x^2+y^2+z^2-1)^2-0.2 x z^3
+    // dy: 6 y (2 x^2+y^2+z^2-1)^2-2 y z^3
+    // dz: z (6 (2 x^2+y^2+z^2-1)^2-3. z (0.1 x^2+y^2))
+
+    float dx=12*x*pow(2*x*x+y*y+z*z-1,2)-0.2*x*z*z*z;
+    float dy=6*y*pow(2*x*x+y*y+z*z-1,2)-2*y*z*z*z;
+    float dz=z*(6*pow(2*x*x+y*y+z*z-1,2)-3.0*z*(0.1*x*x+y*y));
+
+    float dot_pr_r = CalcLight( Light.x+0.5*sin(x+y+z),
+				Light.y+0.3*sin(x+y+z), 
+				Light.z+0.2*sin(x+y+z),
+				dx, dy, dz );
+    
+    float dot_pr_g = CalcLight( Light.x+1*sin(x+y+z),
+				Light.y-1.1*sin(x+y+z),
+				Light.z+1.3*sin(x+y+z),
+				dx, dy, dz );
+    
+    float dot_pr_b = CalcLight( Light.x+2*sin(x+y+z), 
+				Light.y-2*sin(x+y+z),
+				Light.z-3*sin(x+y+z),
+				dx, dy, dz );
+    
+    return make_float4( scale_dot_pr(dot_pr_r),
+			scale_dot_pr(dot_pr_g),
+			scale_dot_pr(dot_pr_b),
+			0 );
+}
+
 
 template <>
 __host__ __device__
@@ -182,6 +217,8 @@ float Surface< SURF_HEART >::calculate(const float3 & V)
 {
     float x = V.x; float y = V.y; float z = V.z;
     return pow(2*x*x+y*y+z*z-1,3) - (0.1*x*x+y*y)*z*z*z;
+
+    // derivative: 12 x (2 x^2+y^2+z^2-1)^2-0.2 x z^3
 }
 
 template <>
