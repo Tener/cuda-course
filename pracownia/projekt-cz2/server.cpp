@@ -54,6 +54,12 @@ std::string parseLine(std::string data)
           serverquit = true;
         }
 
+      if( boost::starts_with( std::string("movie"), strs[0] ) )
+        {
+          bool state = boost::lexical_cast< float >( strs.at(1) ) > 0.5;
+          currentView->movie = state;
+        }
+
       if( boost::starts_with( std::string("async"), strs[0] ) )
         {
           bool async = boost::lexical_cast< float >( strs.at(1) ) > 0.5;
