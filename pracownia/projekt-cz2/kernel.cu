@@ -193,7 +193,11 @@ struct RayTrace
               }
             
             // shade calculation
-            Color4 newcolor = surface.lightning(ray.current_point, make_float3(1, sinf(frame_cnt * 0.01), cosf(frame_cnt * 0.02)));
+	    surface.frame_cnt = frame_cnt;
+            Color4 newcolor = surface.lightning(ray.current_point, 
+						make_float3(1, 
+							    sinf(frame_cnt * 0.02), 
+							    cosf(frame_cnt * 0.03)));
             color = lerp( color, newcolor, expf( -root_number ));
           }
       }
@@ -207,11 +211,10 @@ struct RayTraceScreen
   int w;
   int h;
   View view;
-  uint * pbo;
-
+  thrust::device_ptr< uint > dev_pbo;
     
   RayTraceScreen(int w, int h, View view, uint * pbo) :
-    w(w), h(h), view(view), pbo(pbo)
+    w(w), h(h), view(view), dev_pbo(pbo)
   {
   }
 
@@ -231,14 +234,12 @@ struct RayTraceScreen
 
     void write()
     {
-      //      PNGWriterArgs * args = (PNGWriterArgs *) arg;
-
       thrust::host_vector< uint >::iterator pix(pixels.begin());
         
       for(int i = 0; i < img.get_width(); i++)
         for(int j = 0; j < img.get_height(); j++)
           {
-            img[i][j] = unpack_Color(*pix);
+            img[j][i] = unpack_Color(*pix);
             pix++;
           }
 
@@ -257,38 +258,47 @@ struct RayTraceScreen
   };
 
   __host__
-  void screenshot(const std::string filename)
+  void screenshot(const std::string filename, int frame_cnt)
   {
-    thrust::device_ptr< uint > dev_pbo(pbo);
+    const int shot_width = 1600;
+    const int shot_height = 1600;
 
+    static thrust::device_vector< uint > dev_vector(shot_height * shot_width);  // made static to avoid frequent allocations
+    render(&(dev_vector[0]), shot_width, shot_height, frame_cnt);
+    
     PNGWriterArgs * args = new PNGWriterArgs;
-    args->pixels = thrust::host_vector< uint >(dev_pbo, dev_pbo + w * h );
+    args->pixels = thrust::host_vector< uint >(dev_vector);
     args->filename = filename;
-    args->img = png::image< png::rgba_pixel >(w,h);
+    args->img = png::image< png::rgba_pixel >(shot_width,shot_height);
     
     pthread_t th;
-
     pthread_create( &th, NULL, PNGWriterArgs::write_wrapper, (void*)args );
+    pthread_join( th, NULL );
+  }
+
+  void render(thrust::device_ptr< uint > surface, int max_width, int max_height, int frame_count)
+  {
+    
+    for(int ix_h = 0; ix_h < max_height; ix_h++)
+    {
+      thrust::transform( thrust::make_counting_iterator< short >(0),
+                         thrust::make_counting_iterator< short >(max_width),
+                         surface + max_height * ix_h,
+                         RayTrace< SurfType, RayType >(frame_count,
+						       max_width,max_height,ix_h,
+                                                       view.angle, view.starting_point,
+                                                       view.scale, view.distance, 
+                                                       view.steps, view.bisect_count));
+    }
+
   }
 
   void run()
   {
     static int frame_cnt = 0;
-
-    for(int ix_h = 0; ix_h < h; ix_h++)
-    {
-      thrust::transform( thrust::make_counting_iterator< short >(0),
-                         thrust::make_counting_iterator< short >(w),
-                         thrust::device_ptr< uint >(pbo + h * ix_h),
-                         RayTrace< SurfType, RayType >(frame_cnt,
-						       w,h,ix_h,
-                                                       view.angle, view.starting_point,
-                                                       view.scale, view.distance, 
-                                                       view.steps, view.bisect_count));
-    }
-    
     frame_cnt++;
-
+    
+    render(dev_pbo, w, h, frame_cnt);
 
     if ( view.screenshot )
       {
@@ -304,7 +314,7 @@ struct RayTraceScreen
           }
 
         sprintf(filename, "screenshots/%d/shot_%010d.png", session, cnt); // XXX: make '/' portable
-        screenshot(std::string(filename));
+        screenshot(std::string(filename), frame_cnt);
         
         // we made a screenshot. now, to not confuse 'movie' making part below, disable screenshot flag.
         cnt++;
@@ -332,12 +342,12 @@ struct RayTraceScreen
         }
       
       
-      if (memcmp( (&last_view), (&view), sizeof(View)))
+      if (view.allframes || memcmp( (&last_view), (&view), sizeof(View)))
         {
           char filename[1024];
           sprintf(filename,"%s/%010d.png", path, count);
           count++;
-          screenshot(std::string(filename));
+          screenshot(std::string(filename), frame_cnt);
           last_view = view;
         }
     }
